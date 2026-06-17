@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZamAgro Track - Integrated System</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary: #2E7D32; /* Agro Green */
+            --primary-dark: #1B5E20;
+            --secondary: #F9A825; /* Maize Yellow */
+            --accent: #0288D1; /* Sky Blue */
+            --danger: #D32F2F;
+            --success: #388E3C;
+            --warning: #F57C00;
+            --light: #F1F8E9;
+            --dark: #1c1c1c;
+            --white: #ffffff;
+            --gray: #757575;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); height: 100vh; overflow-x: hidden; }
+
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        
+        button { cursor: pointer; border: none; outline: none; transition: all 0.2s; }
+        
+        .btn { padding: 10px 20px; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--secondary); color: var(--dark); }
+        .btn-secondary:hover { background: #fbc02d; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 0.85rem; }
+
+        /* --- LANDING & LOGIN --- */
+        #landing-page { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); min-height: 100vh; display: flex; flex-direction: column; color: white; }
+        .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+        .pricing-card { background: white; color: var(--dark); padding: 2rem; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; margin-top: 2rem; }
+        
+        #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #e0e0e0; }
+        .login-box { background: white; padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; max-width: 400px; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: var(--radius); }
+
+        /* --- DASHBOARD LAYOUT --- */
+        #app-layout { display: flex; height: 100vh; }
+        .sidebar { width: 260px; background: var(--primary-dark); color: white; display: flex; flex-direction: column; padding: 1rem; flex-shrink: 0; }
+        .brand { font-size: 1.2rem; font-weight: bold; margin-bottom: 2rem; color: var(--secondary); }
+        .nav-links { list-style: none; flex: 1; overflow-y: auto; }
+        .nav-links li { margin-bottom: 0.5rem; }
+        .nav-links a { display: flex; align-items: center; padding: 12px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: var(--radius); }
+        .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.1); color: white; }
+        
+        .main-content { flex: 1; overflow-y: auto; background: #f4f6f8; padding: 2rem; }
+        
+        /* --- CARDS & TABLES --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 5px solid var(--primary); }
+        .card h3 { font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
+        .card .value { font-size: 1.8rem; font-weight: bold; color: var(--dark); }
+        
+        .table-container { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 2rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: var(--light); color: var(--primary-dark); font-weight: 600; white-space: nowrap; }
+        
+        /* --- STATUS COLORS --- */
+        .status-ok { background: #e8f5e9; color: var(--success); }
+        .status-warn { background: #fff3e0; color: var(--warning); }
+        .status-crit { background: #ffebee; color: var(--danger); }
+
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        .modal-content { background: white; padding: 2rem; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: var(--shadow); }
+        .toast { background: white; padding: 1rem; border-left: 5px solid var(--primary); position: fixed; top: 20px; right: 20px; border-radius: 4px; box-shadow: var(--shadow); animation: slideIn 0.3s; z-index: 1000; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- --- TOAST CONTAINER --- -->
+    <div id="toast-container"></div>
+
+    <!-- --- LANDING PAGE --- -->
+    <section id="landing-page">
+        <header style="padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;">
+            <div style="font-size: 1.5rem; font-weight: bold;">ZamAgro<span style="color: var(--secondary)">Track</span></div>
+            <button onclick="showLogin()" class="btn btn-secondary">Log In</button>
+        </header>
+        <div class="hero">
+            <h1>Integrated Agro Management</h1>
+            <p>Linking Stock, Sales, Purchases, Expenses & FISP.</p>
+            <div class="pricing-card">
+                <h2>Subscription</h2>
+                <div class="price" style="font-size: 2rem; color: var(--primary);">K200 / month</div>
+                <p>Payable to: <strong>+260 977 638 790</strong></p>
+                <br>
+                <button onclick="showLogin()" class="btn btn-primary" style="width: 100%">Login</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- LOGIN PAGE --- -->
+    <section id="login-page" class="hidden">
+        <div class="login-box">
+            <h2 class="text-center" style="margin-bottom: 1.5rem; color: var(--primary);">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="loginRole">
+                        <option value="client">Client / Staff</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group"><input type="text" id="username" placeholder="Username (admin/client)" required></div>
+                <div class="form-group"><input type="password" id="password" placeholder="Password (admin/client)" required></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Login</button>
+                <p class="text-center" style="margin-top: 1rem;"><a href="#" onclick="showLanding()" style="color: var(--primary);">Back</a></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- --- APP LAYOUT --- -->
+    <section id="app-layout" class="hidden">
+        <aside class="sidebar">
+            <div class="brand">🌱 ZamAgro Track</div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="nav('dashboard')" id="nav-dashboard" class="active">Dashboard</a></li>
+                <li><a href="#" onclick="nav('inventory')" id="nav-inventory">Inventory</a></li>
+                <li><a href="#" onclick="nav('sales')" id="nav-sales">Sales</a></li>
+                <li><a href="#" onclick="nav('purchases')" id="nav-purchases">Purchases</a></li>
+                <li><a href="#" onclick="nav('expenses')" id="nav-expenses">Expenses</a></li>
+                <li><a href="#" onclick="nav('fisp')" id="nav-fisp">FISP Tracker</a></li>
+                <li><a href="#" onclick="nav('credit')" id="nav-credit">Credit Tracker</a></li>
+                <li><a href="#" onclick="nav('reports')" id="nav-reports">Reports (P&L)</a></li>
+                <li class="admin-only"><a href="#" onclick="nav('settings')" id="nav-settings" style="color: var(--secondary)">⚙️ Settings</a></li>
+            </ul>
+            <div class="user-profile" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #fff3;">
+                <span id="user-display-name">User</span>
+                <button onclick="logout()" class="btn btn-sm btn-danger">Exit</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="header-bar" style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                <h2 id="page-title">Dashboard</h2>
+                <div id="date-display" style="color: var(--gray);"></div>
+            </div>
+
+            <!-- 1. DASHBOARD VIEW -->
+            <div id="view-dashboard">
+                <div class="kpi-grid">
+                    <div class="card"><h3>Stock Value</h3><div class="value" id="kpi-stock">0</div></div>
+                    <div class="card success"><h3>Total Revenue</h3><div class="value" id="kpi-revenue">0</div></div>
+                    <div class="card danger"><h3>Total Expenses</h3><div class="value" id="kpi-expenses">0</div></div>
+                    <div class="card warning"><h3>Net P/L</h3><div class="value" id="kpi-pl">0</div></div>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="card"><h3>Alerts</h3><ul id="dashboard-alerts" style="margin-top: 10px; padding-left: 20px;"></ul></div>
+                    <div class="card"><h3>FISP Outstanding</h3><div class="value" id="kpi-fisp" style="margin-top: 10px;">0</div></div>
+                </div>
+            </div>
+
+            <!-- 2. INVENTORY VIEW -->
+            <div id="view-inventory" class="hidden">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary admin-only" onclick="openModal('modal-inv')">+ Add Stock Item</button>
+                    <input type="text" id="search-inventory" placeholder="Search..." onkeyup="renderTable('inventory')" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="table-container">
+                    <table id="table-inventory"><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost (ZMW)</th><th>Total Val</th><th>Status</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 3. SALES VIEW -->
+            <div id="view-sales" class="hidden">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" onclick="prepareSaleModal()">+ New Sale</button>
+                </div>
+                <div class="table-container">
+                    <table id="table-sales"><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Product</th><th>Qty</th><th>Total (ZMW)</th><th>Method</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 4. PURCHASES VIEW -->
+            <div id="view-purchases" class="hidden">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary admin-only" onclick="preparePurchaseModal()">+ Record Purchase</button>
+                </div>
+                <div class="table-container">
+                    <table id="table-purchases"><thead><tr><th>ID</th><th>Date</th><th>Supplier</th><th>Product</th><th>Qty In</th><th>Total Cost (ZMW)</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 5. EXPENSES VIEW -->
+            <div id="view-expenses" class="hidden">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary admin-only" onclick="openModal('modal-exp')">+ Add Expense</button>
+                </div>
+                <div class="table-container">
+                    <table id="table-expenses"><thead><tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount (ZMW)</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 6. FISP VIEW -->
+            <div id="view-fisp" class="hidden">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary admin-only" onclick="openModal('modal-fisp')">+ Add FISP Claim</button>
+                </div>
+                <div class="table-container">
+                    <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer/Camp</th><th>Voucher</th><th>Value (ZMW)</th><th>Status</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 7. CREDIT VIEW -->
+            <div id="view-credit" class="hidden">
+                <div class="table-container">
+                    <table id="table-credit"><thead><tr><th>Customer</th><th>Product</th><th>Amount Due</th><th>Due Date</th><th>Action</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 8. REPORTS VIEW -->
+            <div id="view-reports" class="hidden admin-only">
+                <div class="table-container">
+                    <h3 style="padding: 1rem;">Monthly Profit & Loss</h3>
+                    <table id="table-pl"><thead><tr><th>Category</th><th>Current Month (ZMW)</th></tr></thead><tbody></tbody></table>
+                </div>
+            </div>
+
+            <!-- 9. SETTINGS VIEW (NEW) -->
+            <div id="view-settings" class="hidden admin-only">
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3>Product Management</h3>
+                    <p>Edit or Remove products from your master list.</p>
+                </div>
+                <div class="table-container">
+                    <table id="table-settings">
+                        <thead><tr><th>ID</th><th>Product Name</th><th>Category</th><th>Current Cost</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </section>
+
+    <!-- --- MODALS --- -->
+
+    <!-- Add Inventory -->
+    <div id="modal-inv" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Add New Stock</h3><br>
+            <form onsubmit="handleAddInventory(event)">
+                <div class="form-group"><input type="text" id="inv-name" placeholder="Product Name" required></div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group"><select id="inv-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
+                    <div class="form-group"><input type="text" id="inv-unit" placeholder="Unit (e.g. bag)" required></div>
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group"><input type="number" id="inv-qty" placeholder="Qty" required></div>
+                    <div class="form-group"><input type="number" id="inv-cost" placeholder="Unit Cost" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Save</button>
+            </form>
+            <button onclick="closeModal('modal-inv')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add Sale -->
+    <div id="modal-sale" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>New Sale</h3><br>
+            <form onsubmit="handleAddSale(event)">
+                <div class="form-group"><input type="text" id="sale-cust" placeholder="Customer Name" required></div>
+                <div class="form-group"><select id="sale-prod" required></select></div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group"><input type="number" id="sale-qty" placeholder="Qty" min="1" required></div>
+                    <div class="form-group"><input type="number" id="sale-price" placeholder="Unit Price" required></div>
+                </div>
+                <div class="form-group"><select id="sale-method">
+                    <option value="Cash">Cash</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Credit">Credit (Add to Tracker)</option>
+                    <option value="E-Voucher">E-Voucher</option>
+                </select></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Complete Sale</button>
+            </form>
+            <button onclick="closeModal('modal-sale')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add Purchase -->
+    <div id="modal-purchase" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Record Purchase</h3><br>
+            <form onsubmit="handleAddPurchase(event)">
+                <div class="form-group"><input type="text" id="pur-sup" placeholder="Supplier Name" required></div>
+                <div class="form-group"><select id="pur-prod" required></select></div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group"><input type="number" id="pur-qty" placeholder="Qty Bought" required></div>
+                    <div class="form-group"><input type="number" id="pur-cost" placeholder="Unit Cost" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Record</button>
+            </form>
+            <button onclick="closeModal('modal-purchase')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add Expense -->
+    <div id="modal-exp" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Add Expense</h3><br>
+            <form onsubmit="handleAddExpense(event)">
+                <div class="form-group"><select id="exp-cat"><option>Transport</option><option>Rent</option><option>Salaries</option><option>Utilities</option><option>Marketing</option><option>Maintenance</option></select></div>
+                <div class="form-group"><input type="text" id="exp-desc" placeholder="Description" required></div>
+                <div class="form-group"><input type="number" id="exp-amt" placeholder="Amount (ZMW)" required></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Save</button>
+            </form>
+            <button onclick="closeModal('modal-exp')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Add FISP -->
+    <div id="modal-fisp" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Add FISP Claim</h3><br>
+            <form onsubmit="handleAddFISP(event)">
+                <div class="form-group"><input type="text" id="fisp-name" placeholder="Farmer/Camp Name" required></div>
+                <div class="form-group"><input type="text" id="fisp-voucher" placeholder="E-Voucher No." required></div>
+                <div class="form-group"><input type="number" id="fisp-val" placeholder="Claim Value (ZMW)" required></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Submit Claim</button>
+            </form>
+            <button onclick="closeModal('modal-fisp')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Product (NEW) -->
+    <div id="modal-edit-product" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Edit Product</h3><br>
+            <form onsubmit="handleEditSave(event)">
+                <input type="hidden" id="edit-id">
+                <div class="form-group"><label>Product Name</label><input type="text" id="edit-name" required></div>
+                <div class="form-group"><label>Category</label><select id="edit-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group"><label>Unit Cost</label><input type="number" id="edit-cost" required></div>
+                    <div class="form-group"><label>Quantity (Adjustment)</label><input type="number" id="edit-qty" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Update Product</button>
+            </form>
+            <button onclick="closeModal('modal-edit-product')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STORE ---
+        const db = {
+            inventory: [
+                { id: "PRD001", name: "D Compound Fertilizer (50kg)", cat: "Fertilizer", unit: "bag", qty: 120, cost: 320, status: "Fresh" },
+                { id: "PRD002", name: "Urea Fertilizer (50kg)", cat: "Fertilizer", unit: "bag", qty: 85, cost: 350, status: "Fresh" },
+                { id: "PRD003", name: "ZM621 Maize Seed (10kg)", cat: "Seed", unit: "bag", qty: 200, cost: 280, status: "Fresh" },
+                { id: "PRD004", name: "ZM521 Maize Seed (10kg)", cat: "Seed", unit: "bag", qty: 150, cost: 260, status: "Fresh" },
+                { id: "PRD005", name: "Roundup Herbicide (1ltr)", cat: "Chemical", unit: "ltr", qty: 60, cost: 180, status: "Fresh" },
+                { id: "PRD012", name: "D Compound (50kg) - FISP", cat: "Fertilizer", unit: "bag", qty: 300, cost: 320, status: "Fresh" }
+            ],
+            sales: [
+                { id: "SAL001", date: "03/01/2025", cust: "Mwansa Banda", prodId: "PRD001", prodName: "D Compound Fertilizer (50kg)", qty: 2, total: 760, method: "Cash" },
+                { id: "SAL002", date: "03/01/2025", cust: "FISP - Choma", prodId: "PRD012", prodName: "D Compound (50kg) - FISP", qty: 50, total: 16000, method: "E-Voucher" }
+            ],
+            purchases: [
+                { id: "PUR001", date: "02/01/2025", supplier: "Nyala Agro", prodId: "PRD001", prodName: "D Compound Fertilizer (50kg)", qty: 150, total: 48000 },
+                { id: "PUR002", date: "02/01/2025", supplier: "Nyala Agro", prodId: "PRD012", prodName: "D Compound (50kg) - FISP", qty: 300, total: 96000 }
+            ],
+            expenses: [
+                { id: "EXP001", date: "02/01/2025", cat: "Transport", desc: "Delivery truck", amt: 2500 },
+                { id: "EXP002", date: "03/01/2025", cat: "Rent", desc: "Shop rent", amt: 3500 }
+            ],
+            fisp: [
+                { id: "FISP001", date: "03/01/2025", name: "Mwansa Banda", voucher: "EV-001", val: 16000, status: "Paid" },
+                { id: "FISP002", date: "05/01/2025", name: "FISP Batch - Pemba", voucher: "EV-002", val: 28000, status: "Pending" }
+            ],
+            credit: [
+                { id: "CRD001", cust: "Joseph Phiri", prod: "Urea Fertilizer", amt: 400, dueDate: "06/02/2025", status: "Outstanding" }
+            ]
+        };
+
+        let currentUser = null;
+
+        const formatZMW = (num) => new Intl.NumberFormat('en-ZM', { style: 'currency', currency: 'ZMW' }).format(num);
+
+        function showToast(msg, type = 'success') {
+            const el = document.createElement('div');
+            el.className = 'toast';
+            el.style.borderLeftColor = type === 'danger' ? 'var(--danger)' : 'var(--success)';
+            el.innerText = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        // --- NAVIGATION & VIEWS ---
+
+        function showLanding() {
+            document.getElementById('landing-page').classList.remove('hidden');
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('app-layout').classList.add('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+        }
+
+        function login(e) {
+            e.preventDefault();
+            const role = document.getElementById('loginRole').value;
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            if (u === role && p === role) {
+                currentUser = role;
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = role === 'admin' ? 'Admin' : 'Client';
+                
+                // Permission toggle
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'admin' ? 'block' : 'none');
+                
+                refreshAll();
+                nav('dashboard');
+            } else {
+                showToast("Invalid Login", "danger");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            showLanding();
+        }
+
+        function nav(view) {
+            // Hide all views
+            const views = document.querySelectorAll('[id^="view-"]');
+            views.forEach(el => el.classList.add('hidden'));
+            
+            // Remove active class from nav links
+            const links = document.querySelectorAll('.nav-links a');
+            links.forEach(el => el.classList.remove('active'));
+            
+            // Show selected view
+            const target = document.getElementById(`view-${view}`);
+            if (target) {
+                target.classList.remove('hidden');
+            } else {
+                console.error("View not found: view-" + view);
+            }
+
+            // Set active link
+            const activeLink = document.getElementById(`nav-${view}`);
+            if(activeLink) activeLink.classList.add('active');
+
+            // Titles
+            const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", reports: "Financial Reports", settings: "System Settings" };
+            document.getElementById('page-title').textContent = titles[view] || "ZamAgro Track";
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // --- CORE LOGIC ---
+
+        function refreshAll() {
+            renderDashboard();
+            renderTable('inventory');
+            renderTable('sales');
+            renderTable('purchases');
+            renderTable('expenses');
+            renderTable('fisp');
+            renderTable('credit');
+            renderPL();
+            renderSettingsTable(); // New
+            document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-ZM');
+        }
+
+        function renderDashboard() {
+            const stockVal = db.inventory.reduce((sum, item) => sum + (item.qty * item.cost), 0);
+            document.getElementById('kpi-stock').textContent = formatZMW(stockVal);
+
+            const revenue = db.sales.reduce((sum, sale) => sum + sale.total, 0);
+            document.getElementById('kpi-revenue').textContent = formatZMW(revenue);
+
+            const expenses = db.expenses.reduce((sum, exp) => sum + exp.amt, 0);
+            document.getElementById('kpi-expenses').textContent = formatZMW(expenses);
+
+            const purchasesTotal = db.purchases.reduce((sum, pur) => sum + pur.total, 0);
+            const netPL = revenue - purchasesTotal - expenses;
+            document.getElementById('kpi-pl').textContent = formatZMW(netPL);
+            document.getElementById('kpi-pl').className = netPL >= 0 ? 'value text-success' : 'value text-danger';
+
+            const fispOut = db.fisp.filter(f => f.status !== 'Paid').reduce((sum, f) => sum + f.val, 0);
+            document.getElementById('kpi-fisp').textContent = formatZMW(fispOut);
+
+            const lowStock = db.inventory.filter(i => i.qty < 20).length;
+            const alertsList = document.getElementById('dashboard-alerts');
+            alertsList.innerHTML = lowStock > 0 ? `<li style="color:red">${lowStock} items low in stock!</li>` : `<li style="color:green">Stock levels healthy.</li>`;
+        }
+
+        function renderTable(type) {
+            const tbody = document.querySelector(`#table-${type} tbody`);
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const searchTerm = document.getElementById(`search-${type}`)?.value.toLowerCase() || '';
+
+            db[type].forEach(item => {
+                if(searchTerm && !JSON.stringify(item).toLowerCase().includes(searchTerm)) return;
+
+                let row = '';
+                if (type === 'inventory') {
+                    row = `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.cat}</td><td>${item.qty}</td><td>${item.cost}</td><td>${formatZMW(item.qty * item.cost)}</td><td><span class="badge status-ok">${item.status}</span></td></tr>`;
+                } else if (type === 'sales') {
+                    // Look up current product name from inventory in case it was edited
+                    const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
+                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.cust}</td><td>${currentProdName}</td><td>${item.qty}</td><td>${formatZMW(item.total)}</td><td>${item.method}</td></tr>`;
+                } else if (type === 'purchases') {
+                    const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
+                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.supplier}</td><td>${currentProdName}</td><td>${item.qty}</td><td>${formatZMW(item.total)}</td></tr>`;
+                } else if (type === 'expenses') {
+                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.cat}</td><td>${item.desc}</td><td>${formatZMW(item.amt)}</td></tr>`;
+                } else if (type === 'fisp') {
+                    let badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
+                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.name}</td><td>${item.voucher}</td><td>${formatZMW(item.val)}</td><td><span class="badge ${badge}">${item.status}</span></td></tr>`;
+                } else if (type === 'credit') {
+                    row = `<tr><td>${item.cust}</td><td>${item.prod}</td><td>${formatZMW(item.amt)}</td><td>${item.dueDate}</td>
+                    <td><button class="btn btn-sm btn-primary" onclick="payCredit('${item.id}')">Pay</button></td></tr>`;
+                }
+                tbody.innerHTML += row;
+            });
+        }
+
+        function renderSettingsTable() {
+            const tbody = document.querySelector(`#table-settings tbody`);
+            tbody.innerHTML = '';
+            db.inventory.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.cat}</td>
+                        <td>${formatZMW(item.cost)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openEditModal('${item.id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct('${item.id}')">Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // --- EDIT PRODUCT LOGIC ---
+
+        function openEditModal(id) {
+            const p = db.inventory.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('edit-name').value = p.name;
+            document.getElementById('edit-cat').value = p.cat;
+            document.getElementById('edit-cost').value = p.cost;
+            document.getElementById('edit-qty').value = p.qty;
+            
+            openModal('modal-edit-product');
+        }
+
+        function handleEditSave(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const p = db.inventory.find(x => x.id === id);
+            
+            if (p) {
+                p.name = document.getElementById('edit-name').value;
+                p.cat = document.getElementById('edit-cat').value;
+                p.cost = parseFloat(document.getElementById('edit-cost').value);
+                p.qty = parseInt(document.getElementById('edit-qty').value);
+                // Update status based on qty
+                p.status = p.qty > 0 ? "Fresh" : "Out of Stock";
+            }
+            
+            closeModal('modal-edit-product');
+            refreshAll();
+            showToast("Product Updated Successfully");
+        }
+
+        function deleteProduct(id) {
+            if(confirm("Are you sure you want to delete this product? This cannot be undone.")) {
+                db.inventory = db.inventory.filter(x => x.id !== id);
+                refreshAll();
+                showToast("Product Deleted", "danger");
+            }
+        }
+
+        // --- REMAINING LOGIC (Standard) ---
+
+        function renderPL() {
+            const tbody = document.querySelector(`#table-pl tbody`);
+            tbody.innerHTML = '';
+            const revenue = db.sales.reduce((sum, s) => sum + s.total, 0);
+            const purchases = db.purchases.reduce((sum, p) => sum + p.total, 0);
+            const expenses = db.expenses.reduce((sum, e) => sum + e.amt, 0);
+            const gross = revenue - purchases;
+            const net = gross - expenses;
+
+            const rows = [
+                { label: "Total Revenue", val: revenue, color: "text-success" },
+                { label: "Cost of Purchases (COGS)", val: purchases, color: "text-danger" },
+                { label: "Gross Profit", val: gross, color: "" },
+                { label: "Total Operating Expenses", val: expenses, color: "text-danger" },
+                { label: "NET PROFIT / LOSS", val: net, color: net >= 0 ? "text-success" : "text-danger" }
+            ];
+
+            rows.forEach(r => {
+                tbody.innerHTML += `<tr><td class="font-bold">${r.label}</td><td class="${r.color} font-bold">${formatZMW(r.val)}</td></tr>`;
+            });
+        }
+
+        function handleAddInventory(e) {
+            e.preventDefault();
+            const newItem = {
+                id: `PRD${String(db.inventory.length + 10).padStart(3,'0')}`,
+                name: document.getElementById('inv-name').value,
+                cat: document.getElementById('inv-cat').value,
+                unit: document.getElementById('inv-unit').value,
+                qty: parseInt(document.getElementById('inv-qty').value),
+                cost: parseFloat(document.getElementById('inv-cost').value),
+                status: "Fresh"
+            };
+            db.inventory.push(newItem);
+            closeModal('modal-inv');
+            e.target.reset();
+            refreshAll();
+            showToast("Item Added to Inventory");
+        }
+
+        function populateProdSelect(elementId) {
+            const sel = document.getElementById(elementId);
+            sel.innerHTML = '<option value="">Select Product</option>';
+            db.inventory.forEach(i => {
+                sel.innerHTML += `<option value="${i.id}">${i.name} (Qty: ${i.qty})</option>`;
+            });
+        }
+
+        function prepareSaleModal() {
+            populateProdSelect('sale-prod');
+            openModal('modal-sale');
+        }
+        function preparePurchaseModal() {
+            populateProdSelect('pur-prod');
+            openModal('modal-purchase');
+        }
+
+        function handleAddSale(e) {
+            e.preventDefault();
+            const prodId = document.getElementById('sale-prod').value;
+            const qty = parseInt(document.getElementById('sale-qty').value);
+            const price = parseFloat(document.getElementById('sale-price').value);
+            const method = document.getElementById('sale-method').value;
+            const cust = document.getElementById('sale-cust').value;
+
+            const product = db.inventory.find(i => i.id === prodId);
+            if (!product || product.qty < qty) {
+                showToast("Insufficient Stock!", "danger");
+                return;
+            }
+
+            product.qty -= qty;
+            if(product.qty <= 0) product.status = "Out of Stock";
+
+            const sale = {
+                id: `SAL${String(db.sales.length + 1).padStart(3,'0')}`,
+                date: new Date().toLocaleDateString('en-GB'),
+                cust: cust,
+                prodId: prodId,
+                prodName: product.name,
+                qty: qty,
+                total: qty * price,
+                method: method
+            };
+            db.sales.push(sale);
+
+            if (method === 'Credit') {
+                const due = new Date();
+                due.setDate(due.getDate() + 30);
+                db.credit.push({
+                    id: `CRD${String(db.credit.length + 1).padStart(3,'0')}`,
+                    cust: cust,
+                    prod: product.name,
+                    amt: qty * price,
+                    dueDate: due.toLocaleDateString('en-GB'),
+                    status: "Outstanding"
+                });
+            }
+
+            closeModal('modal-sale');
+            e.target.reset();
+            refreshAll();
+            showToast("Sale Recorded & Stock Updated");
+        }
+
+        function handleAddPurchase(e) {
+            e.preventDefault();
+            const prodId = document.getElementById('pur-prod').value;
+            const qty = parseInt(document.getElementById('pur-qty').value);
+            const cost = parseFloat(document.getElementById('pur-cost').value);
+            const supplier = document.getElementById('pur-sup').value;
+
+            const product = db.inventory.find(i => i.id === prodId);
+            if (product) {
+                product.qty += qty;
+                product.status = "Fresh";
+            } else {
+                showToast("Product ID not found in Inventory", "danger");
+                return;
+            }
+
+            db.purchases.push({
+                id: `PUR${String(db.purchases.length + 1).padStart(3,'0')}`,
+                date: new Date().toLocaleDateString('en-GB'),
+                supplier: supplier,
+                prodId: prodId,
+                prodName: product.name,
+                qty: qty,
+                total: qty * cost
+            });
+
+            closeModal('modal-purchase');
+            e.target.reset();
+            refreshAll();
+            showToast("Purchase Recorded & Stock Increased");
+        }
+
+        function handleAddExpense(e) {
+            e.preventDefault();
+            db.expenses.push({
+                id: `EXP${String(db.expenses.length + 1).padStart(3,'0')}`,
+                date: new Date().toLocaleDateString('en-GB'),
+                cat: document.getElementById('exp-cat').value,
+                desc: document.getElementById('exp-desc').value,
+                amt: parseFloat(document.getElementById('exp-amt').value)
+            });
+            closeModal('modal-exp');
+            e.target.reset();
+            refreshAll();
+            showToast("Expense Added to P&L");
+        }
+
+        function handleAddFISP(e) {
+            e.preventDefault();
+            db.fisp.push({
+                id: `FISP${String(db.fisp.length + 1).padStart(3,'0')}`,
+                date: new Date().toLocaleDateString('en-GB'),
+                name: document.getElementById('fisp-name').value,
+                voucher: document.getElementById('fisp-voucher').value,
+                val: parseFloat(document.getElementById('fisp-val').value),
+                status: "Pending"
+            });
+            closeModal('modal-fisp');
+            e.target.reset();
+            refreshAll();
+            showToast("FISP Claim Added");
+        }
+
+        function payCredit(id) {
+            const index = db.credit.findIndex(c => c.id === id);
+            if (index !== -1) {
+                db.credit[index].status = "Paid";
+                refreshAll();
+                showToast("Credit Marked as Paid");
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', login);
+
+    </script>
+</body>
+</html>
