@@ -4,26 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZamAgro Track - Integrated System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* --- CSS VARIABLES & RESET --- */
         :root {
-            --primary: #2E7D32; /* Agro Green */
-            --primary-dark: #1B5E20;
-            --secondary: #F9A825; /* Maize Yellow */
-            --accent: #0288D1; /* Sky Blue */
-            --danger: #D32F2F;
-            --success: #388E3C;
-            --warning: #F57C00;
-            --light: #F1F8E9;
-            --dark: #1c1c1c;
+            --primary: #1E6B35;
+            --primary-dark: #13481F;
+            --primary-light: #2E8B47;
+            --secondary: #E8A020;
+            --secondary-light: #F5C050;
+            --accent: #1A7FB5;
+            --danger: #C0392B;
+            --success: #1E7E34;
+            --warning: #D4820A;
+            --bg: #F3F6EE;
+            --surface: #FFFFFF;
+            --surface-2: #F8FAF5;
+            --dark: #1A2016;
+            --text: #2D3829;
+            --text-muted: #6B7566;
+            --border: #DDE5D8;
             --white: #ffffff;
-            --gray: #757575;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --radius: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.07);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --radius-lg: 16px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--light); color: var(--dark); height: 100vh; overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); height: 100vh; overflow-x: hidden; font-size: 0.925rem; line-height: 1.5; }
 
         /* --- UTILITIES --- */
         .hidden { display: none !important; }
@@ -31,64 +44,328 @@
         .grid { display: grid; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
-        .font-bold { font-weight: bold; }
+        .font-bold { font-weight: 700; }
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-        
-        button { cursor: pointer; border: none; outline: none; transition: all 0.2s; }
-        
-        .btn { padding: 10px 20px; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-secondary { background: var(--secondary); color: var(--dark); }
-        .btn-secondary:hover { background: #fbc02d; }
+        .badge { padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px; }
+
+        button { cursor: pointer; border: none; outline: none; transition: all 0.18s ease; font-family: inherit; }
+
+        .btn { padding: 9px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 2px 6px rgba(30,107,53,0.3); }
+        .btn-primary:hover { background: var(--primary-light); box-shadow: 0 4px 10px rgba(30,107,53,0.35); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary { background: var(--secondary); color: #1A2016; font-weight: 700; box-shadow: 0 2px 6px rgba(232,160,32,0.3); }
+        .btn-secondary:hover { background: var(--secondary-light); transform: translateY(-1px); }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-sm { padding: 5px 10px; font-size: 0.85rem; }
+        .btn-danger:hover { background: #a93226; }
+        .btn-sm { padding: 5px 12px; font-size: 0.82rem; border-radius: var(--radius-sm); }
 
-        /* --- LANDING & LOGIN --- */
-        #landing-page { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); min-height: 100vh; display: flex; flex-direction: column; color: white; }
-        .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
-        .pricing-card { background: white; color: var(--dark); padding: 2rem; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; margin-top: 2rem; }
-        
-        #login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #e0e0e0; }
-        .login-box { background: white; padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; max-width: 400px; }
+        /* --- LANDING PAGE --- */
+        #landing-page {
+            background: linear-gradient(160deg, #0F3D1F 0%, #1E6B35 45%, #1A7FB5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        #landing-page::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(ellipse at 20% 80%, rgba(232,160,32,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(26,127,181,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .landing-header { padding: 20px 40px; width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+        .landing-logo { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.5px; }
+        .landing-logo span { color: var(--secondary); }
+        .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+        .hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 0.75rem; }
+        .hero p { font-size: 1.1rem; opacity: 0.85; margin-bottom: 2.5rem; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; font-size: 0.82rem; font-weight: 600; margin-bottom: 1.5rem; backdrop-filter: blur(4px); }
+
+        .pricing-section { width: 100%; max-width: 1150px; }
+        .pricing-section h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.3px; }
+        .pricing-section .subtitle { opacity: 0.8; font-size: 0.9rem; margin-bottom: 1.75rem; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+        .pricing-card {
+            background: rgba(255,255,255,0.97);
+            color: var(--text);
+            padding: 1.75rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.22); }
+        .pricing-card .plan-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 0.6rem; }
+        .pricing-card .price { font-size: 2.1rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .pricing-card .price-period { font-size: 0.78rem; color: var(--text-muted); margin: 4px 0 1rem; }
+        .pricing-card ul { list-style: none; font-size: 0.83rem; line-height: 2.1; }
+        .pricing-card ul li { display: flex; align-items: center; gap: 6px; }
+        .pricing-card ul li.unavailable { color: #bbb; }
+        .pricing-card .plan-note { margin-top: 0.9rem; font-size: 0.78rem; color: var(--text-muted); }
+        .pricing-pill { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; padding: 3px 12px; border-radius: 20px; white-space: nowrap; text-transform: uppercase; }
+
+        .contact-box { margin-top: 1.75rem; background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); padding: 1rem 1.5rem; font-size: 0.88rem; backdrop-filter: blur(6px); }
+        .cta-btn { margin-top: 1.25rem; padding: 13px 42px; font-size: 1rem; border-radius: var(--radius); }
+
+        /* --- LOGIN / SETUP --- */
+        .auth-bg { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #e8f0e4 0%, #d4e3cc 100%); }
+        .login-box {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid var(--border);
+        }
+        .login-logo { font-size: 2rem; text-align: center; margin-bottom: 0.5rem; }
+        .login-title { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-align: center; margin-bottom: 0.2rem; letter-spacing: -0.4px; }
+        .login-sub { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.75rem; }
+
         .form-group { margin-bottom: 1rem; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: var(--radius); }
+        .form-group label { display: block; font-size: 0.83rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30,107,53,0.12);
+        }
 
-        /* --- DASHBOARD LAYOUT --- */
+        /* --- APP LAYOUT --- */
         #app-layout { display: flex; height: 100vh; }
-        .sidebar { width: 260px; background: var(--primary-dark); color: white; display: flex; flex-direction: column; padding: 1rem; flex-shrink: 0; }
-        .brand { font-size: 1.2rem; font-weight: bold; margin-bottom: 2rem; color: var(--secondary); }
-        .nav-links { list-style: none; flex: 1; overflow-y: auto; }
-        .nav-links li { margin-bottom: 0.5rem; }
-        .nav-links a { display: flex; align-items: center; padding: 12px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: var(--radius); }
-        .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.1); color: white; }
-        
-        .main-content { flex: 1; overflow-y: auto; background: #f4f6f8; padding: 2rem; }
-        
-        /* --- CARDS & TABLES --- */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .card { background: white; padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 5px solid var(--primary); }
-        .card h3 { font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
-        .card .value { font-size: 1.8rem; font-weight: bold; color: var(--dark); }
-        
-        .table-container { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 2rem; }
+
+        .sidebar {
+            width: 255px;
+            background: var(--primary-dark);
+            background-image: linear-gradient(180deg, #13481F 0%, #0D3015 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            flex-shrink: 0;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+        }
+        .sidebar-top { padding: 1.25rem 1.25rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .brand {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--secondary);
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-sub { font-size: 0.7rem; color: rgba(255,255,255,0.45); font-weight: 500; margin-top: 1px; letter-spacing: 0.3px; text-transform: uppercase; }
+
+        .nav-links { list-style: none; flex: 1; overflow-y: auto; padding: 0.75rem 0.75rem; }
+        .nav-links li { margin-bottom: 2px; }
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
+        .nav-links a.active {
+            background: rgba(232,160,32,0.18);
+            color: var(--secondary-light);
+            font-weight: 600;
+            border-left: 3px solid var(--secondary);
+            padding-left: 9px;
+        }
+
+        .user-profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1.25rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: auto;
+        }
+        #user-display-name { font-size: 0.82rem; color: rgba(255,255,255,0.65); font-weight: 500; }
+
+        .main-content { flex: 1; overflow-y: auto; background: var(--bg); }
+        .content-inner { padding: 1.75rem 2rem; }
+
+        /* --- LICENSE BAR --- */
+        #license-bar {
+            background: linear-gradient(90deg, #0D3015, #13481F);
+            color: rgba(255,255,255,0.9);
+            font-size: 0.78rem;
+            padding: 6px 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* --- HEADER BAR --- */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+        }
+        .header-bar h2 { font-size: 1.4rem; font-weight: 800; color: var(--dark); letter-spacing: -0.4px; }
+        #date-display { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+        /* --- KPI CARDS --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem; }
+        .card {
+            background: var(--surface);
+            padding: 1.4rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+        .card h3 { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card .value { font-size: 1.7rem; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+
+        /* --- TABLES --- */
+        .table-container {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 1.75rem;
+        }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: var(--light); color: var(--primary-dark); font-weight: 600; white-space: nowrap; }
-        
+        th, td { padding: 11px 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: var(--surface-2); color: var(--primary-dark); font-weight: 700; white-space: nowrap; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fbf5; }
+
         /* --- STATUS COLORS --- */
-        .status-ok { background: #e8f5e9; color: var(--success); }
-        .status-warn { background: #fff3e0; color: var(--warning); }
-        .status-crit { background: #ffebee; color: var(--danger); }
+        .status-ok { background: #e6f4ea; color: #1e6b35; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; display: inline-block; }
+        .status-warn { background: #fef3e2; color: #c07a10; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; display: inline-block; }
+        .status-crit { background: #fde8e6; color: #c0392b; border-radius: 4px; padding: 2px 8px; font-size: 0.78rem; font-weight: 600; display: inline-block; }
 
         /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
-        .modal-content { background: white; padding: 2rem; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: var(--shadow); }
-        .toast { background: white; padding: 1rem; border-left: 5px solid var(--primary); position: fixed; top: 20px; right: 20px; border-radius: 4px; box-shadow: var(--shadow); animation: slideIn 0.3s; z-index: 1000; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,25,10,0.55);
+            backdrop-filter: blur(3px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999;
+        }
+        .modal-content {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: modalIn 0.2s ease;
+        }
+        .modal-content h3 { font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: 1.25rem; letter-spacing: -0.3px; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
+        /* --- TOAST --- */
+        .toast {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-left: 4px solid var(--primary);
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.25s ease;
+            z-index: 1000;
+            font-size: 0.875rem;
+            font-weight: 500;
+            max-width: 320px;
+        }
+        @keyframes slideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* --- ROLE-BASED VISIBILITY --- */
+        #app-layout[data-role="client"] .admin-only { display: none !important; }
+
+        /* --- LICENSE / TIER --- */
+        .nav-locked { opacity: .4; pointer-events: none; position: relative; }
+        .nav-locked::after { content: '🔒'; font-size: .65rem; margin-left: 6px; }
+        #license-expired-overlay { position: fixed; inset: 0; background: rgba(5,15,5,.88); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .license-expired-box { background: white; border-radius: var(--radius-lg); padding: 2.5rem; max-width: 420px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); }
+        .license-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700; letter-spacing: .5px; margin-left: 8px; }
+        .badge-trial    { background: #fff3e0; color: #c45800; }
+        .badge-starter  { background: #e6f4ea; color: #1E6B35; }
+        .badge-standard { background: #fff8e1; color: #c07a10; }
+        .badge-pro      { background: #e3f2fd; color: #0c6ea6; }
+        .badge-lifetime { background: #f3e5f5; color: #6A1B9A; }
+        .locked-view-msg { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; color: var(--text-muted); }
+        .locked-view-msg .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .locked-view-msg h3 { color: var(--dark); margin-bottom: .5rem; font-weight: 700; }
+
+        /* --- VIEW TOOLBAR (search/filter rows) --- */
+        .view-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.1rem; }
+        .view-toolbar input[type="text"],
+        .view-toolbar input[type="date"] {
+            padding: 8px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--text);
+            background: var(--surface);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .view-toolbar input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,107,53,0.1); }
+        .view-toolbar .arrow { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* --- MOBILE SIDEBAR --- */
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px 8px; font-size: 1.5rem; color: var(--primary-dark); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199; }
+        .sidebar-overlay.open { display: block; }
+
+        @media (max-width: 768px) {
+            .hamburger { display: block; }
+            .sidebar {
+                position: fixed; top: 0; left: 0; height: 100vh;
+                z-index: 200; transform: translateX(-100%);
+                transition: transform 0.25s ease;
+            }
+            .sidebar.open { transform: translateX(0); }
+            #app-layout { flex-direction: column; }
+            .content-inner { padding: 1rem; }
+            .header-bar { position: sticky; top: 0; background: var(--bg); z-index: 100; padding-bottom: 1rem; }
+            .hero h1 { font-size: 1.9rem; }
+        }
+
+        /* --- MISC ENHANCEMENTS --- */
+        hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+        select { cursor: pointer; }
+        input[type="number"]::-webkit-inner-spin-button { opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -97,48 +374,168 @@
     <div id="toast-container"></div>
 
     <!-- --- LANDING PAGE --- -->
-    <section id="landing-page">
-        <header style="padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;">
-            <div style="font-size: 1.5rem; font-weight: bold;">ZamAgro<span style="color: var(--secondary)">Track</span></div>
-            <button onclick="showLogin()" class="btn btn-secondary">Log In</button>
+    <section id="landing-page" class="hidden">
+        <header class="landing-header">
+            <div class="landing-logo">ZamAgro<span>Track</span></div>
+            <button onclick="showLogin()" class="btn btn-secondary">Log In →</button>
         </header>
         <div class="hero">
-            <h1>Integrated Agro Management</h1>
-            <p>Linking Stock, Sales, Purchases, Expenses & FISP.</p>
-            <div class="pricing-card">
-                <h2>Subscription</h2>
-                <div class="price" style="font-size: 2rem; color: var(--primary);">K200 / month</div>
-                <p>Payable to: <strong>+260 977 638 790</strong></p>
-                <br>
-                <button onclick="showLogin()" class="btn btn-primary" style="width: 100%">Login</button>
+            <div class="hero-badge">🌱 Built for Zambian Agro Businesses</div>
+            <h1>Run Your Agro Shop<br>With Confidence</h1>
+            <p>Stock, Sales, Purchases, Expenses & FISP — all in one place.</p>
+            <div class="pricing-section">
+                <h2>Choose Your Plan</h2>
+                <p class="subtitle">✅ 1 Month Free Trial on all plans &nbsp;·&nbsp; No hidden fees</p>
+                <div class="pricing-grid">
+                    <!-- Starter -->
+                    <div class="pricing-card" style="border-top:4px solid #2E8B47;">
+                        <div class="plan-label" style="color:#2E8B47;">Starter</div>
+                        <div class="price">K200</div>
+                        <div class="price-period">per month</div>
+                        <ul>
+                            <li>✔ Inventory Management</li>
+                            <li>✔ Sales Log</li>
+                            <li>✔ Expense Tracking</li>
+                            <li>✔ Basic P&amp;L Report</li>
+                            <li class="unavailable">✘ Purchases Module</li>
+                            <li class="unavailable">✘ FISP Tracker</li>
+                            <li class="unavailable">✘ Credit Tracker</li>
+                            <li class="unavailable">✘ Stock Adjustment Log</li>
+                        </ul>
+                        <div class="plan-note">Best for solo operators &amp; small kiosks</div>
+                    </div>
+                    <!-- Standard -->
+                    <div class="pricing-card" style="border-top:4px solid #E8A020;">
+                        <div class="pricing-pill" style="background:#E8A020;color:#1A2016;">Most Popular</div>
+                        <div class="plan-label" style="color:#c07a10;">Standard</div>
+                        <div class="price">K500</div>
+                        <div class="price-period">per month</div>
+                        <ul>
+                            <li>✔ Everything in Starter</li>
+                            <li>✔ Purchases Module</li>
+                            <li>✔ FISP Tracker</li>
+                            <li>✔ Credit Tracker</li>
+                            <li>✔ Full P&amp;L + Tax Report</li>
+                            <li class="unavailable">✘ Stock Adjustment Log</li>
+                            <li class="unavailable">✘ Multi-user Access</li>
+                        </ul>
+                        <div class="plan-note">Ideal for established agro shops</div>
+                    </div>
+                    <!-- Pro -->
+                    <div class="pricing-card" style="border-top:4px solid #1A7FB5;">
+                        <div class="plan-label" style="color:#1A7FB5;">Pro</div>
+                        <div class="price">K1,000</div>
+                        <div class="price-period">per month</div>
+                        <ul>
+                            <li>✔ Everything in Standard</li>
+                            <li>✔ Stock Adjustment Log</li>
+                            <li>✔ Multi-user Access</li>
+                            <li>✔ Write-off Tracking</li>
+                            <li>✔ Priority Support</li>
+                            <li class="unavailable">✘ Lifetime Access</li>
+                        </ul>
+                        <div class="plan-note">For growing agro businesses &amp; chains</div>
+                    </div>
+                    <!-- Lifetime -->
+                    <div class="pricing-card" style="border-top:4px solid #6A1B9A;background:linear-gradient(160deg,#f5eeff,#fff);">
+                        <div class="pricing-pill" style="background:#6A1B9A;color:#fff;">Best Value</div>
+                        <div class="plan-label" style="color:#6A1B9A;">Lifetime</div>
+                        <div class="price" style="color:#6A1B9A;">K3,500</div>
+                        <div class="price-period">once-off · pay once, use forever</div>
+                        <div style="font-size:.75rem;color:#6A1B9A;font-weight:600;margin-bottom:.75rem;">≈ 6 months of Pro — save K2,500+</div>
+                        <ul>
+                            <li>✔ All Pro Features</li>
+                            <li>✔ Lifetime Access</li>
+                            <li>✔ All Future Updates Free</li>
+                            <li>✔ Priority Support Forever</li>
+                            <li>✔ No Monthly Renewals</li>
+                        </ul>
+                        <div class="plan-note">For businesses that want to own their software</div>
+                    </div>
+                </div>
+                <div class="contact-box">
+                    📞 To purchase or activate, contact: <strong id="landing-phone">+260 97X XXX XXX</strong> (WhatsApp / Call)<br>
+                    <span style="opacity:.75;font-size:.82rem;">Mention your plan and shop name. You will receive an activation code.</span>
+                </div>
+                <button onclick="showLogin()" class="btn btn-secondary cta-btn">Login / Try Free →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- FIRST RUN SETUP WIZARD --- -->
+    <section id="setup-page" class="hidden">
+        <div class="auth-bg">
+            <div class="login-box" style="max-width:440px;">
+                <div class="login-logo">🌿</div>
+                <div class="login-title">Welcome to ZamAgro Track</div>
+                <p class="login-sub">Set up your business account. Staff credentials can be added later in Settings.</p>
+                <form id="setupForm">
+                    <div class="form-group"><label>Business / Company Name</label><input type="text" id="setup-company-name" placeholder="e.g. Chanda Agro Supplies" required autocomplete="organization"/></div>
+                    <hr style="margin:1rem 0;border-color:#ddd;"/>
+                    <p style="font-weight:700;margin-bottom:.75rem;color:var(--primary-dark);font-size:.9rem;">Administrator Account</p>
+                    <div class="form-group"><label>Admin Username</label><input type="text" id="setup-admin-user" placeholder="e.g. admin" required autocomplete="off"/></div>
+                    <div class="form-group"><label>Admin Password</label><input type="password" id="setup-admin-pw" placeholder="Min 6 characters" required/></div>
+                    <div class="form-group"><label>Confirm Password</label><input type="password" id="setup-admin-pw2" placeholder="Repeat password" required/></div>
+                    <div id="setup-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                    <div id="setup-cloud-status" style="display:none;font-size:.82rem;margin-bottom:.75rem;padding:.5rem;border-radius:4px;"></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%" id="setup-btn">Create Account &amp; Connect Cloud →</button>
+                </form>
             </div>
         </div>
     </section>
 
     <!-- --- LOGIN PAGE --- -->
     <section id="login-page" class="hidden">
-        <div class="login-box">
-            <h2 class="text-center" style="margin-bottom: 1.5rem; color: var(--primary);">Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Role</label>
-                    <select id="loginRole">
-                        <option value="client">Client / Staff</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
-                <div class="form-group"><input type="text" id="username" placeholder="Username (admin/client)" required></div>
-                <div class="form-group"><input type="password" id="password" placeholder="Password (admin/client)" required></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%">Login</button>
-                <p class="text-center" style="margin-top: 1rem;"><a href="#" onclick="showLanding()" style="color: var(--primary);">Back</a></p>
-            </form>
+        <div class="auth-bg">
+            <div class="login-box">
+                <div class="login-logo">🌿</div>
+                <div class="login-title">ZamAgro Track</div>
+                <p class="login-sub">Sign in to continue</p>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="loginRole">
+                            <option value="admin">Administrator</option>
+                            <option value="client">Client / Staff</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter username" required autocomplete="username"/></div>
+                    <div class="form-group" style="position:relative;"><label>Password</label><input type="password" id="password" placeholder="Enter password" required autocomplete="current-password"/><button type="button" onclick="togglePw('password',this)" style="position:absolute;right:.75rem;top:2.1rem;background:none;border:none;cursor:pointer;color:var(--gray);">&#128065;</button></div>
+                    <div id="login-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                    <div id="login-lockout" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                    <button type="submit" class="btn btn-primary" style="width:100%" id="login-btn">Login</button>
+                    <p class="text-center" style="margin-top:1rem;"><a href="#" onclick="showLanding()" style="color:var(--primary);">&#8592; Back</a></p>
+                </form>
+            </div>
         </div>
     </section>
 
+    <!-- --- LICENSE EXPIRED OVERLAY --- -->
+    <div id="license-expired-overlay" class="hidden">
+        <div class="license-expired-box">
+            <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
+            <h2 style="color:var(--danger);margin-bottom:.75rem;">License Expired</h2>
+            <p style="color:#555;margin-bottom:1.5rem;">Your ZamAgro Track license has expired. Please renew to continue using the system.</p>
+            <div style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:.9rem;color:#333;">
+                📞 Contact: <strong id="expired-phone">+260 97X XXX XXX</strong><br>
+                <span style="color:#888;font-size:.82rem;">WhatsApp or Call to renew your plan</span>
+            </div>
+            <button onclick="logout()" class="btn btn-primary" style="width:100%">Back to Home</button>
+        </div>
+    </div>
+
     <!-- --- APP LAYOUT --- -->
     <section id="app-layout" class="hidden">
-        <aside class="sidebar">
-            <div class="brand">🌱 ZamAgro Track</div>
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <div class="brand" style="display:flex;align-items:center;gap:0.5rem;">
+                    <img class="brand-logo-img" alt="Company logo" style="display:none;width:26px;height:26px;border-radius:6px;object-fit:cover;background:#fff;flex-shrink:0;">
+                    <span class="brand-emoji">🌱</span>
+                    <span class="brand-name-text">ZamAgro Track</span>
+                </div>
+                <div class="brand-sub">Agro Business Manager</div>
+            </div>
             <ul class="nav-links">
                 <li><a href="#" onclick="nav('dashboard')" id="nav-dashboard" class="active">Dashboard</a></li>
                 <li><a href="#" onclick="nav('inventory')" id="nav-inventory">Inventory</a></li>
@@ -156,9 +553,17 @@
             </div>
         </aside>
 
-        <main class="main-content">
-            <div class="header-bar" style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-                <h2 id="page-title">Dashboard</h2>
+        <main class="main-content" style="">
+            <div id="license-bar">
+                <span><span class="brand-emoji">🌱</span> <span class="brand-name-text">ZamAgro Track</span> &nbsp;|&nbsp; Plan: <strong id="lb-tier">—</strong> <span id="lb-badge"></span></span>
+                <span id="lb-expiry"></span>
+            </div>
+            <div class="content-inner">
+            <div class="header-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+                    <h2 id="page-title">Dashboard</h2>
+                </div>
                 <div id="date-display" style="color: var(--gray);"></div>
             </div>
 
@@ -170,6 +575,37 @@
                     <div class="card danger"><h3>Total Expenses</h3><div class="value" id="kpi-expenses">0</div></div>
                     <div class="card warning"><h3>Net P/L</h3><div class="value" id="kpi-pl">0</div></div>
                 </div>
+
+                <!-- CASH FLOW SUMMARY PANEL -->
+                <div class="card" style="margin-bottom: 2rem; border-left-color: var(--accent);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+                        <h3 style="color:var(--accent); font-size:1rem;">📊 Cash Flow Summary</h3>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button class="btn btn-sm" id="cf-btn-today" onclick="setCashFlowPeriod('today')" style="background:var(--accent);color:white;">Today</button>
+                            <button class="btn btn-sm" id="cf-btn-week"  onclick="setCashFlowPeriod('week')"  style="background:#eee;">This Week</button>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:1rem;">
+                        <div style="background:var(--surface-2); border-radius:var(--radius); padding:1rem; text-align:center;">
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:.3rem;">Cash In (Sales)</div>
+                            <div id="cf-cash-in" style="font-size:1.3rem; font-weight:bold; color:var(--success);">K0.00</div>
+                        </div>
+                        <div style="background:var(--surface-2); border-radius:var(--radius); padding:1rem; text-align:center;">
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:.3rem;">Cash Out (Purchases + Exp)</div>
+                            <div id="cf-cash-out" style="font-size:1.3rem; font-weight:bold; color:var(--danger);">K0.00</div>
+                        </div>
+                        <div style="background:var(--surface-2); border-radius:var(--radius); padding:1rem; text-align:center;">
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:.3rem;">Net Cash</div>
+                            <div id="cf-net" style="font-size:1.3rem; font-weight:bold;">K0.00</div>
+                        </div>
+                        <div style="background:var(--surface-2); border-radius:var(--radius); padding:1rem; text-align:center;">
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:.3rem;">Transactions</div>
+                            <div id="cf-txns" style="font-size:1.3rem; font-weight:bold; color:var(--accent);">0</div>
+                        </div>
+                    </div>
+                    <div id="cf-credit-note" style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);"></div>
+                </div>
+
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="card"><h3>Alerts</h3><ul id="dashboard-alerts" style="margin-top: 10px; padding-left: 20px;"></ul></div>
                     <div class="card"><h3>FISP Outstanding</h3><div class="value" id="kpi-fisp" style="margin-top: 10px;">0</div></div>
@@ -178,29 +614,39 @@
 
             <!-- 2. INVENTORY VIEW -->
             <div id="view-inventory" class="hidden">
-                <div style="margin-bottom: 1rem;">
-                    <button class="btn btn-primary admin-only" onclick="openModal('modal-inv')">+ Add Stock Item</button>
-                    <input type="text" id="search-inventory" placeholder="Search..." onkeyup="renderTable('inventory')" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="openModal('modal-inv')">+ Add Stock Item</button>
+                    <input type="text" id="search-inventory" placeholder="Search inventory..." onkeyup="renderTable('inventory')">
                 </div>
                 <div class="table-container">
-                    <table id="table-inventory"><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost (ZMW)</th><th>Total Val</th><th>Status</th></tr></thead><tbody></tbody></table>
+                    <table id="table-inventory"><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost (ZMW)</th><th>Sell Price (ZMW)</th><th>Margin</th><th>Total Val</th><th>Status</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
             <!-- 3. SALES VIEW -->
             <div id="view-sales" class="hidden">
-                <div style="margin-bottom: 1rem;">
+                <div class="view-toolbar">
                     <button class="btn btn-primary" onclick="prepareSaleModal()">+ New Sale</button>
+                    <input type="text" id="search-sales" placeholder="Search sales..." onkeyup="renderTable('sales')">
+                    <input type="date" id="date-from-sales" onchange="renderTable('sales')" title="From">
+                    <span class="arrow">→</span>
+                    <input type="date" id="date-to-sales" onchange="renderTable('sales')" title="To">
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('sales')">Clear</button>
                 </div>
                 <div class="table-container">
-                    <table id="table-sales"><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Product</th><th>Qty</th><th>Total (ZMW)</th><th>Method</th></tr></thead><tbody></tbody></table>
+                    <table id="table-sales"><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Product</th><th>Qty</th><th>Total (ZMW)</th><th>Method</th><th>Receipt</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
             <!-- 4. PURCHASES VIEW -->
             <div id="view-purchases" class="hidden">
-                <div style="margin-bottom: 1rem;">
-                    <button class="btn btn-primary admin-only" onclick="preparePurchaseModal()">+ Record Purchase</button>
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="preparePurchaseModal()">+ Record Purchase</button>
+                    <input type="text" id="search-purchases" placeholder="Search purchases..." onkeyup="renderTable('purchases')">
+                    <input type="date" id="date-from-purchases" onchange="renderTable('purchases')" title="From">
+                    <span class="arrow">→</span>
+                    <input type="date" id="date-to-purchases" onchange="renderTable('purchases')" title="To">
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('purchases')">Clear</button>
                 </div>
                 <div class="table-container">
                     <table id="table-purchases"><thead><tr><th>ID</th><th>Date</th><th>Supplier</th><th>Product</th><th>Qty In</th><th>Total Cost (ZMW)</th></tr></thead><tbody></tbody></table>
@@ -209,8 +655,13 @@
 
             <!-- 5. EXPENSES VIEW -->
             <div id="view-expenses" class="hidden">
-                <div style="margin-bottom: 1rem;">
-                    <button class="btn btn-primary admin-only" onclick="openModal('modal-exp')">+ Add Expense</button>
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="openModal('modal-exp')">+ Add Expense</button>
+                    <input type="text" id="search-expenses" placeholder="Search expenses..." onkeyup="renderTable('expenses')">
+                    <input type="date" id="date-from-expenses" onchange="renderTable('expenses')" title="From">
+                    <span class="arrow">→</span>
+                    <input type="date" id="date-to-expenses" onchange="renderTable('expenses')" title="To">
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('expenses')">Clear</button>
                 </div>
                 <div class="table-container">
                     <table id="table-expenses"><thead><tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount (ZMW)</th></tr></thead><tbody></tbody></table>
@@ -219,43 +670,189 @@
 
             <!-- 6. FISP VIEW -->
             <div id="view-fisp" class="hidden">
-                <div style="margin-bottom: 1rem;">
-                    <button class="btn btn-primary admin-only" onclick="openModal('modal-fisp')">+ Add FISP Claim</button>
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="openModal('modal-fisp')">+ Add FISP Claim</button>
+                    <input type="text" id="search-fisp" placeholder="Search FISP claims..." onkeyup="renderTable('fisp')">
                 </div>
                 <div class="table-container">
-                    <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer/Camp</th><th>Voucher</th><th>Value (ZMW)</th><th>Status</th></tr></thead><tbody></tbody></table>
+                    <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer/Camp</th><th>Voucher</th><th>Value (ZMW)</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
             <!-- 7. CREDIT VIEW -->
             <div id="view-credit" class="hidden">
+                <div class="view-toolbar">
+                    <button class="btn btn-sm btn-secondary" onclick="setCreditFilter('outstanding')" id="cf-outstanding">Outstanding</button>
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="setCreditFilter('paid')" id="cf-paid">Paid</button>
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="setCreditFilter('all')" id="cf-all">All</button>
+                </div>
                 <div class="table-container">
-                    <table id="table-credit"><thead><tr><th>Customer</th><th>Product</th><th>Amount Due</th><th>Due Date</th><th>Action</th></tr></thead><tbody></tbody></table>
+                    <table id="table-credit"><thead><tr><th>Customer</th><th>Product</th><th>Amount Due</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
             <!-- 8. REPORTS VIEW -->
-            <div id="view-reports" class="hidden admin-only">
+            <div id="view-reports" class="hidden">
                 <div class="table-container">
-                    <h3 style="padding: 1rem;">Monthly Profit & Loss</h3>
-                    <table id="table-pl"><thead><tr><th>Category</th><th>Current Month (ZMW)</th></tr></thead><tbody></tbody></table>
+                    <div style="padding:1rem 1.25rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                        <h3 style="font-weight:700;color:var(--dark);font-size:1rem;">Profit &amp; Loss</h3>
+                        <input type="month" id="pl-month" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.875rem;outline:none;" onchange="renderPL()">
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="document.getElementById('pl-month').value=''; renderPL();">All Time</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPLcsv()">⬇ P&amp;L CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportCSV('sales')">⬇ Sales CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportCSV('inventory')">⬇ Stock CSV</button>
+                    </div>
+                    <div style="padding:0.75rem 1.25rem 1rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;border-top:1px solid var(--border);">
+                        <span style="font-weight:600;color:var(--primary-dark);font-size:0.875rem;">💾 Data Backup</span>
+                        <button class="btn btn-sm btn-primary" onclick="backupJSON()">⬇ Download Backup</button>
+                        <label class="btn btn-sm" style="background:#e8f3fc;color:var(--accent);cursor:pointer;border:1.5px solid #c5dff5;">
+                            ⬆ Restore from Backup
+                            <input type="file" id="restore-file-input" accept=".json" onchange="restoreJSON(event)" style="display:none;">
+                        </label>
+                        <span style="font-size:0.78rem;color:var(--text-muted);">Backup protects against data loss. Restore replaces ALL current data.</span>
+                    </div>
+                    <table id="table-pl"><thead><tr><th>Category</th><th id="pl-col-header">All Time (ZMW)</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
             <!-- 9. SETTINGS VIEW (NEW) -->
             <div id="view-settings" class="hidden admin-only">
+                <div class="card" style="margin-bottom: 2rem; border-left-color: var(--secondary);">
+                    <h3 style="margin-bottom: 1rem;">🏪 Company Information</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">This appears on all printed receipts and exported reports.</p>
+                    <div style="display:flex;flex-direction:column;gap:.75rem;max-width:480px;">
+                        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                            <label for="setting-company-name" style="font-weight:600;color:var(--primary-dark);min-width:110px;">Company Name</label>
+                            <input type="text" id="setting-company-name" placeholder="e.g. Chanda Agro Supplies" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;outline:none;">
+                        </div>
+                        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                            <label for="setting-company-phone" style="font-weight:600;color:var(--primary-dark);min-width:110px;">Phone / WhatsApp</label>
+                            <input type="text" id="setting-company-phone" placeholder="e.g. +260 97X XXX XXX" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;outline:none;">
+                        </div>
+                        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                            <label for="setting-company-address" style="font-weight:600;color:var(--primary-dark);min-width:110px;">Address / Town</label>
+                            <input type="text" id="setting-company-address" placeholder="e.g. Mansa, Luapula Province" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;outline:none;">
+                        </div>
+                        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                            <label style="font-weight:600;color:var(--primary-dark);min-width:110px;">Company Logo</label>
+                            <img id="logo-preview" alt="Logo preview" style="display:none;width:56px;height:56px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);background:#fff;">
+                            <label class="btn btn-sm" style="background:#e8f3fc;color:var(--accent);cursor:pointer;border:1.5px solid #c5dff5;">
+                                ⬆ Upload Logo
+                                <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoUpload(event)" style="display:none;">
+                            </label>
+                            <button type="button" id="logo-remove-btn" class="btn btn-sm btn-danger" style="display:none;" onclick="removeLogo()">Remove</button>
+                        </div>
+                        <p style="color:var(--text-muted);font-size:.78rem;margin:-0.25rem 0 0;">Square images work best (e.g. 200×200px). Appears next to your company name on receipts and in the app menu.</p>
+                        <div>
+                            <button class="btn btn-primary btn-sm" onclick="saveCompanyInfo()">Save Company Info</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- STAFF ACCOUNT CARD -->
+                <div class="card" style="margin-bottom: 2rem; border-left-color: var(--primary);">
+                    <h3 style="margin-bottom:1rem;">&#128100; Staff / Client Account</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">The staff account lets your counter staff or clients log in with limited access. Only one staff account is supported.</p>
+                    <div id="staff-account-display" style="display:none;background:var(--surface-2);border-radius:8px;padding:.85rem 1rem;margin-bottom:1rem;font-size:.9rem;flex-wrap:wrap;">
+                        <span>Staff account: <strong id="staff-username-display"></strong></span>
+                        <button class="btn btn-sm btn-danger" style="margin-left:1rem;" onclick="removeStaffAccount()">Remove</button>
+                    </div>
+                    <div id="staff-account-form">
+                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem;">
+                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Staff Username</label><input type="text" id="staff-new-user" placeholder="e.g. staff" autocomplete="off"/></div>
+                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Staff Password</label><input type="password" id="staff-new-pw" placeholder="Min 6 characters"/></div>
+                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Confirm Password</label><input type="password" id="staff-new-pw2" placeholder="Repeat password"/></div>
+                        </div>
+                        <div id="staff-form-error" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.5rem;"></div>
+                        <button class="btn btn-primary btn-sm" onclick="saveStaffAccount()">Save Staff Account</button>
+                    </div>
+                </div>
+
+
+                <!-- CLOUD BACKUP CARD -->
+                <div class="card" style="margin-bottom: 2rem; border-left-color:#1565C0;">
+                    <h3 style="margin-bottom:.5rem;color:#1565C0;">&#9729;&#65039; Cloud Backup</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:.75rem;">Your data is automatically linked to your account. Use these to manually push or pull.</p>
+                    <div id="cloud-sync-status-box" style="background:#f9f9f9;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.88rem;">
+                        <span id="cloud-sync-status-text">Checking...</span>
+                    </div>
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+                        <button class="btn btn-primary btn-sm" onclick="cloudUploadData()">&#8593; Upload to Cloud</button>
+                        <button class="btn btn-sm" style="background:#e8f3fc;color:var(--accent);border:1.5px solid #c5dff5;" onclick="cloudDownloadData()">&#8595; Restore from Cloud</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;"><strong>Upload</strong> saves your current data to the cloud. <strong>Restore</strong> replaces all local data with the latest cloud backup &mdash; useful on a new or reset device.</p>
+                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:.4rem;">Last synced: <span id="cloud-last-synced">&mdash;</span></div>
+                </div>
+
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Global Settings</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <label for="setting-threshold" style="font-weight: 600; color: var(--primary-dark);">Low Stock Alert Threshold</label>
+                        <input type="number" id="setting-threshold" min="1" max="9999" style="width: 90px; padding: 8px; border: 1px solid #ccc; border-radius: var(--radius); font-size: 1rem;">
+                        <button class="btn btn-primary btn-sm" onclick="saveThreshold()">Save</button>
+                        <span style="color: var(--gray); font-size: 0.85rem;">Items with qty below this number will trigger a dashboard alert.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <label for="setting-creditterm" style="font-weight: 600; color: var(--primary-dark);">Credit Term (Days)</label>
+                        <input type="number" id="setting-creditterm" min="1" max="365" style="width: 90px; padding: 8px; border: 1px solid #ccc; border-radius: var(--radius); font-size: 1rem;">
+                        <button class="btn btn-primary btn-sm" onclick="saveCreditTerm()">Save</button>
+                        <span style="color: var(--gray); font-size: 0.85rem;">Number of days before a Credit sale's due date.</span>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Tax Settings</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <label for="setting-taxregime" style="font-weight: 600; color: var(--primary-dark);">Tax Regime</label>
+                        <select id="setting-taxregime" style="padding: 8px; border: 1px solid #ccc; border-radius: var(--radius); font-size: 1rem;">
+                            <option value="none">None / Not yet registered</option>
+                            <option value="tot">Turnover Tax (5%)</option>
+                            <option value="vat">VAT-Registered (16%)</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="saveTaxRegime()">Save</button>
+                    </div>
+                    <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.75rem;">
+                        Turnover Tax: 5% on annual revenue above ZMW 30,000 (0% on the first ZMW 30,000/year). Only for businesses with annual turnover up to ZMW 5,000,000.<br>
+                        VAT: 16%, calculated assuming all prices entered in Sales/Inventory/Purchases are <strong>VAT-inclusive</strong>.<br>
+                        These regimes are mutually exclusive under ZRA rules — selecting one disables the other in the P&amp;L. Rates and thresholds may change; confirm with ZRA or your accountant before filing.
+                    </p>
+                </div>
                 <div class="card" style="margin-bottom: 2rem;">
                     <h3>Product Management</h3>
                     <p>Edit or Remove products from your master list.</p>
                 </div>
                 <div class="table-container">
                     <table id="table-settings">
-                        <thead><tr><th>ID</th><th>Product Name</th><th>Category</th><th>Current Cost</th><th>Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Product Name</th><th>Category</th><th>Current Cost</th><th>Reorder Pt</th><th>Actions</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
+
+                <!-- LICENSE SETTINGS CARD (admin only) -->
+                <div class="card" style="margin-top:2rem;border-left-color:#6A1B9A;">
+                    <h3 style="margin-bottom:1rem;color:#6A1B9A;">🔑 License Management</h3>
+                    <div id="license-info-box" style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.9rem;"></div>
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+                        <div>
+                            <label style="font-weight:600;display:block;margin-bottom:.4rem;">Set Plan</label>
+                            <select id="lic-tier-select" style="padding:8px;border:1px solid #ccc;border-radius:var(--radius);">
+                                <option value="trial">Trial (30 days free)</option>
+                                <option value="starter">Starter — K200/mo</option>
+                                <option value="standard">Standard — K500/mo</option>
+                                <option value="pro">Pro — K1,000/mo</option>
+                                <option value="lifetime">Lifetime — K3,500 once-off</option>
+                            </select>
+                        </div>
+                        <div id="lic-expiry-group">
+                            <label style="font-weight:600;display:block;margin-bottom:.4rem;">Expiry Date</label>
+                            <input type="date" id="lic-expiry-input" style="padding:8px;border:1px solid #ccc;border-radius:var(--radius);">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveLicense()">Apply License</button>
+                        <button class="btn" style="background:#eee;" onclick="resetToTrial()">Reset to Trial</button>
+                    </div>
+                    <p style="color:var(--gray);font-size:.8rem;margin-top:.75rem;">Enter the plan and expiry date as provided after payment. Lifetime plan has no expiry.</p>
+                </div>
             </div>
 
+        </div><!-- /padding wrapper -->
         </main>
     </section>
 
@@ -271,9 +868,13 @@
                     <div class="form-group"><select id="inv-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
                     <div class="form-group"><input type="text" id="inv-unit" placeholder="Unit (e.g. bag)" required></div>
                 </div>
-                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                     <div class="form-group"><input type="number" id="inv-qty" placeholder="Qty" required></div>
-                    <div class="form-group"><input type="number" id="inv-cost" placeholder="Unit Cost" required></div>
+                    <div class="form-group"><input type="number" id="inv-cost" placeholder="Unit Cost (ZMW)" required></div>
+                    <div class="form-group"><input type="number" id="inv-price" placeholder="Selling Price (ZMW)" required></div>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="inv-reorder" placeholder="Reorder Point (leave blank to use global threshold)" min="0">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%">Save</button>
             </form>
@@ -292,12 +893,15 @@
                     <div class="form-group"><input type="number" id="sale-qty" placeholder="Qty" min="1" required></div>
                     <div class="form-group"><input type="number" id="sale-price" placeholder="Unit Price" required></div>
                 </div>
-                <div class="form-group"><select id="sale-method">
+                <div class="form-group"><select id="sale-method" onchange="toggleMomoField()">
                     <option value="Cash">Cash</option>
                     <option value="Mobile Money">Mobile Money</option>
                     <option value="Credit">Credit (Add to Tracker)</option>
                     <option value="E-Voucher">E-Voucher</option>
                 </select></div>
+                <div class="form-group hidden" id="momo-ref-group">
+                    <input type="text" id="sale-momo-ref" placeholder="MoMo Transaction ID (e.g. MP240625.1234.A56789)">
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%">Complete Sale</button>
             </form>
             <button onclick="closeModal('modal-sale')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
@@ -357,9 +961,14 @@
                 <input type="hidden" id="edit-id">
                 <div class="form-group"><label>Product Name</label><input type="text" id="edit-name" required></div>
                 <div class="form-group"><label>Category</label><select id="edit-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
-                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                     <div class="form-group"><label>Unit Cost</label><input type="number" id="edit-cost" required></div>
+                    <div class="form-group"><label>Selling Price</label><input type="number" id="edit-price" required></div>
                     <div class="form-group"><label>Quantity (Adjustment)</label><input type="number" id="edit-qty" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Reorder Point</label>
+                    <input type="number" id="edit-reorder" min="0" placeholder="Leave blank to use global threshold">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%">Update Product</button>
             </form>
@@ -367,39 +976,563 @@
         </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div id="modal-receipt" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 360px; font-family: 'Courier New', monospace;">
+            <div id="receipt-body">
+                <!-- populated by printReceipt() -->
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;" id="receipt-actions">
+                <button class="btn btn-primary" style="flex:1;" onclick="window.print()">🖨 Print</button>
+                <button class="btn btn-sm" style="flex:1; background:#eee;" onclick="closeModal('modal-receipt')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            body > *:not(#modal-receipt) { display: none !important; }
+            #modal-receipt { position: static !important; background: none !important; display: block !important; }
+            .modal-content { box-shadow: none !important; max-width: 100% !important; }
+            #receipt-actions { display: none !important; }
+            .receipt-divider { border-top: 1px dashed #000; margin: 8px 0; }
+        }
+        .receipt-divider { border-top: 1px dashed #ccc; margin: 8px 0; }
+        #receipt-body { font-size: 0.85rem; line-height: 1.6; }
+        #receipt-body .receipt-row { display: flex; justify-content: space-between; }
+        #receipt-body .receipt-title { text-align: center; font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
+        #receipt-body .receipt-logo { display: block; margin: 0 auto 6px; max-width: 64px; max-height: 64px; object-fit: contain; }
+        #receipt-body .receipt-sub { text-align: center; color: #555; font-size: 0.8rem; margin-bottom: 8px; }
+        #receipt-body .receipt-total { font-weight: bold; font-size: 1rem; }
+    </style>
+
     <script>
-        // --- DATA STORE ---
-        const db = {
-            inventory: [
-                { id: "PRD001", name: "D Compound Fertilizer (50kg)", cat: "Fertilizer", unit: "bag", qty: 120, cost: 320, status: "Fresh" },
-                { id: "PRD002", name: "Urea Fertilizer (50kg)", cat: "Fertilizer", unit: "bag", qty: 85, cost: 350, status: "Fresh" },
-                { id: "PRD003", name: "ZM621 Maize Seed (10kg)", cat: "Seed", unit: "bag", qty: 200, cost: 280, status: "Fresh" },
-                { id: "PRD004", name: "ZM521 Maize Seed (10kg)", cat: "Seed", unit: "bag", qty: 150, cost: 260, status: "Fresh" },
-                { id: "PRD005", name: "Roundup Herbicide (1ltr)", cat: "Chemical", unit: "ltr", qty: 60, cost: 180, status: "Fresh" },
-                { id: "PRD012", name: "D Compound (50kg) - FISP", cat: "Fertilizer", unit: "bag", qty: 300, cost: 320, status: "Fresh" }
-            ],
-            sales: [
-                { id: "SAL001", date: "03/01/2025", cust: "Mwansa Banda", prodId: "PRD001", prodName: "D Compound Fertilizer (50kg)", qty: 2, total: 760, method: "Cash" },
-                { id: "SAL002", date: "03/01/2025", cust: "FISP - Choma", prodId: "PRD012", prodName: "D Compound (50kg) - FISP", qty: 50, total: 16000, method: "E-Voucher" }
-            ],
-            purchases: [
-                { id: "PUR001", date: "02/01/2025", supplier: "Nyala Agro", prodId: "PRD001", prodName: "D Compound Fertilizer (50kg)", qty: 150, total: 48000 },
-                { id: "PUR002", date: "02/01/2025", supplier: "Nyala Agro", prodId: "PRD012", prodName: "D Compound (50kg) - FISP", qty: 300, total: 96000 }
-            ],
-            expenses: [
-                { id: "EXP001", date: "02/01/2025", cat: "Transport", desc: "Delivery truck", amt: 2500 },
-                { id: "EXP002", date: "03/01/2025", cat: "Rent", desc: "Shop rent", amt: 3500 }
-            ],
-            fisp: [
-                { id: "FISP001", date: "03/01/2025", name: "Mwansa Banda", voucher: "EV-001", val: 16000, status: "Paid" },
-                { id: "FISP002", date: "05/01/2025", name: "FISP Batch - Pemba", voucher: "EV-002", val: 28000, status: "Pending" }
-            ],
-            credit: [
-                { id: "CRD001", cust: "Joseph Phiri", prod: "Urea Fertilizer", amt: 400, dueDate: "06/02/2025", status: "Outstanding" }
-            ]
+        // --- XSS HELPER ---
+        function esc(str) {
+            const d = document.createElement('div');
+            d.appendChild(document.createTextNode(String(str ?? '')));
+            return d.innerHTML;
+        }
+
+        // --- UID HELPER (collision-safe) ---
+        function uid(prefix) {
+            return prefix + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase();
+        }
+
+        // --- PERSISTENCE HELPERS ---
+        const KEYS = {
+            inventory: 'za_inventory',
+            sales:     'za_sales',
+            purchases: 'za_purchases',
+            expenses:  'za_expenses',
+            fisp:      'za_fisp',
+            credit:    'za_credit',
+            settings:  'za_settings'
         };
 
+        const DEFAULTS = {
+            inventory: [],
+            sales:     [],
+            purchases: [],
+            expenses:  [],
+            fisp:      [],
+            credit:    [],
+            settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none' }
+        };
+
+        // Load a collection from localStorage, falling back to seed data on first run.
+        function dbLoad(key) {
+            try {
+                const raw = localStorage.getItem(KEYS[key]);
+                return raw !== null ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULTS[key]));
+            } catch(e) {
+                return JSON.parse(JSON.stringify(DEFAULTS[key]));
+            }
+        }
+
+        // Save a collection back to localStorage immediately after every change.
+        function dbSave(key) {
+            try {
+                localStorage.setItem(KEYS[key], JSON.stringify(db[key]));
+            } catch(e) {
+                console.error('ZamAgro: save failed for', key, e);
+            }
+        }
+
+        // --- DATA STORE (backed by localStorage, mirrored to cloud when connected) ---
+        // Every write passes through writeCollection()/writeSettings() below, which is the
+        // single chokepoint used to diff changes and queue them for Firebase sync.
+        const db = {
+            get inventory() { return dbLoad('inventory'); },
+            set inventory(v) { writeCollection('inventory', v); },
+            get sales()     { return dbLoad('sales'); },
+            set sales(v)    { writeCollection('sales', v); },
+            get purchases() { return dbLoad('purchases'); },
+            set purchases(v){ writeCollection('purchases', v); },
+            get expenses()  { return dbLoad('expenses'); },
+            set expenses(v) { writeCollection('expenses', v); },
+            get fisp()      { return dbLoad('fisp'); },
+            set fisp(v)     { writeCollection('fisp', v); },
+            get credit()    { return dbLoad('credit'); },
+            set credit(v)   { writeCollection('credit', v); },
+            get settings()  { return dbLoad('settings'); },
+            set settings(v) { writeSettings(v); }
+        };
+
+        // Writes a collection array locally, then (if cloud sync is connected) figures out
+        // exactly which records were added/changed/removed and queues only those for upload —
+        // never a full-array overwrite, so two staff editing different records offline can't
+        // clobber each other when they both come back online.
+        function writeCollection(key, newVal) {
+            const oldVal = dbLoad(key);
+            localStorage.setItem(KEYS[key], JSON.stringify(newVal));
+            if (!window.__applyingRemoteSync) {
+                queueCollectionDiff(key, oldVal, newVal);
+            }
+        }
+
+        function writeSettings(newVal) {
+            if (!newVal.updatedAt) newVal.updatedAt = Date.now();
+            localStorage.setItem(KEYS.settings, JSON.stringify(newVal));
+            if (!window.__applyingRemoteSync) {
+                queueSettingsSync(newVal);
+            }
+        }
+
+        // ============================================================
+        // ☁ FIREBASE CLOUD SYNC — multi-device, multi-staff, offline-safe
+        // ============================================================
+        // SETUP (one-time, in the Firebase Console for your project):
+        //
+        // 1. Fill in FIREBASE_CONFIG below with your project's values
+        //    (Project Settings → General → Your apps → Web app → SDK setup & config).
+        //    These are public client identifiers, not secrets — the real protection is
+        //    the Database Rules in step 2.
+        //
+        // 2. Realtime Database → Rules → paste exactly this, then Publish:
+        //    {
+        //      "rules": {
+        //        "businesses": {
+        //          "$uid": {
+        //            ".read":  "auth != null && auth.uid === $uid",
+        //            ".write": "auth != null && auth.uid === $uid",
+        //            "$collection": {
+        //              ".validate": "$collection === 'inventory' || $collection === 'sales' || $collection === 'purchases' || $collection === 'expenses' || $collection === 'fisp' || $collection === 'credit' || $collection === 'settings'"
+        //            }
+        //          }
+        //        }
+        //      }
+        //    }
+        //    This denies everyone by default and only ever lets a signed-in account read/write
+        //    its OWN business node — there is no path under which one customer's data is
+        //    readable or writable by another, even if they guess another business's UID.
+        //
+        // 3. Authentication → Sign-in method → enable "Email/Password".
+        //
+        // 4. (Optional, extra layer) App Check → register a Web app with reCAPTCHA v3,
+        //    then paste the site key into APP_CHECK_SITE_KEY below. This blocks requests
+        //    that don't come from your real app, even if someone has a valid login.
+        //    Leave blank to skip — sync still works without it.
+        //
+        const FIREBASE_CONFIG = {
+            apiKey:            "AIzaSyCwgiY5KMLDEmuWzBG7KGvegh1WaC9KoLk",
+            authDomain:        "zamagro-99533.firebaseapp.com",
+            projectId:         "zamagro-99533",
+            databaseURL:       "https://zamagro-99533-default-rtdb.firebaseio.com",
+            storageBucket:     "zamagro-99533.firebasestorage.app",
+            messagingSenderId: "816881416807",
+            appId:             "1:816881416807:web:4a1775a239a2a4eb45b2c2",
+            measurementId:     "G-P0S5D2QZ9C"
+        };
+        const APP_CHECK_SITE_KEY = ""; // optional reCAPTCHA v3 site key, see step 4 above
+
+        const CLOUD_KEY       = 'za_cloud_auth';   // { uid, email, idToken, refreshToken, idTokenExpiry }
+        const SYNC_QUEUE_KEY  = 'za_pending_sync'; // persistent offline-safe outbox
+        const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit'];
+
+        let cloudAuth = null;
+        let sseConn = null;
+        let syncFlushTimer = null;
+        let lastSyncedAt = 0;
+
+        function isCloudConfigured() {
+            return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('YOUR_');
+        }
+
+        // -- local persistence for cloud session + outbox --
+        function loadCloudAuth() {
+            try { return JSON.parse(localStorage.getItem(CLOUD_KEY)) || null; } catch(e) { return null; }
+        }
+        function saveCloudAuth(a) { cloudAuth = a; localStorage.setItem(CLOUD_KEY, JSON.stringify(a)); }
+        function clearCloudAuth() { cloudAuth = null; localStorage.removeItem(CLOUD_KEY); }
+
+        function loadSyncQueue() {
+            try { return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY)) || []; } catch(e) { return []; }
+        }
+        function saveSyncQueue(q) { localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(q)); }
+
+        // -- queueing: diff-based, per-record, so concurrent edits to different records never clobber each other --
+        function enqueueSync(collection, recordId, method, data) {
+            if (!cloudAuth) return;
+            const q = loadSyncQueue().filter(op => !(op.collection === collection && op.recordId === recordId));
+            q.push({ opId: uid('OP'), collection, recordId, method, data, ts: Date.now() });
+            saveSyncQueue(q);
+            updateSyncBadge();
+            scheduleFlush();
+        }
+
+        function queueCollectionDiff(collection, oldArr, newArr) {
+            if (!cloudAuth || !SYNC_COLLECTIONS.includes(collection)) return;
+            const oldMap = new Map((oldArr || []).map(r => [r.id, r]));
+            const newMap = new Map((newArr || []).map(r => [r.id, r]));
+            newMap.forEach((rec, id) => {
+                const old = oldMap.get(id);
+                if (!old || JSON.stringify(old) !== JSON.stringify(rec)) {
+                    if (!rec.updatedAt) rec.updatedAt = Date.now();
+                    enqueueSync(collection, id, 'PUT', rec);
+                }
+            });
+            oldMap.forEach((rec, id) => {
+                if (!newMap.has(id)) enqueueSync(collection, id, 'DELETE', null);
+            });
+        }
+
+        function queueSettingsSync(settingsObj) {
+            enqueueSync('settings', '_root', 'PUT', settingsObj);
+        }
+
+        function scheduleFlush() {
+            if (syncFlushTimer) return;
+            syncFlushTimer = setTimeout(() => { syncFlushTimer = null; flushSyncQueue(); }, 800);
+        }
+
+        // -- Firebase Auth (REST) --
+        async function cloudSignUp(email, password) {
+            const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, returnSecureToken: true })
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+                const msg = data.error?.message || 'Could not create cloud account';
+                const err = new Error(msg);
+                err.code = msg;
+                throw err;
+            }
+            return data;
+        }
+
+        async function cloudSignIn(email, password) {
+            const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_CONFIG.apiKey}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, returnSecureToken: true })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error?.message === 'EMAIL_NOT_FOUND' || data.error?.message === 'INVALID_PASSWORD' || data.error?.message === 'INVALID_LOGIN_CREDENTIALS' ? 'No cloud account matches that email/password.' : (data.error?.message || 'Sign-in failed'));
+            return data;
+        }
+
+        async function getFreshIdToken() {
+            if (!cloudAuth) return null;
+            if (cloudAuth.idTokenExpiry && Date.now() < cloudAuth.idTokenExpiry - 60000) return cloudAuth.idToken;
+            try {
+                const resp = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_CONFIG.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(cloudAuth.refreshToken)}`
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error?.message || 'Token refresh failed');
+                cloudAuth.idToken = data.id_token;
+                cloudAuth.refreshToken = data.refresh_token;
+                cloudAuth.idTokenExpiry = Date.now() + (parseInt(data.expires_in, 10) * 1000);
+                saveCloudAuth(cloudAuth);
+                return cloudAuth.idToken;
+            } catch (e) {
+                console.error('ZamAgro Cloud: token refresh failed', e);
+                setSyncStatus('error', 'Session expired — reconnect cloud sync');
+                return null;
+            }
+        }
+
+        // -- optional App Check attestation (extra layer, no-ops if not configured) --
+        async function getAppCheckToken() {
+            if (!APP_CHECK_SITE_KEY || FIREBASE_CONFIG.appId.startsWith('YOUR_') || !window.grecaptcha) return null;
+            try {
+                const recaptchaToken = await new Promise(resolve => grecaptcha.ready(() => grecaptcha.execute(APP_CHECK_SITE_KEY, { action: 'sync' }).then(resolve)));
+                const resp = await fetch(`https://firebaseappcheck.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/apps/${FIREBASE_CONFIG.appId}:exchangeRecaptchaV3Token?key=${FIREBASE_CONFIG.apiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recaptchaV3Token: recaptchaToken })
+                });
+                const data = await resp.json();
+                return data.token || null;
+            } catch (e) { return null; }
+        }
+
+        function maybeLoadAppCheckScript() {
+            if (!APP_CHECK_SITE_KEY || document.getElementById('grecaptcha-script')) return;
+            const s = document.createElement('script');
+            s.id = 'grecaptcha-script';
+            s.src = `https://www.google.com/recaptcha/api.js?render=${APP_CHECK_SITE_KEY}`;
+            document.head.appendChild(s);
+        }
+
+        // -- raw REST calls, scoped to this business's own node only --
+        async function firebaseRequest(method, path, body) {
+            const idToken = await getFreshIdToken();
+            if (!idToken) throw new Error('No valid cloud session');
+            const appCheckToken = await getAppCheckToken();
+            const url = `${FIREBASE_CONFIG.databaseURL}/businesses/${cloudAuth.uid}/${path}.json?auth=${idToken}`;
+            const headers = { 'Content-Type': 'application/json' };
+            if (appCheckToken) headers['X-Firebase-AppCheck'] = appCheckToken;
+            const resp = await fetch(url, { method, headers, body: method === 'DELETE' ? undefined : JSON.stringify(body) });
+            if (!resp.ok) throw new Error(`Firebase ${method} ${path} failed: ${resp.status}`);
+            return resp.json().catch(() => null);
+        }
+
+        async function firebaseGet(path) {
+            const idToken = await getFreshIdToken();
+            if (!idToken) throw new Error('No valid cloud session');
+            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${cloudAuth.uid}/${path}.json?auth=${idToken}`);
+            if (!resp.ok) throw new Error(`Firebase GET ${path} failed: ${resp.status}`);
+            return resp.json();
+        }
+
+        // -- outbox flush: sends queued ops in order, stops at first failure so nothing is lost or reordered --
+        async function flushSyncQueue() {
+            if (!cloudAuth || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+            let q = loadSyncQueue();
+            if (!q.length) { setSyncStatus('idle'); return; }
+            setSyncStatus('syncing');
+            for (const op of q) {
+                try {
+                    const path = `${op.collection}/${op.recordId}`;
+                    if (op.method === 'DELETE') await firebaseRequest('DELETE', path, null);
+                    else await firebaseRequest('PUT', path, op.data);
+                    q = q.filter(o => o.opId !== op.opId);
+                    saveSyncQueue(q);
+                    updateSyncBadge();
+                } catch (e) {
+                    console.warn('ZamAgro Cloud: sync op failed, will retry', op, e);
+                    setSyncStatus('error', 'Sync paused — will retry');
+                    return;
+                }
+            }
+            lastSyncedAt = Date.now();
+            setSyncStatus('idle');
+            updateSyncMeta();
+        }
+
+        // -- realtime inbound sync: other staff devices' changes stream in live --
+        function startCloudListener() {
+            stopCloudListener();
+            if (!cloudAuth) return;
+            getFreshIdToken().then(idToken => {
+                if (!idToken) return;
+                const url = `${FIREBASE_CONFIG.databaseURL}/businesses/${cloudAuth.uid}.json?auth=${idToken}`;
+                sseConn = new EventSource(url);
+                sseConn.addEventListener('put', e => handleRemoteEvent(JSON.parse(e.data)));
+                sseConn.addEventListener('patch', e => handleRemoteEvent(JSON.parse(e.data)));
+                sseConn.addEventListener('auth_revoked', () => { stopCloudListener(); setTimeout(startCloudListener, 3000); });
+                sseConn.onerror = () => { stopCloudListener(); setTimeout(startCloudListener, 5000); };
+            });
+        }
+        function stopCloudListener() { if (sseConn) { sseConn.close(); sseConn = null; } }
+
+        function handleRemoteEvent(evt) {
+            const segments = (evt.path || '/').split('/').filter(Boolean);
+            if (segments.length === 0) {
+                if (evt.data && typeof evt.data === 'object') {
+                    Object.keys(evt.data).forEach(col => {
+                        if (col === 'settings') mergeRemoteSettings(evt.data[col]);
+                        else mergeRemoteCollection(col, evt.data[col]);
+                    });
+                }
+                return;
+            }
+            const collection = segments[0];
+            if (collection === 'settings') { if (evt.data) mergeRemoteSettings(evt.data); return; }
+            if (!SYNC_COLLECTIONS.includes(collection)) return;
+            if (segments.length === 1) mergeRemoteCollection(collection, evt.data || {});
+            else mergeRemoteRecord(collection, segments[1], evt.data);
+        }
+
+        function hasPendingOp(collection, recordId) {
+            return loadSyncQueue().some(op => op.collection === collection && op.recordId === recordId);
+        }
+
+        function mergeRemoteRecord(collection, recordId, remoteRec) {
+            if (hasPendingOp(collection, recordId)) return; // an unsynced local edit is in flight — don't clobber it
+            const arr = dbLoad(collection);
+            const idx = arr.findIndex(r => r.id === recordId);
+            if (remoteRec === null) {
+                if (idx !== -1) arr.splice(idx, 1);
+            } else if (idx === -1) {
+                arr.push(remoteRec);
+            } else if ((remoteRec.updatedAt || 0) >= (arr[idx].updatedAt || 0)) {
+                arr[idx] = remoteRec;
+            } else {
+                return; // local copy is newer
+            }
+            window.__applyingRemoteSync = true;
+            localStorage.setItem(KEYS[collection], JSON.stringify(arr));
+            window.__applyingRemoteSync = false;
+            refreshAll();
+        }
+
+        function mergeRemoteCollection(collection, remoteObj) {
+            if (!SYNC_COLLECTIONS.includes(collection)) return;
+            const pendingIds = new Set(loadSyncQueue().filter(op => op.collection === collection).map(op => op.recordId));
+            const localArr = dbLoad(collection);
+            const localMap = new Map(localArr.map(r => [r.id, r]));
+            const merged = [];
+            const seen = new Set();
+            Object.entries(remoteObj || {}).forEach(([id, rec]) => {
+                seen.add(id);
+                if (pendingIds.has(id)) { if (localMap.has(id)) merged.push(localMap.get(id)); return; }
+                const local = localMap.get(id);
+                merged.push((!local || (rec.updatedAt || 0) >= (local.updatedAt || 0)) ? rec : local);
+            });
+            localMap.forEach((rec, id) => { if (!seen.has(id)) merged.push(rec); }); // not-yet-synced local-only records are kept, never silently dropped
+            window.__applyingRemoteSync = true;
+            localStorage.setItem(KEYS[collection], JSON.stringify(merged));
+            window.__applyingRemoteSync = false;
+            refreshAll();
+        }
+
+        function mergeRemoteSettings(remoteSettings) {
+            if (!remoteSettings || hasPendingOp('settings', '_root')) return;
+            const local = dbLoad('settings');
+            if ((remoteSettings.updatedAt || 0) >= (local.updatedAt || 0)) {
+                window.__applyingRemoteSync = true;
+                localStorage.setItem(KEYS.settings, JSON.stringify(remoteSettings));
+                window.__applyingRemoteSync = false;
+                refreshAll();
+            }
+        }
+
+        // -- connect / disconnect flows --
+        async function pushFullSnapshot() {
+            for (const col of SYNC_COLLECTIONS) {
+                const arr = dbLoad(col);
+                const obj = {};
+                arr.forEach(r => { if (!r.updatedAt) r.updatedAt = Date.now(); obj[r.id] = r; });
+                localStorage.setItem(KEYS[col], JSON.stringify(arr));
+                await firebaseRequest('PUT', col, obj);
+            }
+            const s = dbLoad('settings');
+            if (!s.updatedAt) s.updatedAt = Date.now();
+            localStorage.setItem(KEYS.settings, JSON.stringify(s));
+            await firebaseRequest('PUT', 'settings', s);
+        }
+
+        async function pullFullSnapshot() {
+            for (const col of SYNC_COLLECTIONS) {
+                const remote = await firebaseGet(col);
+                mergeRemoteCollection(col, remote || {});
+            }
+            const remoteSettings = await firebaseGet('settings');
+            if (remoteSettings) mergeRemoteSettings(remoteSettings);
+        }
+
+        async function connectCloudSync(email, password, mode) {
+            if (!isCloudConfigured()) { showToast('Cloud sync is not configured yet — add your Firebase keys first', 'danger'); return; }
+            setSyncStatus('connecting');
+            try {
+                const data = mode === 'create' ? await cloudSignUp(email, password) : await cloudSignIn(email, password);
+                saveCloudAuth({
+                    uid: data.localId,
+                    email,
+                    idToken: data.idToken,
+                    refreshToken: data.refreshToken,
+                    idTokenExpiry: Date.now() + (parseInt(data.expiresIn, 10) * 1000)
+                });
+                if (mode === 'create') await pushFullSnapshot();
+                else await pullFullSnapshot();
+                startCloudListener();
+                renderCloudSyncUI();
+                showToast('Cloud sync connected');
+            } catch (e) {
+                setSyncStatus('error', e.message);
+                showToast(e.message || 'Cloud sync failed', 'danger');
+            }
+        }
+
+        function disconnectCloudSync() {
+            stopCloudListener();
+            clearCloudAuth();
+            saveSyncQueue([]);
+            renderCloudSyncUI();
+            showToast('Cloud sync disconnected (your local data is unaffected)');
+        }
+
+        // -- Cloud Backup: simple upload / download --
+        async function cloudUploadData() {
+            if (!cloudAuth) { showToast('Not connected to cloud. Log in again to reconnect.', 'danger'); return; }
+            setSyncStatus('syncing');
+            try {
+                await pushFullSnapshot();
+                setSyncStatus('idle');
+                showToast('Data uploaded to cloud');
+            } catch(e) {
+                setSyncStatus('error', e.message);
+                showToast('Upload failed: ' + (e.message || 'Check connection'), 'danger');
+            }
+        }
+
+        async function cloudDownloadData() {
+            if (!cloudAuth) { showToast('Not connected to cloud. Log in again to reconnect.', 'danger'); return; }
+            if (!confirm('Restore from cloud? This will replace ALL local data with the latest cloud backup.')) return;
+            setSyncStatus('syncing');
+            try {
+                await pullFullSnapshot();
+                setSyncStatus('idle');
+                showToast('Data restored from cloud');
+                refreshAll();
+            } catch(e) {
+                setSyncStatus('error', e.message);
+                showToast('Restore failed: ' + (e.message || 'Check connection'), 'danger');
+            }
+        }
+
+        function renderCloudSyncUI() {
+            updateSyncMeta();
+            setSyncStatus('idle');
+        }
+
+        function updateSyncMeta() {
+            const el = document.getElementById('cloud-last-synced');
+            if (el) el.textContent = lastSyncedAt ? new Date(lastSyncedAt).toLocaleString('en-ZM') : 'never';
+        }
+
+        function setSyncStatus(state, message) {
+            const text = document.getElementById('cloud-sync-status-text');
+            const box  = document.getElementById('cloud-sync-status-box');
+            if (!text || !box) return;
+            const connected = !!cloudAuth;
+            const s = {
+                idle:    { color: connected ? '#2e7d32' : '#e65100', bg: connected ? '#e8f5e9' : '#fff8e1',
+                           label: connected ? 'Connected - ' + (cloudAuth.email || 'your account') : 'Not connected - sign up to enable cloud backup.' },
+                syncing: { color: '#1565C0', bg: '#e3f2fd', label: 'Working...' },
+                error:   { color: '#c62828', bg: '#fdecea', label: 'Error: ' + (message || 'Cloud unavailable') }
+            }[state] || { color: '#2e7d32', bg: '#e8f5e9', label: '' };
+            box.style.background = s.bg;
+            text.style.color = s.color;
+            text.textContent = s.label;
+        }
+
+        // -- boot: resume an existing cloud session in the background, regardless of login state --
+        document.addEventListener('DOMContentLoaded', () => {
+            maybeLoadAppCheckScript();
+            cloudAuth = loadCloudAuth();
+            if (cloudAuth) startCloudListener();
+            window.addEventListener('online', () => { flushSyncQueue(); if (cloudAuth && !sseConn) startCloudListener(); });
+            setInterval(() => { if (cloudAuth) flushSyncQueue(); }, 20000);
+        });
+
         let currentUser = null;
+        let creditFilter = 'outstanding'; // 'outstanding' | 'paid' | 'all'
+        let cashFlowPeriod = 'today';     // 'today' | 'week'
 
         const formatZMW = (num) => new Intl.NumberFormat('en-ZM', { style: 'currency', currency: 'ZMW' }).format(num);
 
@@ -415,44 +1548,457 @@
         // --- NAVIGATION & VIEWS ---
 
         function showLanding() {
+            ['login-page','setup-page','app-layout'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('landing-page').classList.remove('hidden');
-            document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('app-layout').classList.add('hidden');
+        }
+
+        function _showLoginPage() {
+            ['landing-page','setup-page','app-layout'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('login-error').style.display = 'none';
+            const accounts = getAccounts();
+            const roleSelect = document.getElementById('loginRole');
+            const clientOption = roleSelect ? roleSelect.querySelector('option[value="client"]') : null;
+            if (clientOption) clientOption.style.display = (accounts && accounts.client) ? '' : 'none';
+            if (roleSelect && !(accounts && accounts.client)) roleSelect.value = 'admin';
+            checkLockoutDisplay();
         }
 
         function showLogin() {
-            document.getElementById('landing-page').classList.add('hidden');
-            document.getElementById('login-page').classList.remove('hidden');
+            if (isFirstRun()) { showSetup(); } else { _showLoginPage(); }
         }
 
-        function login(e) {
-            e.preventDefault();
-            const role = document.getElementById('loginRole').value;
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+        // ── LICENSE SYSTEM ────────────────────────────────────────────────
+        const LICENSE_KEY = 'za_license';
 
-            if (u === role && p === role) {
-                currentUser = role;
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('app-layout').classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = role === 'admin' ? 'Admin' : 'Client';
-                
-                // Permission toggle
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'admin' ? 'block' : 'none');
-                
-                refreshAll();
-                nav('dashboard');
+        // Feature access per tier
+        const TIER_FEATURES = {
+            trial:    ['dashboard','inventory','sales','expenses','reports','purchases','fisp','credit','adjustlog'],
+            starter:  ['dashboard','inventory','sales','expenses','reports'],
+            standard: ['dashboard','inventory','sales','expenses','reports','purchases','fisp','credit'],
+            pro:      ['dashboard','inventory','sales','expenses','reports','purchases','fisp','credit','adjustlog'],
+            lifetime: ['dashboard','inventory','sales','expenses','reports','purchases','fisp','credit','adjustlog']
+        };
+
+        const TIER_LABELS = {
+            trial: 'Free Trial', starter: 'Starter', standard: 'Standard', pro: 'Pro', lifetime: 'Lifetime'
+        };
+
+        const TIER_PRICES = {
+            trial: '', starter: 'K200/mo', standard: 'K500/mo', pro: 'K1,000/mo', lifetime: 'K3,500 once-off'
+        };
+
+        // Nav views that can be locked
+        const NAV_FEATURE_MAP = {
+            purchases: 'purchases',
+            fisp:      'fisp',
+            credit:    'credit'
+            // inventory, sales, expenses, reports, dashboard always visible
+        };
+
+        function getLicense() {
+            try {
+                const raw = localStorage.getItem(LICENSE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch(e) {}
+            // Default: start trial from first run
+            const trialExpiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            const lic = { tier: 'trial', expiry: trialExpiry, activatedAt: Date.now() };
+            localStorage.setItem(LICENSE_KEY, JSON.stringify(lic));
+            return lic;
+        }
+
+        function saveLicenseData(tier, expiryTimestamp) {
+            const lic = { tier, expiry: expiryTimestamp, activatedAt: Date.now() };
+            localStorage.setItem(LICENSE_KEY, JSON.stringify(lic));
+        }
+
+        function isLicenseActive() {
+            const lic = getLicense();
+            if (lic.tier === 'lifetime') return true;
+            return lic.expiry > Date.now();
+        }
+
+        function hasFeature(feature) {
+            if (!isLicenseActive()) return false;
+            const lic = getLicense();
+            const allowed = TIER_FEATURES[lic.tier] || TIER_FEATURES['trial'];
+            return allowed.includes(feature);
+        }
+
+        function applyLicenseUI() {
+            const lic = getLicense();
+            const active = isLicenseActive();
+
+            // Show expired overlay if license is dead
+            const expiredOverlay = document.getElementById('license-expired-overlay');
+            if (!active) {
+                expiredOverlay.classList.remove('hidden');
+                return;
             } else {
-                showToast("Invalid Login", "danger");
+                expiredOverlay.classList.add('hidden');
+            }
+
+            // Update license bar
+            const tierLabel = TIER_LABELS[lic.tier] || lic.tier;
+            document.getElementById('lb-tier').textContent = tierLabel;
+            const badge = document.getElementById('lb-badge');
+            badge.innerHTML = `<span class="license-badge badge-${lic.tier}">${TIER_PRICES[lic.tier] || ''}</span>`;
+
+            const expiryEl = document.getElementById('lb-expiry');
+            if (lic.tier === 'lifetime') {
+                expiryEl.textContent = '✔ Lifetime Access';
+            } else {
+                const days = Math.ceil((lic.expiry - Date.now()) / (24*60*60*1000));
+                const expiryDate = new Date(lic.expiry).toLocaleDateString('en-ZM');
+                expiryEl.textContent = `Expires: ${expiryDate} (${days} day${days!==1?'s':''} left)`;
+                if (days <= 7) expiryEl.style.color = '#FFCC02';
+                if (days <= 3) expiryEl.style.color = '#FF6B6B';
+            }
+
+            // Lock/unlock nav items
+            Object.entries(NAV_FEATURE_MAP).forEach(([navId, feature]) => {
+                const li = document.getElementById(`nav-${navId}`)?.parentElement;
+                if (!li) return;
+                if (hasFeature(feature)) {
+                    li.classList.remove('nav-locked');
+                } else {
+                    li.classList.add('nav-locked');
+                }
+            });
+
+            // Update license info box in settings
+            renderLicenseInfoBox();
+        }
+
+        function renderLicenseInfoBox() {
+            const box = document.getElementById('license-info-box');
+            if (!box) return;
+            const lic = getLicense();
+            const active = isLicenseActive();
+            const tierLabel = TIER_LABELS[lic.tier] || lic.tier;
+            const expiryDate = lic.tier === 'lifetime' ? '—' : new Date(lic.expiry).toLocaleDateString('en-ZM');
+            const status = active ? `<span style="color:var(--success);font-weight:700;">✔ Active</span>` : `<span style="color:var(--danger);font-weight:700;">✘ Expired</span>`;
+            const features = (TIER_FEATURES[lic.tier]||[]).filter(f=>f!=='dashboard').join(', ');
+            box.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.5rem;font-size:.88rem;">
+                    <div><strong>Plan:</strong> ${tierLabel}</div>
+                    <div><strong>Status:</strong> ${status}</div>
+                    <div><strong>Price:</strong> ${TIER_PRICES[lic.tier]||'Free'}</div>
+                    <div><strong>Expiry:</strong> ${expiryDate}</div>
+                    <div style="grid-column:1/-1;"><strong>Modules included:</strong> ${features}</div>
+                </div>`;
+        }
+
+        function saveLicense() {
+            const tier = document.getElementById('lic-tier-select').value;
+            let expiry;
+            if (tier === 'lifetime') {
+                expiry = 9999999999999; // far future
+            } else {
+                const dateVal = document.getElementById('lic-expiry-input').value;
+                if (!dateVal) { showToast('Please enter an expiry date.', 'danger'); return; }
+                expiry = new Date(dateVal).getTime() + 24*60*60*1000 - 1; // end of that day
+            }
+            saveLicenseData(tier, expiry);
+            applyLicenseUI();
+            showToast(`License updated: ${TIER_LABELS[tier]}`);
+        }
+
+        function resetToTrial() {
+            const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            saveLicenseData('trial', expiry);
+            applyLicenseUI();
+            showToast('Reset to 30-day trial.');
+        }
+
+        // Show/hide lifetime expiry date input
+        document.addEventListener('DOMContentLoaded', () => {
+            const sel = document.getElementById('lic-tier-select');
+            const grp = document.getElementById('lic-expiry-group');
+            if (sel && grp) {
+                sel.addEventListener('change', () => {
+                    grp.style.display = sel.value === 'lifetime' ? 'none' : '';
+                });
+                // Pre-fill current tier in settings
+                const lic = getLicense();
+                sel.value = lic.tier;
+                if (lic.tier !== 'lifetime' && lic.expiry) {
+                    const d = new Date(lic.expiry);
+                    document.getElementById('lic-expiry-input').value = d.toISOString().split('T')[0];
+                } else {
+                    grp.style.display = 'none';
+                }
+            }
+        });
+
+        // ── AUTH HELPERS (PBKDF2 via WebCrypto) ──────────────────────────
+        const AUTH_KEY = 'za_auth_accounts';
+        const LOCKOUT_KEY = 'za_lockout';
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
+
+        async function pbkdf2Hash(password, salt) {
+            const enc = new TextEncoder();
+            const keyMat = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits(
+                { name: 'PBKDF2', salt: enc.encode(salt), iterations: 100000, hash: 'SHA-256' },
+                keyMat, 256
+            );
+            return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        function genSalt() {
+            return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2,'0')).join('');
+        }
+
+        function getAccounts() {
+            try { return JSON.parse(localStorage.getItem(AUTH_KEY)) || null; } catch(e) { return null; }
+        }
+
+        function isFirstRun() { return !getAccounts(); }
+
+        function getLockout() {
+            try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || { attempts: 0, until: 0 }; } catch(e) { return { attempts: 0, until: 0 }; }
+        }
+        function saveLockout(data) { localStorage.setItem(LOCKOUT_KEY, JSON.stringify(data)); }
+        function clearLockout() { localStorage.removeItem(LOCKOUT_KEY); }
+
+        function togglePw(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (el.type === 'password') { el.type = 'text'; btn.textContent = '\uD83D\uDE48'; }
+            else { el.type = 'password'; btn.textContent = '\uD83D\uDC41'; }
+        }
+
+        // ── SETUP WIZARD ─────────────────────────────────────────────────
+        function showSetup() {
+            ['landing-page','login-page','app-layout'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('setup-page').classList.remove('hidden');
+        }
+
+        // Derive stable Firebase email from company + admin username
+        function deriveCloudEmail(companyName, adminUser) {
+            const s = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return s(companyName) + '.' + s(adminUser) + '@zamagro.app';
+        }
+
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const errEl    = document.getElementById('setup-error');
+            const statusEl = document.getElementById('setup-cloud-status');
+            errEl.style.display = 'none';
+            statusEl.style.display = 'none';
+
+            const companyName = document.getElementById('setup-company-name').value.trim();
+            const adminUser   = document.getElementById('setup-admin-user').value.trim();
+            const adminPw     = document.getElementById('setup-admin-pw').value;
+            const adminPw2    = document.getElementById('setup-admin-pw2').value;
+
+            if (!companyName) { errEl.textContent = 'Please enter your business name.'; errEl.style.display = 'block'; return; }
+            if (adminPw !== adminPw2) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+            if (adminPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+
+            const btn = document.getElementById('setup-btn');
+            btn.disabled = true; btn.textContent = 'Creating account...';
+
+            const adminSalt = genSalt();
+            const accounts = {
+                admin:  { username: adminUser, salt: adminSalt, hash: await pbkdf2Hash(adminPw, adminSalt) },
+                client: null
+            };
+            localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
+
+            // Save company name
+            const existingSettings = JSON.parse(localStorage.getItem('zamagro_settings') || '{}');
+            existingSettings.companyName = companyName;
+            localStorage.setItem('zamagro_settings', JSON.stringify(existingSettings));
+
+            // Auto-connect cloud using derived email (companyname.adminuser@zamagro.app)
+            const cloudEmail = deriveCloudEmail(companyName, adminUser);
+            statusEl.style.background = '#e3f2fd'; statusEl.style.color = '#1565C0';
+            statusEl.textContent = 'Connecting to cloud...'; statusEl.style.display = 'block';
+
+            try {
+                await connectCloudSync(cloudEmail, adminPw, 'create');
+                statusEl.style.background = '#e8f5e9'; statusEl.style.color = '#2e7d32';
+                statusEl.textContent = 'Cloud connected! Redirecting...';
+            } catch(e) {
+                if (e.code === 'EMAIL_EXISTS') {
+                    // Duplicate — block signup, clear local data
+                    localStorage.removeItem(AUTH_KEY);
+                    localStorage.removeItem('zamagro_settings');
+                    statusEl.style.display = 'none';
+                    errEl.textContent = 'That company name + admin username is already registered. Please use a different company name or admin username.';
+                    errEl.style.display = 'block';
+                    btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud';
+                    return;
+                }
+                // No internet - non-blocking, proceed offline
+                statusEl.style.background = '#fff8e1'; statusEl.style.color = '#e65100';
+                statusEl.textContent = 'No internet - cloud skipped. Connect later in Settings.';
+            }
+
+            btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud';
+            setTimeout(() => { showToast('Account created! Please log in.'); _showLoginPage(); }, 1200);
+        });
+
+        // --- STAFF ACCOUNT MANAGEMENT ---
+        function renderStaffAccountUI() {
+            const accounts = getAccounts();
+            const displayEl = document.getElementById('staff-account-display');
+            const formEl    = document.getElementById('staff-account-form');
+            const nameEl    = document.getElementById('staff-username-display');
+            if (!displayEl || !formEl) return;
+            if (accounts && accounts.client) {
+                if (nameEl) nameEl.textContent = accounts.client.username;
+                displayEl.style.display = 'flex';
+                formEl.style.display = 'none';
+            } else {
+                displayEl.style.display = 'none';
+                formEl.style.display = 'block';
             }
         }
 
+        async function saveStaffAccount() {
+            const errEl   = document.getElementById('staff-form-error');
+            const newUser = document.getElementById('staff-new-user').value.trim();
+            const newPw   = document.getElementById('staff-new-pw').value;
+            const newPw2  = document.getElementById('staff-new-pw2').value;
+            errEl.style.display = 'none';
+            const accounts = getAccounts();
+            if (!newUser) { errEl.textContent = 'Please enter a staff username.'; errEl.style.display = 'block'; return; }
+            if (newPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+            if (newPw !== newPw2) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+            if (accounts && accounts.admin && accounts.admin.username.toLowerCase() === newUser.toLowerCase()) {
+                errEl.textContent = 'Staff username must differ from admin username.'; errEl.style.display = 'block'; return;
+            }
+            const salt = genSalt();
+            const hash = await pbkdf2Hash(newPw, salt);
+            accounts.client = { username: newUser, salt, hash };
+            localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
+            document.getElementById('staff-new-user').value = '';
+            document.getElementById('staff-new-pw').value = '';
+            document.getElementById('staff-new-pw2').value = '';
+            renderStaffAccountUI();
+            showToast('Staff account saved.');
+        }
+
+        function removeStaffAccount() {
+            if (!confirm('Remove the staff account? They will no longer be able to log in.')) return;
+            const accounts = getAccounts();
+            if (accounts) { accounts.client = null; localStorage.setItem(AUTH_KEY, JSON.stringify(accounts)); }
+            renderStaffAccountUI();
+            showToast('Staff account removed.');
+        }
+
+
+        // ── LOGIN / LOGOUT ────────────────────────────────────────────────
+        function checkLockoutDisplay() {
+            const lk = getLockout();
+            const lockoutEl = document.getElementById('login-lockout');
+            const loginBtn  = document.getElementById('login-btn');
+            if (lk.until > Date.now()) {
+                const mins = Math.ceil((lk.until - Date.now()) / 60000);
+                lockoutEl.textContent = `Too many failed attempts. Try again in ${mins} minute${mins>1?'s':''}.`;
+                lockoutEl.style.display = 'block';
+                loginBtn.disabled = true;
+                setTimeout(checkLockoutDisplay, 10000);
+            } else {
+                lockoutEl.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('login-error');
+            const lk = getLockout();
+            if (lk.until > Date.now()) { checkLockoutDisplay(); return; }
+
+            const role = document.getElementById('loginRole').value;
+            const u    = document.getElementById('username').value.trim();
+            const p    = document.getElementById('password').value;
+            const accounts = getAccounts();
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true; btn.textContent = 'Checking…';
+
+            const acct = accounts ? accounts[role] : null;
+            let valid = false;
+            if (acct && acct.username.toLowerCase() === u.toLowerCase()) {
+                const hash = await pbkdf2Hash(p, acct.salt);
+                valid = hash === acct.hash;
+            }
+
+            btn.disabled = false; btn.textContent = 'Login';
+
+            if (valid) {
+                clearLockout();
+                currentUser = role;
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = acct.username;
+                // Gate admin-only elements via a class on the layout root
+                document.getElementById('app-layout').dataset.role = role;
+                applyLicenseUI();
+                refreshAll();
+                nav('dashboard');
+            } else {
+                const attempts = (lk.attempts || 0) + 1;
+                if (attempts >= MAX_ATTEMPTS) {
+                    saveLockout({ attempts, until: Date.now() + LOCKOUT_MS });
+                    checkLockoutDisplay();
+                } else {
+                    saveLockout({ attempts, until: 0 });
+                    errEl.textContent = `Incorrect username or password. ${MAX_ATTEMPTS - attempts} attempt${MAX_ATTEMPTS-attempts===1?'':'s'} remaining.`;
+                    errEl.style.display = 'block';
+                }
+            }
+        });
+
         function logout() {
             currentUser = null;
+            delete document.getElementById('app-layout').dataset.role;
             showLanding();
         }
 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('open');
+        }
+
         function nav(view) {
+            closeSidebar();
+            // Block client from accessing admin-only views
+            const adminViews = ['settings'];
+            if (adminViews.includes(view) && currentUser !== 'admin') {
+                nav('dashboard');
+                return;
+            }
+            // Block locked/tier-restricted views
+            const featureViews = { purchases:'purchases', fisp:'fisp', credit:'credit' };
+            if (featureViews[view] && !hasFeature(featureViews[view])) {
+                // Show locked message inline instead of redirecting
+                const views = document.querySelectorAll('[id^="view-"]');
+                views.forEach(el => el.classList.add('hidden'));
+                const links = document.querySelectorAll('.nav-links a');
+                links.forEach(el => el.classList.remove('active'));
+                const target = document.getElementById(`view-${view}`);
+                if (target) {
+                    target.classList.remove('hidden');
+                    const lic = getLicense();
+                    const tierNeeded = view === 'purchases' || view === 'fisp' || view === 'credit' ? 'Standard' : 'Pro';
+                    target.innerHTML = `<div class="locked-view-msg"><div class="lock-icon">🔒</div><h3>Feature Locked</h3><p>This module requires the <strong>${tierNeeded}</strong> plan or higher.</p><p style="margin-top:.5rem;font-size:.85rem;color:#888;">Contact us to upgrade your plan.</p></div>`;
+                }
+                const titles = { purchases:'Purchase Orders', fisp:'FISP Claims', credit:'Credit Tracker' };
+                document.getElementById('page-title').textContent = titles[view] || view;
+                return;
+            }
             // Hide all views
             const views = document.querySelectorAll('[id^="view-"]');
             views.forEach(el => el.classList.add('hidden'));
@@ -476,6 +2022,16 @@
             // Titles
             const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", reports: "Financial Reports", settings: "System Settings" };
             document.getElementById('page-title').textContent = titles[view] || "ZamAgro Track";
+
+            // Pre-select current month on Reports
+            if (view === 'reports') {
+                const inp = document.getElementById('pl-month');
+                if (inp && !inp.value) {
+                    const now = new Date();
+                    inp.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                }
+                renderPL();
+            }
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -493,6 +2049,23 @@
             renderTable('credit');
             renderPL();
             renderSettingsTable(); // New
+            const thresholdInput = document.getElementById('setting-threshold');
+            if (thresholdInput) thresholdInput.value = db.settings.lowStockThreshold || 20;
+            const creditTermInput = document.getElementById('setting-creditterm');
+            if (creditTermInput) creditTermInput.value = db.settings.creditTermDays || 30;
+            const taxRegimeInput = document.getElementById('setting-taxregime');
+            if (taxRegimeInput) taxRegimeInput.value = db.settings.taxRegime || 'none';
+            const co = getCompanyInfo();
+            const cnEl = document.getElementById('setting-company-name');
+            const cpEl = document.getElementById('setting-company-phone');
+            const caEl = document.getElementById('setting-company-address');
+            if (cnEl) cnEl.value = db.settings.companyName    || '';
+            if (cpEl) cpEl.value = db.settings.companyPhone   || '';
+            if (caEl) caEl.value = db.settings.companyAddress || '';
+            renderLogoPreview();
+            updateBrand();
+            renderCloudSyncUI();
+            renderStaffAccountUI();
             document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-ZM');
         }
 
@@ -514,9 +2087,22 @@
             const fispOut = db.fisp.filter(f => f.status !== 'Paid').reduce((sum, f) => sum + f.val, 0);
             document.getElementById('kpi-fisp').textContent = formatZMW(fispOut);
 
-            const lowStock = db.inventory.filter(i => i.qty < 20).length;
+            const globalThreshold = db.settings.lowStockThreshold || 20;
+            const lowStockItems = db.inventory.filter(i => {
+                const threshold = i.reorderPt !== undefined ? i.reorderPt : globalThreshold;
+                return i.qty < threshold;
+            });
             const alertsList = document.getElementById('dashboard-alerts');
-            alertsList.innerHTML = lowStock > 0 ? `<li style="color:red">${lowStock} items low in stock!</li>` : `<li style="color:green">Stock levels healthy.</li>`;
+            if (lowStockItems.length === 0) {
+                alertsList.innerHTML = `<li style="color:green">Stock levels healthy.</li>`;
+            } else {
+                alertsList.innerHTML = lowStockItems.map(i => {
+                    const threshold = i.reorderPt !== undefined ? i.reorderPt : globalThreshold;
+                    return `<li style="color:red"><strong>${esc(i.name)}</strong> — ${i.qty} left (reorder at ${threshold})</li>`;
+                }).join('');
+            }
+
+            renderCashFlow();
         }
 
         function renderTable(type) {
@@ -525,46 +2111,258 @@
             tbody.innerHTML = '';
             const searchTerm = document.getElementById(`search-${type}`)?.value.toLowerCase() || '';
 
+            // Date range filter — applies to types that have a `date` field (DD/MM/YYYY)
+            const dateFrom = document.getElementById(`date-from-${type}`)?.value || ''; // YYYY-MM-DD
+            const dateTo   = document.getElementById(`date-to-${type}`)?.value   || '';
+
+            function inDateRange(dateStr) {
+                if (!dateFrom && !dateTo) return true;
+                // Convert DD/MM/YYYY → YYYY-MM-DD for comparison
+                const [d, m, y] = dateStr.split('/');
+                const iso = `${y}-${m}-${d}`;
+                if (dateFrom && iso < dateFrom) return false;
+                if (dateTo   && iso > dateTo)   return false;
+                return true;
+            }
+
             db[type].forEach(item => {
-                if(searchTerm && !JSON.stringify(item).toLowerCase().includes(searchTerm)) return;
+                if (searchTerm && !JSON.stringify(item).toLowerCase().includes(searchTerm)) return;
+                if (item.date && !inDateRange(item.date)) return;
 
                 let row = '';
                 if (type === 'inventory') {
-                    row = `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.cat}</td><td>${item.qty}</td><td>${item.cost}</td><td>${formatZMW(item.qty * item.cost)}</td><td><span class="badge status-ok">${item.status}</span></td></tr>`;
+                    const margin = item.price ? ((item.price - item.cost) / item.price * 100).toFixed(1) : null;
+                    const marginBadge = margin !== null
+                        ? `<span class="badge ${parseFloat(margin) >= 0 ? 'status-ok' : 'status-crit'}">${margin}%</span>`
+                        : `<span style="color:var(--gray);font-size:.8rem;">—</span>`;
+                    const sellPrice = item.price ? formatZMW(item.price) : `<span style="color:var(--warning);font-size:.8rem;">Not set</span>`;
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.name)}</td><td>${esc(item.cat)}</td><td>${esc(item.qty)}</td><td>${esc(item.cost)}</td><td>${sellPrice}</td><td>${marginBadge}</td><td>${formatZMW(item.qty * item.cost)}</td><td><span class="badge status-ok">${esc(item.status)}</span></td></tr>`;
                 } else if (type === 'sales') {
-                    // Look up current product name from inventory in case it was edited
                     const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
-                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.cust}</td><td>${currentProdName}</td><td>${item.qty}</td><td>${formatZMW(item.total)}</td><td>${item.method}</td></tr>`;
+                    const methodCell = item.momoRef
+                        ? `${esc(item.method)}<br><span style="font-size:.72rem;color:var(--gray);">Ref: ${esc(item.momoRef)}</span>`
+                        : esc(item.method);
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cust)}</td><td>${esc(currentProdName)}</td><td>${esc(item.qty)}</td><td>${formatZMW(item.total)}</td><td>${methodCell}</td><td><button class="btn btn-sm" style="background:#eee;" onclick="printReceipt('${esc(item.id)}')">🖨</button></td></tr>`;
                 } else if (type === 'purchases') {
                     const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
-                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.supplier}</td><td>${currentProdName}</td><td>${item.qty}</td><td>${formatZMW(item.total)}</td></tr>`;
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.supplier)}</td><td>${esc(currentProdName)}</td><td>${esc(item.qty)}</td><td>${formatZMW(item.total)}</td></tr>`;
                 } else if (type === 'expenses') {
-                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.cat}</td><td>${item.desc}</td><td>${formatZMW(item.amt)}</td></tr>`;
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cat)}</td><td>${esc(item.desc)}</td><td>${formatZMW(item.amt)}</td></tr>`;
                 } else if (type === 'fisp') {
                     let badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
-                    row = `<tr><td>${item.id}</td><td>${item.date}</td><td>${item.name}</td><td>${item.voucher}</td><td>${formatZMW(item.val)}</td><td><span class="badge ${badge}">${item.status}</span></td></tr>`;
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.name)}</td><td>${esc(item.voucher)}</td><td>${formatZMW(item.val)}</td><td><span class="badge ${badge}">${esc(item.status)}</span></td><td><button class="btn btn-sm btn-primary" onclick="payFISP('${esc(item.id)}')">Mark Paid</button></td></tr>`;
                 } else if (type === 'credit') {
-                    row = `<tr><td>${item.cust}</td><td>${item.prod}</td><td>${formatZMW(item.amt)}</td><td>${item.dueDate}</td>
-                    <td><button class="btn btn-sm btn-primary" onclick="payCredit('${item.id}')">Pay</button></td></tr>`;
+                    if (creditFilter === 'outstanding' && item.status !== 'Outstanding') return;
+                    if (creditFilter === 'paid' && item.status !== 'Paid') return;
+                    const statusBadge = item.status === 'Paid'
+                        ? `<span class="badge status-ok">Paid</span>`
+                        : `<span class="badge status-warn">Outstanding</span>`;
+                    const actionBtn = item.status === 'Outstanding'
+                        ? `<button class="btn btn-sm btn-primary" onclick="payCredit('${esc(item.id)}')">Pay</button>`
+                        : `<span style="color:var(--gray);font-size:.85rem;">—</span>`;
+                    row = `<tr><td>${esc(item.cust)}</td><td>${esc(item.prod)}</td><td>${formatZMW(item.amt)}</td><td>${esc(item.dueDate)}</td><td>${statusBadge}</td><td>${actionBtn}</td></tr>`;
                 }
                 tbody.innerHTML += row;
             });
         }
 
+        function clearDateFilter(type) {
+            const from = document.getElementById(`date-from-${type}`);
+            const to   = document.getElementById(`date-to-${type}`);
+            if (from) from.value = '';
+            if (to)   to.value   = '';
+            renderTable(type);
+        }
+
+        function setCreditFilter(f) {
+            creditFilter = f;
+            ['outstanding','paid','all'].forEach(id => {
+                const btn = document.getElementById(`cf-${id}`);
+                btn.style.background = id === f ? 'var(--secondary)' : '#eee';
+                btn.style.color = id === f ? 'var(--dark)' : '';
+            });
+            renderTable('credit');
+        }
+
+        // --- COMPANY INFO ---
+        function getCompanyInfo() {
+            const s = db.settings;
+            return {
+                name:    s.companyName    || 'ZamAgro Track',
+                phone:   s.companyPhone   || '',
+                address: s.companyAddress || '',
+                logo:    s.companyLogo    || ''
+            };
+        }
+
+        function saveCompanyInfo() {
+            const s = db.settings;
+            s.companyName    = document.getElementById('setting-company-name').value.trim();
+            s.companyPhone   = document.getElementById('setting-company-phone').value.trim();
+            s.companyAddress = document.getElementById('setting-company-address').value.trim();
+            db.settings = s;
+            updateBrand();
+            showToast('Company info saved');
+        }
+
+        // --- COMPANY LOGO ---
+        const LOGO_MAX_DIM = 256; // px, longest side after resize
+
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            e.target.value = ''; // allow re-selecting the same file later
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast('Please choose an image file', 'danger');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image is too large (max 5MB)', 'danger');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    let { width, height } = img;
+                    if (width > LOGO_MAX_DIM || height > LOGO_MAX_DIM) {
+                        if (width > height) { height = Math.round(height * LOGO_MAX_DIM / width); width = LOGO_MAX_DIM; }
+                        else { width = Math.round(width * LOGO_MAX_DIM / height); height = LOGO_MAX_DIM; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.drawImage(img, 0, 0, width, height);
+                    let dataUrl;
+                    try {
+                        dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    } catch (err) {
+                        showToast('Could not process image', 'danger');
+                        return;
+                    }
+                    const s = db.settings;
+                    s.companyLogo = dataUrl;
+                    try {
+                        db.settings = s;
+                    } catch (err) {
+                        showToast('Logo too large to save — try a smaller image', 'danger');
+                        return;
+                    }
+                    renderLogoPreview();
+                    updateBrand();
+                    showToast('Logo updated');
+                };
+                img.onerror = () => showToast('Could not read that image', 'danger');
+                img.src = ev.target.result;
+            };
+            reader.onerror = () => showToast('Could not read file', 'danger');
+            reader.readAsDataURL(file);
+        }
+
+        function removeLogo() {
+            const s = db.settings;
+            delete s.companyLogo;
+            db.settings = s;
+            renderLogoPreview();
+            updateBrand();
+            showToast('Logo removed');
+        }
+
+        function renderLogoPreview() {
+            const preview = document.getElementById('logo-preview');
+            const removeBtn = document.getElementById('logo-remove-btn');
+            if (!preview) return;
+            const logo = db.settings.companyLogo || '';
+            if (logo) {
+                preview.src = logo;
+                preview.style.display = 'inline-block';
+                if (removeBtn) removeBtn.style.display = 'inline-block';
+            } else {
+                preview.removeAttribute('src');
+                preview.style.display = 'none';
+                if (removeBtn) removeBtn.style.display = 'none';
+            }
+        }
+
+        // Updates every place the company logo/name appears (sidebar, license bar, etc.)
+        function updateBrand() {
+            const co = getCompanyInfo();
+            const hasLogo = !!co.logo;
+            document.querySelectorAll('.brand-logo-img').forEach(img => {
+                img.src = co.logo;
+                img.style.display = hasLogo ? 'inline-block' : 'none';
+            });
+            document.querySelectorAll('.brand-emoji').forEach(el => {
+                el.style.display = hasLogo ? 'none' : 'inline';
+            });
+            document.querySelectorAll('.brand-name-text').forEach(el => {
+                el.textContent = co.name;
+            });
+        }
+
+        function saveThreshold() {
+            const val = parseInt(document.getElementById('setting-threshold').value);
+            if (isNaN(val) || val < 1) { showToast("Enter a valid number (min 1)", "danger"); return; }
+            const s = db.settings;
+            s.lowStockThreshold = val;
+            db.settings = s;
+            renderDashboard();
+            showToast(`Low stock threshold set to ${val}`);
+        }
+
+        function saveCreditTerm() {
+            const val = parseInt(document.getElementById('setting-creditterm').value);
+            if (isNaN(val) || val < 1) { showToast("Enter a valid number (min 1)", "danger"); return; }
+            const s = db.settings;
+            s.creditTermDays = val;
+            db.settings = s;
+            showToast(`Credit term set to ${val} day${val === 1 ? '' : 's'}`);
+        }
+
+        function saveTaxRegime() {
+            const val = document.getElementById('setting-taxregime').value;
+            const s = db.settings;
+            s.taxRegime = val;
+            db.settings = s;
+            renderPL();
+            const labels = { none: 'No tax regime', tot: 'Turnover Tax (5%)', vat: 'VAT-Registered (16%)' };
+            showToast(`Tax regime set to: ${labels[val]}`);
+        }
+
+        const EDIT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
         function renderSettingsTable() {
             const tbody = document.querySelector(`#table-settings tbody`);
             tbody.innerHTML = '';
+            const isAdmin = currentUser === 'admin';
+            const now = Date.now();
+            const globalThreshold = db.settings.lowStockThreshold || 20;
+
             db.inventory.forEach(item => {
+                // Items without createdAt (seed data / pre-update) are treated as too old to edit
+                const age = item.createdAt ? (now - item.createdAt) : Infinity;
+                const withinWindow = age <= EDIT_WINDOW_MS;
+                const daysLeft = withinWindow ? Math.ceil((EDIT_WINDOW_MS - age) / 86400000) : 0;
+
+                const editBtn = withinWindow
+                    ? `<button class="btn btn-sm btn-primary" onclick="openEditModal('${esc(item.id)}')">Edit <span style="font-size:0.75rem;opacity:0.8;">(${daysLeft}d left)</span></button>`
+                    : `<button class="btn btn-sm" style="background:#eee;color:#aaa;cursor:not-allowed;" disabled title="Edit window expired (7 days)">Edit</button>`;
+
+                const deleteBtn = isAdmin
+                    ? `<button class="btn btn-sm btn-danger" onclick="deleteProduct('${esc(item.id)}')">Delete</button>`
+                    : '';
+
                 tbody.innerHTML += `
                     <tr>
-                        <td>${item.id}</td>
-                        <td>${item.name}</td>
-                        <td>${item.cat}</td>
+                        <td>${esc(item.id)}</td>
+                        <td>${esc(item.name)}</td>
+                        <td>${esc(item.cat)}</td>
                         <td>${formatZMW(item.cost)}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="openEditModal('${item.id}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProduct('${item.id}')">Delete</button>
-                        </td>
+                        <td>${item.reorderPt !== undefined ? item.reorderPt : `<span style="color:var(--gray);font-size:.8rem;">Global (${globalThreshold})</span>`}</td>
+                        <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">${editBtn}${deleteBtn}</td>
                     </tr>`;
             });
         }
@@ -574,12 +2372,19 @@
         function openEditModal(id) {
             const p = db.inventory.find(x => x.id === id);
             if (!p) return;
+            const age = p.createdAt ? (Date.now() - p.createdAt) : Infinity;
+            if (age > EDIT_WINDOW_MS) {
+                showToast("Edit window has expired for this item (7 days)", "danger");
+                return;
+            }
 
             document.getElementById('edit-id').value = p.id;
             document.getElementById('edit-name').value = p.name;
             document.getElementById('edit-cat').value = p.cat;
             document.getElementById('edit-cost').value = p.cost;
+            document.getElementById('edit-price').value = p.price || '';
             document.getElementById('edit-qty').value = p.qty;
+            document.getElementById('edit-reorder').value = p.reorderPt !== undefined ? p.reorderPt : '';
             
             openModal('modal-edit-product');
         }
@@ -587,24 +2392,30 @@
         function handleEditSave(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
-            const p = db.inventory.find(x => x.id === id);
-            
+            const inv = db.inventory;
+            const p = inv.find(x => x.id === id);
             if (p) {
                 p.name = document.getElementById('edit-name').value;
                 p.cat = document.getElementById('edit-cat').value;
                 p.cost = parseFloat(document.getElementById('edit-cost').value);
+                p.price = parseFloat(document.getElementById('edit-price').value);
                 p.qty = parseInt(document.getElementById('edit-qty').value);
-                // Update status based on qty
                 p.status = p.qty > 0 ? "Fresh" : "Out of Stock";
+                const reorderVal = document.getElementById('edit-reorder').value;
+                if (reorderVal !== '') { p.reorderPt = parseInt(reorderVal); } else { delete p.reorderPt; }
+                db.inventory = inv;
             }
-            
             closeModal('modal-edit-product');
             refreshAll();
             showToast("Product Updated Successfully");
         }
 
         function deleteProduct(id) {
-            if(confirm("Are you sure you want to delete this product? This cannot be undone.")) {
+            if (currentUser !== 'admin') {
+                showToast("Only admins can delete products", "danger");
+                return;
+            }
+            if (confirm("Are you sure you want to delete this product? This cannot be undone.")) {
                 db.inventory = db.inventory.filter(x => x.id !== id);
                 refreshAll();
                 showToast("Product Deleted", "danger");
@@ -613,21 +2424,88 @@
 
         // --- REMAINING LOGIC (Standard) ---
 
+        // Computes tax line(s) for the P&L given a period's revenue/purchases.
+        // For Turnover Tax, the ZMW 30,000 0% band is ANNUAL, so for a single-month view
+        // we prorate that band's effect using the calendar year's actual cumulative revenue
+        // (i.e. only the slice of this period's revenue that falls above the year's 30k mark is taxed).
+        function calcTaxLines(revenue, purchases, monthVal) {
+            const regime = db.settings.taxRegime || 'none';
+            const lines = [];
+            let taxDeduction = 0; // amount to subtract in arriving at Net Profit
+            let revenueExclVat = revenue; // revenue used for Gross Profit calc
+
+            if (regime === 'tot') {
+                const ZERO_BAND = 30000;
+                let taxableRevenue = revenue;
+                if (monthVal) {
+                    // Find this charge year's cumulative revenue up to and including this month
+                    const [yr, mon] = monthVal.split('-');
+                    const yearRevenueUpToMonth = db.sales
+                        .filter(s => {
+                            const [, m, y] = s.date.split('/');
+                            return y === yr && parseInt(m) <= parseInt(mon);
+                        })
+                        .reduce((sum, s) => sum + s.total, 0);
+                    const yearRevenueBeforeMonth = yearRevenueUpToMonth - revenue;
+                    const bandRemaining = Math.max(0, ZERO_BAND - yearRevenueBeforeMonth);
+                    taxableRevenue = Math.max(0, revenue - bandRemaining);
+                } else {
+                    taxableRevenue = Math.max(0, revenue - ZERO_BAND);
+                }
+                const tot = taxableRevenue * 0.05;
+                taxDeduction = tot;
+                lines.push({ label: "Turnover Tax (5%, above ZMW 30,000/yr)", val: tot, color: "text-danger" });
+            } else if (regime === 'vat') {
+                // Prices are VAT-inclusive: back out VAT at 16/116
+                const outputVat = revenue * (16 / 116);
+                const inputVat = purchases * (16 / 116);
+                const netVat = Math.max(0, outputVat - inputVat);
+                revenueExclVat = revenue - outputVat;
+                lines.push({ label: "Output VAT (16%, on Sales)", val: outputVat, color: "text-danger" });
+                lines.push({ label: "Input VAT (16%, on Purchases)", val: -inputVat, color: "text-success" });
+                lines.push({ label: "Net VAT Payable to ZRA", val: netVat, color: "text-danger" });
+                taxDeduction = 0; // VAT isn't a P&L expense — it's collected/passed through, not income
+            }
+            return { lines, taxDeduction, revenueExclVat, regime };
+        }
+
         function renderPL() {
             const tbody = document.querySelector(`#table-pl tbody`);
             tbody.innerHTML = '';
-            const revenue = db.sales.reduce((sum, s) => sum + s.total, 0);
-            const purchases = db.purchases.reduce((sum, p) => sum + p.total, 0);
-            const expenses = db.expenses.reduce((sum, e) => sum + e.amt, 0);
+
+            const monthVal = document.getElementById('pl-month')?.value; // "YYYY-MM" or ""
+
+            // Records use DD/MM/YYYY — parse month as "MM/YYYY"
+            function matchesMonth(dateStr) {
+                if (!monthVal) return true;
+                const [day, mon, yr] = dateStr.split('/');
+                return `${yr}-${mon}` === monthVal;
+            }
+
+            const colHeader = document.getElementById('pl-col-header');
+            if (monthVal) {
+                const [yr, mon] = monthVal.split('-');
+                const label = new Date(yr, mon - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+                colHeader.textContent = `${label} (ZMW)`;
+            } else {
+                colHeader.textContent = 'All Time (ZMW)';
+            }
+
+            const revenue  = db.sales.filter(s => matchesMonth(s.date)).reduce((sum, s) => sum + s.total, 0);
+            const purchases = db.purchases.filter(p => matchesMonth(p.date)).reduce((sum, p) => sum + p.total, 0);
+            const expenses  = db.expenses.filter(e => matchesMonth(e.date)).reduce((sum, e) => sum + e.amt, 0);
             const gross = revenue - purchases;
-            const net = gross - expenses;
+
+            const tax = calcTaxLines(revenue, purchases, monthVal);
+            const net = gross - expenses - tax.taxDeduction;
 
             const rows = [
-                { label: "Total Revenue", val: revenue, color: "text-success" },
-                { label: "Cost of Purchases (COGS)", val: purchases, color: "text-danger" },
-                { label: "Gross Profit", val: gross, color: "" },
-                { label: "Total Operating Expenses", val: expenses, color: "text-danger" },
-                { label: "NET PROFIT / LOSS", val: net, color: net >= 0 ? "text-success" : "text-danger" }
+                { label: "Total Revenue",              val: revenue,   color: "text-success" },
+                { label: "Cost of Purchases (COGS)",   val: purchases, color: "text-danger"  },
+                { label: "Gross Profit",               val: gross,     color: ""             },
+                { label: "Total Operating Expenses",   val: expenses,  color: "text-danger"  },
+                ...tax.lines,
+                { label: "NET PROFIT / LOSS",          val: net,       color: net >= 0 ? "text-success" : "text-danger" }
             ];
 
             rows.forEach(r => {
@@ -635,18 +2513,130 @@
             });
         }
 
+        // --- CSV EXPORT ---
+
+        function csvEscape(val) {
+            const s = String(val ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+        }
+
+        function downloadCSV(filename, rows) {
+            const content = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function exportPLcsv() {
+            const monthVal = document.getElementById('pl-month')?.value;
+            function matchesMonth(dateStr) {
+                if (!monthVal) return true;
+                const [, mon, yr] = dateStr.split('/');
+                return `${yr}-${mon}` === monthVal;
+            }
+            const revenue   = db.sales.filter(s => matchesMonth(s.date)).reduce((sum, s) => sum + s.total, 0);
+            const purchases = db.purchases.filter(p => matchesMonth(p.date)).reduce((sum, p) => sum + p.total, 0);
+            const expenses  = db.expenses.filter(e => matchesMonth(e.date)).reduce((sum, e) => sum + e.amt, 0);
+            const gross = revenue - purchases;
+            const tax = calcTaxLines(revenue, purchases, monthVal);
+            const net = gross - expenses - tax.taxDeduction;
+            const period = monthVal
+                ? new Date(monthVal + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })
+                : 'All Time';
+            const rows = [
+                [`${getCompanyInfo().name} — P&L Report (${period})`],
+                [],
+                ['Category', 'Amount (ZMW)'],
+                ['Total Revenue',            revenue.toFixed(2)],
+                ['Cost of Purchases (COGS)', purchases.toFixed(2)],
+                ['Gross Profit',             gross.toFixed(2)],
+                ['Total Operating Expenses', expenses.toFixed(2)],
+                ...tax.lines.map(l => [l.label, l.val.toFixed(2)]),
+                ['NET PROFIT / LOSS',        net.toFixed(2)],
+            ];
+            downloadCSV(`ZamAgro_PL_${period.replace(/\s/g,'_')}.csv`, rows);
+        }
+
+        function exportCSV(type) {
+            let headers, rows;
+            if (type === 'inventory') {
+                headers = ['ID', 'Product', 'Category', 'Unit', 'Qty', 'Unit Cost (ZMW)', 'Total Value (ZMW)', 'Status'];
+                rows = db.inventory.map(i => [i.id, i.name, i.cat, i.unit, i.qty, i.cost.toFixed(2), (i.qty * i.cost).toFixed(2), i.status]);
+            } else if (type === 'sales') {
+                headers = ['ID', 'Date', 'Customer', 'Product', 'Qty', 'Total (ZMW)', 'Method'];
+                rows = db.sales.map(s => {
+                    const prod = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName;
+                    return [s.id, s.date, s.cust, prod, s.qty, s.total.toFixed(2), s.method];
+                });
+            }
+            const label = type === 'inventory' ? 'Stock' : 'Sales';
+            const coName = getCompanyInfo().name;
+            downloadCSV(`ZamAgro_${label}_${new Date().toISOString().slice(0,10)}.csv`, [
+                [`${coName} — ${label} Export ${new Date().toLocaleDateString('en-GB')}`],
+                [],
+                headers,
+                ...rows
+            ]);
+        }
+
+        function printReceipt(saleId) {
+            const sale = db.sales.find(s => s.id === saleId);
+            if (!sale) return;
+            const prodName = db.inventory.find(i => i.id === sale.prodId)?.name || sale.prodName;
+            const unitPrice = sale.qty > 0 ? (sale.total / sale.qty) : 0;
+            const momoRow = sale.momoRef
+                ? `<div class="receipt-row"><span>MoMo Ref:</span><span>${esc(sale.momoRef)}</span></div>`
+                : '';
+            const co = getCompanyInfo();
+            const logoRow   = co.logo    ? `<img src="${co.logo}" class="receipt-logo" alt="">` : '';
+            const phoneRow   = co.phone   ? `<div style="text-align:center;font-size:.78rem;color:#555;">${esc(co.phone)}</div>` : '';
+            const addressRow = co.address ? `<div style="text-align:center;font-size:.78rem;color:#555;">${esc(co.address)}</div>` : '';
+
+            document.getElementById('receipt-body').innerHTML = `
+                ${logoRow}
+                <div class="receipt-title">${co.logo ? '' : '🌱 '}${esc(co.name)}</div>
+                ${phoneRow}
+                ${addressRow}
+                <div class="receipt-sub">Sales Receipt</div>
+                <hr class="receipt-divider">
+                <div class="receipt-row"><span>Receipt No:</span><span>${esc(sale.id)}</span></div>
+                <div class="receipt-row"><span>Date:</span><span>${esc(sale.date)}</span></div>
+                <div class="receipt-row"><span>Customer:</span><span>${esc(sale.cust)}</span></div>
+                <div class="receipt-row"><span>Method:</span><span>${esc(sale.method)}</span></div>
+                ${momoRow}
+                <hr class="receipt-divider">
+                <div class="receipt-row"><span><strong>Item</strong></span><span><strong>ZMW</strong></span></div>
+                <div class="receipt-row"><span>${esc(prodName)}</span></div>
+                <div class="receipt-row"><span>&nbsp;&nbsp;${esc(sale.qty)} × ${formatZMW(unitPrice)}</span><span>${formatZMW(sale.total)}</span></div>
+                <hr class="receipt-divider">
+                <div class="receipt-row receipt-total"><span>TOTAL</span><span>${formatZMW(sale.total)}</span></div>
+                <hr class="receipt-divider">
+                <div style="text-align:center; font-size:0.78rem; margin-top:8px; color:#555;">Thank you for your business!<br>Powered by ZamAgro Track</div>
+            `;
+            openModal('modal-receipt');
+        }
+
         function handleAddInventory(e) {
             e.preventDefault();
+            const inv = db.inventory;
             const newItem = {
-                id: `PRD${String(db.inventory.length + 10).padStart(3,'0')}`,
+                id: uid('PRD'),
                 name: document.getElementById('inv-name').value,
                 cat: document.getElementById('inv-cat').value,
                 unit: document.getElementById('inv-unit').value,
                 qty: parseInt(document.getElementById('inv-qty').value),
                 cost: parseFloat(document.getElementById('inv-cost').value),
-                status: "Fresh"
+                price: parseFloat(document.getElementById('inv-price').value),
+                status: "Fresh",
+                createdAt: Date.now()
             };
-            db.inventory.push(newItem);
+            const reorderVal = document.getElementById('inv-reorder').value;
+            if (reorderVal !== '') newItem.reorderPt = parseInt(reorderVal);
+            inv.push(newItem);
+            db.inventory = inv;
             closeModal('modal-inv');
             e.target.reset();
             refreshAll();
@@ -657,13 +2647,153 @@
             const sel = document.getElementById(elementId);
             sel.innerHTML = '<option value="">Select Product</option>';
             db.inventory.forEach(i => {
-                sel.innerHTML += `<option value="${i.id}">${i.name} (Qty: ${i.qty})</option>`;
+                sel.innerHTML += `<option value="${i.id}" data-price="${i.price || ''}">${i.name} (Qty: ${i.qty})</option>`;
             });
+            // Auto-fill price on sale modal
+            if (elementId === 'sale-prod') {
+                sel.onchange = function() {
+                    const opt = sel.selectedOptions[0];
+                    const priceField = document.getElementById('sale-price');
+                    if (priceField && opt && opt.dataset.price) {
+                        priceField.value = opt.dataset.price;
+                    } else if (priceField) {
+                        priceField.value = '';
+                    }
+                };
+            }
+        }
+
+        // --- CASH FLOW SUMMARY ---
+
+        function setCashFlowPeriod(period) {
+            cashFlowPeriod = period;
+            document.getElementById('cf-btn-today').style.background = period === 'today' ? 'var(--accent)' : '#eee';
+            document.getElementById('cf-btn-today').style.color      = period === 'today' ? 'white' : '';
+            document.getElementById('cf-btn-week').style.background  = period === 'week'  ? 'var(--accent)' : '#eee';
+            document.getElementById('cf-btn-week').style.color       = period === 'week'  ? 'white' : '';
+            renderCashFlow();
+        }
+
+        function renderCashFlow() {
+            // Parse DD/MM/YYYY → comparable ISO string YYYY-MM-DD
+            function toISO(ddmmyyyy) {
+                const [d, m, y] = ddmmyyyy.split('/');
+                return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            }
+
+            const now   = new Date();
+            const todayISO = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+            // Week start = Monday of the current week
+            const dayOfWeek = (now.getDay() + 6) % 7; // 0=Mon … 6=Sun
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - dayOfWeek);
+            const weekStartISO = weekStart.toISOString().slice(0, 10);
+
+            function inPeriod(dateStr) {
+                const iso = toISO(dateStr);
+                if (cashFlowPeriod === 'today') return iso === todayISO;
+                return iso >= weekStartISO && iso <= todayISO;
+            }
+
+            // Cash IN: sales (exclude pure Credit — no cash received yet)
+            const salesToday = db.sales.filter(s => inPeriod(s.date) && s.method !== 'Credit');
+            const cashIn  = salesToday.reduce((sum, s) => sum + s.total, 0);
+            const txnCount = db.sales.filter(s => inPeriod(s.date)).length; // all txns incl credit
+
+            // Cash OUT: purchases + expenses
+            const cashOutPur = db.purchases.filter(p => inPeriod(p.date)).reduce((sum, p) => sum + p.total, 0);
+            const cashOutExp = db.expenses.filter(e  => inPeriod(e.date)).reduce((sum, e) => sum + e.amt,   0);
+            const cashOut = cashOutPur + cashOutExp;
+
+            const net = cashIn - cashOut;
+
+            document.getElementById('cf-cash-in').textContent  = formatZMW(cashIn);
+            document.getElementById('cf-cash-out').textContent = formatZMW(cashOut);
+            document.getElementById('cf-txns').textContent     = txnCount;
+
+            const netEl = document.getElementById('cf-net');
+            netEl.textContent = formatZMW(net);
+            netEl.style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            // Credit note
+            const creditSales = db.sales.filter(s => inPeriod(s.date) && s.method === 'Credit');
+            const creditAmt   = creditSales.reduce((sum, s) => sum + s.total, 0);
+            const note = document.getElementById('cf-credit-note');
+            note.textContent = creditAmt > 0
+                ? `ℹ️ ${formatZMW(creditAmt)} in credit sales not counted as cash in (${creditSales.length} txn${creditSales.length > 1 ? 's' : ''}).`
+                : '';
+        }
+
+        // --- JSON BACKUP & RESTORE ---
+
+        function backupJSON() {
+            const snapshot = {};
+            Object.keys(KEYS).forEach(k => {
+                snapshot[k] = db[k];
+            });
+            snapshot._meta = {
+                app: 'ZamAgro Track',
+                exportedAt: new Date().toISOString(),
+                version: 1
+            };
+            const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            const dateStr = new Date().toISOString().slice(0, 10);
+            a.href = URL.createObjectURL(blob);
+            a.download = `ZamAgro_Backup_${dateStr}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('Backup downloaded successfully');
+        }
+
+        function restoreJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.name.endsWith('.json')) {
+                showToast('Please select a valid .json backup file', 'danger');
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Validate it looks like a ZamAgro backup
+                    const knownKeys = Object.keys(KEYS);
+                    const hasAny = knownKeys.some(k => k in data);
+                    if (!hasAny) {
+                        showToast('File does not appear to be a ZamAgro backup', 'danger');
+                        return;
+                    }
+                    if (!confirm(`⚠️ This will REPLACE all current data with the backup from ${data._meta?.exportedAt?.slice(0,10) || 'unknown date'}.\n\nAre you sure?`)) return;
+                    knownKeys.forEach(k => {
+                        if (k in data) {
+                            localStorage.setItem(KEYS[k], JSON.stringify(data[k]));
+                        }
+                    });
+                    refreshAll();
+                    showToast('Data restored from backup successfully');
+                } catch(err) {
+                    showToast('Failed to parse backup file: ' + err.message, 'danger');
+                }
+                event.target.value = ''; // reset so same file can be selected again
+            };
+            reader.readAsText(file);
         }
 
         function prepareSaleModal() {
             populateProdSelect('sale-prod');
+            document.getElementById('sale-momo-ref').value = '';
+            toggleMomoField();
             openModal('modal-sale');
+        }
+        function toggleMomoField() {
+            const isMomo = document.getElementById('sale-method').value === 'Mobile Money';
+            const group = document.getElementById('momo-ref-group');
+            const input = document.getElementById('sale-momo-ref');
+            group.classList.toggle('hidden', !isMomo);
+            input.required = isMomo;
         }
         function preparePurchaseModal() {
             populateProdSelect('pur-prod');
@@ -677,8 +2807,10 @@
             const price = parseFloat(document.getElementById('sale-price').value);
             const method = document.getElementById('sale-method').value;
             const cust = document.getElementById('sale-cust').value;
+            const momoRef = method === 'Mobile Money' ? document.getElementById('sale-momo-ref').value.trim() : '';
 
-            const product = db.inventory.find(i => i.id === prodId);
+            const inv = db.inventory;
+            const product = inv.find(i => i.id === prodId);
             if (!product || product.qty < qty) {
                 showToast("Insufficient Stock!", "danger");
                 return;
@@ -686,36 +2818,44 @@
 
             product.qty -= qty;
             if(product.qty <= 0) product.status = "Out of Stock";
+            db.inventory = inv;
 
+            const sales = db.sales;
             const sale = {
-                id: `SAL${String(db.sales.length + 1).padStart(3,'0')}`,
+                id: uid('SAL'),
                 date: new Date().toLocaleDateString('en-GB'),
                 cust: cust,
                 prodId: prodId,
                 prodName: product.name,
                 qty: qty,
                 total: qty * price,
-                method: method
+                method: method,
+                momoRef: momoRef
             };
-            db.sales.push(sale);
+            sales.push(sale);
+            db.sales = sales;
 
             if (method === 'Credit') {
+                const credit = db.credit;
                 const due = new Date();
-                due.setDate(due.getDate() + 30);
-                db.credit.push({
-                    id: `CRD${String(db.credit.length + 1).padStart(3,'0')}`,
+                const creditTermDays = db.settings.creditTermDays || 30;
+                due.setDate(due.getDate() + creditTermDays);
+                credit.push({
+                    id: uid('CRD'),
                     cust: cust,
                     prod: product.name,
                     amt: qty * price,
                     dueDate: due.toLocaleDateString('en-GB'),
                     status: "Outstanding"
                 });
+                db.credit = credit;
             }
 
             closeModal('modal-sale');
             e.target.reset();
             refreshAll();
             showToast("Sale Recorded & Stock Updated");
+            printReceipt(sale.id);
         }
 
         function handleAddPurchase(e) {
@@ -725,17 +2865,20 @@
             const cost = parseFloat(document.getElementById('pur-cost').value);
             const supplier = document.getElementById('pur-sup').value;
 
-            const product = db.inventory.find(i => i.id === prodId);
+            const inv = db.inventory;
+            const product = inv.find(i => i.id === prodId);
             if (product) {
                 product.qty += qty;
                 product.status = "Fresh";
+                db.inventory = inv;
             } else {
                 showToast("Product ID not found in Inventory", "danger");
                 return;
             }
 
-            db.purchases.push({
-                id: `PUR${String(db.purchases.length + 1).padStart(3,'0')}`,
+            const purchases = db.purchases;
+            purchases.push({
+                id: uid('PUR'),
                 date: new Date().toLocaleDateString('en-GB'),
                 supplier: supplier,
                 prodId: prodId,
@@ -743,6 +2886,7 @@
                 qty: qty,
                 total: qty * cost
             });
+            db.purchases = purchases;
 
             closeModal('modal-purchase');
             e.target.reset();
@@ -752,13 +2896,15 @@
 
         function handleAddExpense(e) {
             e.preventDefault();
-            db.expenses.push({
-                id: `EXP${String(db.expenses.length + 1).padStart(3,'0')}`,
+            const expenses = db.expenses;
+            expenses.push({
+                id: uid('EXP'),
                 date: new Date().toLocaleDateString('en-GB'),
                 cat: document.getElementById('exp-cat').value,
                 desc: document.getElementById('exp-desc').value,
                 amt: parseFloat(document.getElementById('exp-amt').value)
             });
+            db.expenses = expenses;
             closeModal('modal-exp');
             e.target.reset();
             refreshAll();
@@ -767,30 +2913,48 @@
 
         function handleAddFISP(e) {
             e.preventDefault();
-            db.fisp.push({
-                id: `FISP${String(db.fisp.length + 1).padStart(3,'0')}`,
+            const fisp = db.fisp;
+            fisp.push({
+                id: uid('FISP'),
                 date: new Date().toLocaleDateString('en-GB'),
                 name: document.getElementById('fisp-name').value,
                 voucher: document.getElementById('fisp-voucher').value,
                 val: parseFloat(document.getElementById('fisp-val').value),
                 status: "Pending"
             });
+            db.fisp = fisp;
             closeModal('modal-fisp');
             e.target.reset();
             refreshAll();
             showToast("FISP Claim Added");
         }
 
-        function payCredit(id) {
-            const index = db.credit.findIndex(c => c.id === id);
+        function payFISP(id) {
+            const fisp = db.fisp;
+            const index = fisp.findIndex(f => f.id === id);
             if (index !== -1) {
-                db.credit[index].status = "Paid";
+                fisp[index].status = "Paid";
+                db.fisp = fisp;
+                refreshAll();
+                showToast("FISP Claim Marked as Paid");
+            }
+        }
+
+        function payCredit(id) {
+            const credit = db.credit;
+            const index = credit.findIndex(c => c.id === id);
+            if (index !== -1) {
+                credit[index].status = "Paid";
+                db.credit = credit;
                 refreshAll();
                 showToast("Credit Marked as Paid");
             }
         }
 
-        document.getElementById('loginForm').addEventListener('submit', login);
+        // loginForm submit handled by secure auth above
+
+        // --- INIT ---
+        showLanding();
 
     </script>
 </body>
