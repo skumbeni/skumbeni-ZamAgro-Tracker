@@ -459,10 +459,14 @@
                     </div>
                 </div>
                 <div class="contact-box">
-                    📞 To purchase or activate, contact: <strong id="landing-phone">+260 97X XXX XXX</strong> (WhatsApp / Call)<br>
+                    📞 To purchase or activate, contact: <strong id="landing-phone">0977 638 790 / 0960 271 128</strong> (WhatsApp / Call)<br>
                     <span style="opacity:.75;font-size:.82rem;">Mention your plan and shop name. You will receive an activation code.</span>
                 </div>
                 <button onclick="showLogin()" class="btn btn-secondary cta-btn">Log In / Sign Up →</button>
+                <div style="margin-top:1.5rem;font-size:.78rem;opacity:.6;display:flex;gap:1.25rem;justify-content:center;">
+                    <a href="#" onclick="openModal('modal-tos');return false;" style="color:white;text-decoration:underline;">Terms of Service</a>
+                    <a href="#" onclick="openModal('modal-privacy');return false;" style="color:white;text-decoration:underline;">Privacy Policy</a>
+                </div>
             </div>
         </div>
     </section>
@@ -526,10 +530,15 @@
                                 <option value="client">Client / Staff</option>
                             </select>
                         </div>
+                        <div class="form-group" id="login-company-field"><label>Business / Company Name</label><input type="text" id="login-company-name" placeholder="e.g. Chanda Agro Supplies" required autocomplete="organization"/></div>
                         <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter username" required autocomplete="username"/></div>
                         <div class="form-group" style="position:relative;"><label>Password</label><input type="password" id="password" placeholder="Enter password" required autocomplete="current-password"/><button type="button" onclick="togglePw('password',this)" style="position:absolute;right:.75rem;top:2.1rem;background:none;border:none;cursor:pointer;color:var(--gray);">&#128065;</button></div>
                         <div id="login-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
                         <div id="login-lockout" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                        <div style="display:flex;align-items:flex-start;gap:.5rem;margin-bottom:1rem;font-size:.82rem;color:var(--text-muted);">
+                            <input type="checkbox" id="login-tos-check" style="margin-top:3px;flex-shrink:0;accent-color:var(--primary);">
+                            <label for="login-tos-check">I agree to the <a href="#" onclick="openModal('modal-tos');return false;" style="color:var(--primary);font-weight:600;">Terms of Service</a> and <a href="#" onclick="openModal('modal-privacy');return false;" style="color:var(--primary);font-weight:600;">Privacy Policy</a></label>
+                        </div>
                         <button type="submit" class="btn btn-primary" style="width:100%" id="login-btn">Sign In</button>
                     </form>
                 </div>
@@ -537,14 +546,19 @@
                 <!-- CREATE ACCOUNT PANEL -->
                 <div id="auth-signup-panel" style="display:none;">
                     <form id="signupForm" onsubmit="handleSignup(event)">
-                        <div class="form-group"><label>Business / Company Name</label><input type="text" id="signup-company-name" placeholder="e.g. Chanda Agro Supplies" required autocomplete="organization"/></div>
+                        <div class="form-group"><label>Business / Company Name</label><input type="text" id="signup-company-name" placeholder="e.g. Chanda Agro Supplies" required autocomplete="organization" oninput="scheduleAvailabilityCheck()"/></div>
                         <hr style="margin:.85rem 0;border-color:#ddd;"/>
                         <p style="font-weight:700;margin-bottom:.75rem;color:var(--primary-dark);font-size:.88rem;">Administrator Account</p>
-                        <div class="form-group"><label>Admin Username</label><input type="text" id="signup-admin-user" placeholder="e.g. admin" required autocomplete="off"/></div>
+                        <div class="form-group"><label>Admin Username</label><input type="text" id="signup-admin-user" placeholder="e.g. admin" required autocomplete="off" oninput="scheduleAvailabilityCheck()"/></div>
+                        <div id="signup-availability" style="display:none;font-size:.8rem;margin:-6px 0 10px;padding:4px 8px;border-radius:4px;"></div>
                         <div class="form-group"><label>Admin Password</label><input type="password" id="signup-admin-pw" placeholder="Min 6 characters" required/></div>
                         <div class="form-group"><label>Confirm Password</label><input type="password" id="signup-admin-pw2" placeholder="Repeat password" required/></div>
                         <div id="signup-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
                         <div id="signup-cloud-status" style="display:none;font-size:.82rem;margin-bottom:.75rem;padding:.5rem;border-radius:4px;"></div>
+                        <div style="display:flex;align-items:flex-start;gap:.5rem;margin-bottom:1rem;font-size:.82rem;color:var(--text-muted);">
+                            <input type="checkbox" id="signup-tos-check" style="margin-top:3px;flex-shrink:0;accent-color:var(--primary);">
+                            <label for="signup-tos-check">I agree to the <a href="#" onclick="openModal('modal-tos');return false;" style="color:var(--primary);font-weight:600;">Terms of Service</a> and <a href="#" onclick="openModal('modal-privacy');return false;" style="color:var(--primary);font-weight:600;">Privacy Policy</a></label>
+                        </div>
                         <button type="submit" class="btn btn-primary" style="width:100%" id="signup-btn">Create Account &amp; Connect Cloud →</button>
                     </form>
                 </div>
@@ -560,7 +574,7 @@
             <h2 style="color:var(--danger);margin-bottom:.75rem;">License Expired</h2>
             <p style="color:#555;margin-bottom:1.5rem;">Your ZamAgro Track license has expired. Please renew to continue using the system.</p>
             <div style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:.9rem;color:#333;">
-                📞 Contact: <strong id="expired-phone">+260 97X XXX XXX</strong><br>
+                📞 Contact: <strong id="expired-phone">0977 638 790 / 0960 271 128</strong><br>
                 <span style="color:#888;font-size:.82rem;">WhatsApp or Call to renew your plan</span>
             </div>
             <button onclick="logout()" class="btn btn-primary" style="width:100%">Back to Home</button>
@@ -793,21 +807,43 @@
                 </div>
                 <!-- STAFF ACCOUNT CARD -->
                 <div class="card" style="margin-bottom: 2rem; border-left-color: var(--primary);">
-                    <h3 style="margin-bottom:1rem;">&#128100; Staff / Client Account</h3>
-                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">The staff account lets your counter staff or clients log in with limited access. Only one staff account is supported.</p>
-                    <div id="staff-account-display" style="display:none;background:var(--surface-2);border-radius:8px;padding:.85rem 1rem;margin-bottom:1rem;font-size:.9rem;flex-wrap:wrap;">
-                        <span>Staff account: <strong id="staff-username-display"></strong></span>
-                        <button class="btn btn-sm btn-danger" style="margin-left:1rem;" onclick="removeStaffAccount()">Remove</button>
-                    </div>
-                    <div id="staff-account-form">
-                        <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem;">
-                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Staff Username</label><input type="text" id="staff-new-user" placeholder="e.g. staff" autocomplete="off"/></div>
-                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Staff Password</label><input type="password" id="staff-new-pw" placeholder="Min 6 characters"/></div>
-                            <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Confirm Password</label><input type="password" id="staff-new-pw2" placeholder="Repeat password"/></div>
+                    <h3 style="margin-bottom:1rem;">&#128100; Staff / Client Accounts</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">Up to 2 staff accounts are supported. Each can log in with limited access using their own username and password.</p>
+
+                    <!-- Slot 1 -->
+                    <div style="border:1.5px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;">
+                        <div style="font-weight:700;font-size:.85rem;color:var(--primary-dark);margin-bottom:.65rem;">Staff Account 1</div>
+                        <div id="staff-account-display-1" style="display:none;background:var(--surface-2);border-radius:6px;padding:.7rem .9rem;margin-bottom:.65rem;font-size:.9rem;display:none;align-items:center;flex-wrap:wrap;">
+                            <span>Username: <strong id="staff-username-display-1"></strong></span>
+                            <button class="btn btn-sm btn-danger" style="margin-left:auto;" onclick="removeStaffAccount(1)">Remove</button>
                         </div>
-                        <div id="staff-form-error" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.5rem;"></div>
-                        <button class="btn btn-primary btn-sm" onclick="saveStaffAccount()">Save Staff Account</button>
+                        <div id="staff-account-form-1">
+                            <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem;">
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Username</label><input type="text" id="staff-new-user-1" placeholder="e.g. staff1" autocomplete="off"/></div>
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Password</label><input type="password" id="staff-new-pw-1" placeholder="Min 6 characters"/></div>
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Confirm</label><input type="password" id="staff-new-pw2-1" placeholder="Repeat password"/></div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="saveStaffAccount(1)">Save Account 1</button>
+                        </div>
                     </div>
+
+                    <!-- Slot 2 -->
+                    <div style="border:1.5px solid var(--border);border-radius:8px;padding:1rem;">
+                        <div style="font-weight:700;font-size:.85rem;color:var(--primary-dark);margin-bottom:.65rem;">Staff Account 2</div>
+                        <div id="staff-account-display-2" style="display:none;background:var(--surface-2);border-radius:6px;padding:.7rem .9rem;margin-bottom:.65rem;font-size:.9rem;display:none;align-items:center;flex-wrap:wrap;">
+                            <span>Username: <strong id="staff-username-display-2"></strong></span>
+                            <button class="btn btn-sm btn-danger" style="margin-left:auto;" onclick="removeStaffAccount(2)">Remove</button>
+                        </div>
+                        <div id="staff-account-form-2">
+                            <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.75rem;">
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Username</label><input type="text" id="staff-new-user-2" placeholder="e.g. staff2" autocomplete="off"/></div>
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Password</label><input type="password" id="staff-new-pw-2" placeholder="Min 6 characters"/></div>
+                                <div class="form-group" style="margin:0;flex:1;min-width:140px;"><label style="font-size:.85rem;">Confirm</label><input type="password" id="staff-new-pw2-2" placeholder="Repeat password"/></div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="saveStaffAccount(2)">Save Account 2</button>
+                        </div>
+                    </div>
+                    <div id="staff-form-error" style="display:none;color:var(--danger);font-size:.82rem;margin-top:.5rem;"></div>
                 </div>
 
 
@@ -1628,43 +1664,89 @@
         // business + how to sign in" WITHOUT knowing the company name. Written any time an
         // admin or staff account is (re)created; readable by anyone signed out (see Database
         // Rules), so the lookup itself never requires being logged in.
-        // Path: usernames/{lowercased username} -> { uid, email, role, salt?, hash? }
-        // (salt/hash present only for role:'client' — staff have no Firebase Auth user of their
-        // own, so their password is checked locally against the hash stored here.)
+        //
+        // Key scheme:
+        //   admin  → plain lowercased username  (globally unique via Firebase email)
+        //   client → "{uid}__{lowercased username}"  (scoped to the business so two shops
+        //             can both have a staff called "mary" without colliding)
+        //
+        function _dirKey(role, username, uid) {
+            const u = (username || '').trim().toLowerCase();
+            if (role === 'client' && uid) return uid + '__' + u;
+            return u;
+        }
+
         async function publishUsernameDirectoryEntry(idToken, username, entry) {
             if (!idToken || !username) return;
-            const key = username.trim().toLowerCase();
+            const key = _dirKey(entry.role, username, entry.uid);
             if (!key) return;
-            try {
-                await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(entry)
-                });
-            } catch (e) {
-                console.warn('ZamAgro Cloud: failed to publish username directory entry', e);
+            // Also store a reverse-lookup so a new device can find the scoped key from
+            // just the plain username (needed for client cloud-first login).
+            if (entry.role === 'client') {
+                // Write scoped entry
+                try {
+                    await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
+                    });
+                } catch (e) { console.warn('ZamAgro Cloud: failed to publish staff directory entry', e); }
+                // Write plain-username pointer so lookup by bare username still works
+                const plainKey = (username || '').trim().toLowerCase();
+                try {
+                    await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(plainKey + '__ptr')}.json?auth=${idToken}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ scopedKey: key, uid: entry.uid })
+                    });
+                } catch (e) { console.warn('ZamAgro Cloud: failed to publish username pointer', e); }
+            } else {
+                try {
+                    await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry)
+                    });
+                } catch (e) { console.warn('ZamAgro Cloud: failed to publish username directory entry', e); }
             }
         }
 
-        async function removeUsernameDirectoryEntry(idToken, username) {
+        async function removeUsernameDirectoryEntry(idToken, username, role, uid) {
             if (!idToken || !username) return;
-            const key = username.trim().toLowerCase();
+            const key = _dirKey(role || 'admin', username, uid);
             if (!key) return;
             try {
                 await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, { method: 'DELETE' });
-            } catch (e) {
-                console.warn('ZamAgro Cloud: failed to remove username directory entry', e);
+            } catch (e) { console.warn('ZamAgro Cloud: failed to remove username directory entry', e); }
+            // Also remove the pointer if this was a client
+            if (role === 'client') {
+                const plainKey = (username || '').trim().toLowerCase();
+                try {
+                    await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(plainKey + '__ptr')}.json?auth=${idToken}`, { method: 'DELETE' });
+                } catch (e) {}
             }
         }
 
-        // Looks up a bare username with NO auth required (public read) to find which business
-        // it belongs to and how to authenticate. Returns null if not found or cloud not configured.
-        async function lookupUsernameDirectory(username) {
+        // Looks up a username with NO auth required (public read).
+        // For client role: first checks for a pointer (uid__ptr) to find the scoped entry,
+        // then fetches the scoped entry. Falls back to plain key for legacy entries.
+        // Returns null if not found or cloud not configured.
+        async function lookupUsernameDirectory(username, role) {
             if (!isCloudConfigured()) return null;
-            const key = (username || '').trim().toLowerCase();
-            if (!key) return null;
+            const plainKey = (username || '').trim().toLowerCase();
+            if (!plainKey) return null;
             try {
-                const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json`);
+                // If looking up a client, first resolve the pointer to get the scoped key
+                if (!role || role === 'client') {
+                    const ptrResp = await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(plainKey + '__ptr')}.json`);
+                    if (ptrResp.ok) {
+                        const ptr = await ptrResp.json();
+                        if (ptr && ptr.scopedKey) {
+                            const scopedResp = await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(ptr.scopedKey)}.json`);
+                            if (scopedResp.ok) {
+                                const entry = await scopedResp.json();
+                                if (entry) return entry;
+                            }
+                        }
+                    }
+                }
+                // Admin lookup (or fallback for legacy plain-key entries)
+                const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(plainKey)}.json`);
                 if (!resp.ok) return null;
                 return await resp.json();
             } catch (e) {
@@ -1753,7 +1835,7 @@
             // Show "Client / Staff" whenever a local staff account exists OR cloud sign-in is
             // available (a staff member on a brand-new device has no local account yet, but can
             // still sign in via the cloud directory).
-            const showClientOption = (accounts && accounts.client) || isCloudConfigured();
+            const showClientOption = (accounts && accounts.clients && accounts.clients.some(c => c)) || isCloudConfigured();
             if (clientOption) clientOption.style.display = showClientOption ? '' : 'none';
             if (roleSelect && !showClientOption) roleSelect.value = 'admin';
             checkLockoutDisplay();
@@ -1793,6 +1875,7 @@
             if (!companyName) { errEl.textContent = 'Please enter your business name.'; errEl.style.display = 'block'; return; }
             if (adminPw !== adminPw2) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
             if (adminPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+            if (!document.getElementById('signup-tos-check').checked) { errEl.textContent = 'Please agree to the Terms of Service and Privacy Policy to continue.'; errEl.style.display = 'block'; return; }
 
             if (!isCloudConfigured()) {
                 errEl.textContent = 'Cloud sync is not configured. Sign up is unavailable until this is fixed.';
@@ -1831,7 +1914,7 @@
             const adminSalt = genSalt();
             const accounts = {
                 admin:  { username: adminUser, salt: adminSalt, hash: await pbkdf2Hash(adminPw, adminSalt) },
-                client: null
+                clients: [null, null]
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
 
@@ -2097,6 +2180,52 @@
             return s(companyName) + '.' + s(adminUser) + '@zamagro.app';
         }
 
+        // ── SIGNUP AVAILABILITY CHECK ─────────────────────────────────────
+        // Checks whether the company+username combo is already registered by
+        // trying to fetch the derived username directory entry from Firebase.
+        // Uses a debounce so we don't hammer the DB on every keystroke.
+        let _availCheckTimer = null;
+
+        function scheduleAvailabilityCheck() {
+            clearTimeout(_availCheckTimer);
+            const el = document.getElementById('signup-availability');
+            if (!el) return;
+            const company = (document.getElementById('signup-company-name')?.value || '').trim();
+            const user    = (document.getElementById('signup-admin-user')?.value || '').trim();
+            if (!company || !user) { el.style.display = 'none'; return; }
+            el.style.display = 'block';
+            el.style.background = '#f3f4f6';
+            el.style.color = '#555';
+            el.textContent = '⏳ Checking availability...';
+            _availCheckTimer = setTimeout(() => checkAvailability(company, user), 700);
+        }
+
+        async function checkAvailability(company, user) {
+            const el = document.getElementById('signup-availability');
+            if (!el) return;
+            if (!isCloudConfigured()) { el.style.display = 'none'; return; }
+            try {
+                const email = deriveCloudEmail(company, user);
+                // Use Firebase's email lookup endpoint — returns EMAIL_NOT_FOUND if free
+                const resp = await fetch(
+                    `https://identitytoolkit.googleapis.com/v1/accounts:fetchSignInMethodsForEmail?key=${FIREBASE_CONFIG.apiKey}`,
+                    { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ identifier: email, continueUri: location.href }) }
+                );
+                const data = await resp.json();
+                const taken = data.allProviders && data.allProviders.length > 0;
+                if (taken) {
+                    el.style.background = '#ffebee'; el.style.color = '#c62828';
+                    el.textContent = '✘ That company name + username is already taken. Try a different combination.';
+                } else {
+                    el.style.background = '#e8f5e9'; el.style.color = '#2e7d32';
+                    el.textContent = '✔ Available!';
+                }
+            } catch(e) {
+                el.style.display = 'none';
+            }
+        }
+
         document.getElementById('setupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const errEl    = document.getElementById('setup-error');
@@ -2147,7 +2276,7 @@
             const adminSalt = genSalt();
             const accounts = {
                 admin:  { username: adminUser, salt: adminSalt, hash: await pbkdf2Hash(adminPw, adminSalt) },
-                client: null
+                clients: [null, null]
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
 
@@ -2169,25 +2298,29 @@
         // --- STAFF ACCOUNT MANAGEMENT ---
         function renderStaffAccountUI() {
             const accounts = getAccounts();
-            const displayEl = document.getElementById('staff-account-display');
-            const formEl    = document.getElementById('staff-account-form');
-            const nameEl    = document.getElementById('staff-username-display');
-            if (!displayEl || !formEl) return;
-            if (accounts && accounts.client) {
-                if (nameEl) nameEl.textContent = accounts.client.username;
-                displayEl.style.display = 'flex';
-                formEl.style.display = 'none';
-            } else {
-                displayEl.style.display = 'none';
-                formEl.style.display = 'block';
-            }
+            const clients = (accounts && accounts.clients) || [null, null];
+            [1, 2].forEach(slot => {
+                const c = clients[slot - 1];
+                const displayEl = document.getElementById(`staff-account-display-${slot}`);
+                const formEl    = document.getElementById(`staff-account-form-${slot}`);
+                const nameEl    = document.getElementById(`staff-username-display-${slot}`);
+                if (!displayEl || !formEl) return;
+                if (c) {
+                    if (nameEl) nameEl.textContent = c.username;
+                    displayEl.style.display = 'flex';
+                    formEl.style.display = 'none';
+                } else {
+                    displayEl.style.display = 'none';
+                    formEl.style.display = 'block';
+                }
+            });
         }
 
-        async function saveStaffAccount() {
+        async function saveStaffAccount(slot) {
             const errEl   = document.getElementById('staff-form-error');
-            const newUser = document.getElementById('staff-new-user').value.trim();
-            const newPw   = document.getElementById('staff-new-pw').value;
-            const newPw2  = document.getElementById('staff-new-pw2').value;
+            const newUser = document.getElementById(`staff-new-user-${slot}`).value.trim();
+            const newPw   = document.getElementById(`staff-new-pw-${slot}`).value;
+            const newPw2  = document.getElementById(`staff-new-pw2-${slot}`).value;
             errEl.style.display = 'none';
             const accounts = getAccounts();
             if (!newUser) { errEl.textContent = 'Please enter a staff username.'; errEl.style.display = 'block'; return; }
@@ -2196,44 +2329,51 @@
             if (accounts && accounts.admin && accounts.admin.username.toLowerCase() === newUser.toLowerCase()) {
                 errEl.textContent = 'Staff username must differ from admin username.'; errEl.style.display = 'block'; return;
             }
-            // If this staff username previously pointed to a different business in the cloud
-            // directory (e.g. reused after being removed elsewhere), clean that up first so
-            // sign-in resolves to THIS business.
-            const oldClient = accounts && accounts.client;
+            // Check username not already used by the other slot
+            const clients = (accounts && accounts.clients) || [null, null];
+            const otherSlot = slot === 1 ? 1 : 0; // index of the other slot
+            const otherClient = clients[otherSlot];
+            if (otherClient && otherClient.username.toLowerCase() === newUser.toLowerCase()) {
+                errEl.textContent = 'That username is already used by the other staff account.'; errEl.style.display = 'block'; return;
+            }
+            // Remove old directory entry if username changed
+            const oldClient = clients[slot - 1];
             if (oldClient && oldClient.username.toLowerCase() !== newUser.toLowerCase() && cloudAuth) {
                 const idTok = await getFreshIdToken();
-                await removeUsernameDirectoryEntry(idTok, oldClient.username);
+                await removeUsernameDirectoryEntry(idTok, oldClient.username, 'client', cloudAuth.uid);
             }
             const salt = genSalt();
             const hash = await pbkdf2Hash(newPw, salt);
-            accounts.client = { username: newUser, salt, hash };
+            clients[slot - 1] = { username: newUser, salt, hash };
+            accounts.clients = clients;
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
-            // Publish to the cloud username directory so this staff member can sign in
-            // cloud-first on a brand-new device. No-ops silently if not connected to cloud yet.
             if (cloudAuth) {
                 const idTok = await getFreshIdToken();
                 await publishUsernameDirectoryEntry(idTok, newUser, {
                     uid: cloudAuth.uid, email: cloudAuth.email, role: 'client', salt, hash
                 });
             }
-            document.getElementById('staff-new-user').value = '';
-            document.getElementById('staff-new-pw').value = '';
-            document.getElementById('staff-new-pw2').value = '';
+            document.getElementById(`staff-new-user-${slot}`).value = '';
+            document.getElementById(`staff-new-pw-${slot}`).value = '';
+            document.getElementById(`staff-new-pw2-${slot}`).value = '';
             renderStaffAccountUI();
-            showToast('Staff account saved.');
+            showToast(`Staff account ${slot} saved.`);
         }
 
-        async function removeStaffAccount() {
-            if (!confirm('Remove the staff account? They will no longer be able to log in.')) return;
+        async function removeStaffAccount(slot) {
+            if (!confirm(`Remove staff account ${slot}? They will no longer be able to log in.`)) return;
             const accounts = getAccounts();
-            const removedUsername = accounts && accounts.client && accounts.client.username;
-            if (accounts) { accounts.client = null; localStorage.setItem(AUTH_KEY, JSON.stringify(accounts)); }
+            const clients = (accounts && accounts.clients) || [null, null];
+            const removedUsername = clients[slot - 1] && clients[slot - 1].username;
+            clients[slot - 1] = null;
+            accounts.clients = clients;
+            localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
             if (removedUsername && cloudAuth) {
                 const idTok = await getFreshIdToken();
-                await removeUsernameDirectoryEntry(idTok, removedUsername);
+                await removeUsernameDirectoryEntry(idTok, removedUsername, 'client', cloudAuth.uid);
             }
             renderStaffAccountUI();
-            showToast('Staff account removed.');
+            showToast(`Staff account ${slot} removed.`);
         }
 
 
@@ -2262,10 +2402,23 @@
             const lk = getLockout();
             if (lk.until > Date.now()) { checkLockoutDisplay(); return; }
 
-            const role = document.getElementById('loginRole').value;
-            const u    = document.getElementById('username').value.trim();
-            const p    = document.getElementById('password').value;
+            const role         = document.getElementById('loginRole').value;
+            const u            = document.getElementById('username').value.trim();
+            const p            = document.getElementById('password').value;
+            const loginCompany = (document.getElementById('login-company-name')?.value || '').trim();
             const accounts = getAccounts();
+
+            if (!loginCompany) {
+                errEl.textContent = 'Please enter your Business / Company Name.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (!document.getElementById('login-tos-check').checked) {
+                errEl.textContent = 'Please agree to the Terms of Service and Privacy Policy to continue.';
+                errEl.style.display = 'block';
+                return;
+            }
 
             const btn = document.getElementById('login-btn');
             btn.disabled = true; btn.textContent = 'Checking…';
@@ -2277,7 +2430,11 @@
                 return;
             }
 
-            const acct = accounts ? accounts[role] : null;
+            const acct = accounts
+                ? (role === 'client'
+                    ? ((accounts.clients || []).find(c => c && c.username.toLowerCase() === u.toLowerCase()) || null)
+                    : accounts[role])
+                : null;
             let valid = false;
             let displayName = null;
 
@@ -2294,7 +2451,8 @@
                     btn.textContent = 'Verifying with cloud…';
                     try {
                         if (role === 'admin') {
-                            const companyName = (db.settings && db.settings.companyName) || '';
+                            // Use typed company name; fall back to locally stored name
+                            const companyName = loginCompany || (db.settings && db.settings.companyName) || '';
                             const email = deriveCloudEmail(companyName, u);
                             const data = await cloudSignIn(email, p);
                             saveCloudAuth({
@@ -2318,7 +2476,7 @@
                             if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                                 throw new TypeError('offline');
                             }
-                            const entry = await lookupUsernameDirectory(u);
+                            const entry = await lookupUsernameDirectory(u, role);
                             if (!entry || entry.role !== 'client' || !entry.salt || !entry.hash) {
                                 valid = false;
                             } else {
@@ -2359,7 +2517,7 @@
                 // the username via the cloud directory and pulling that business's data down.
                 btn.textContent = 'Looking up account…';
                 try {
-                    const result = await cloudFirstLogin(role, u, p);
+                    const result = await cloudFirstLogin(role, u, p, loginCompany);
                     valid = result.valid;
                     displayName = result.displayName;
                     if (result.notFound) {
@@ -2407,18 +2565,61 @@
         // Resolves the username via the public directory, authenticates against the cloud,
         // pulls the business's data down, and rebuilds the local account(s) from it.
         // Returns { valid, displayName, notFound?, networkError? }.
-        async function cloudFirstLogin(role, username, password) {
+        async function cloudFirstLogin(role, username, password, loginCompany) {
             if (!isCloudConfigured()) return { valid: false, notFound: true };
             if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                 return { valid: false, networkError: true };
             }
 
+            // For admin: derive the Firebase email directly from company+username instead of
+            // going through the public directory — this is both faster and avoids the collision
+            // problem where two businesses with the same username would overwrite each other's
+            // directory entry. The company name is now collected on the login form for all roles.
+            if (role === 'admin' && loginCompany) {
+                const derivedEmail = deriveCloudEmail(loginCompany, username);
+                let authData;
+                try {
+                    authData = await cloudSignIn(derivedEmail, password);
+                } catch (e) {
+                    if (e && (e.code === 'EMAIL_NOT_FOUND' || e.code === 'INVALID_LOGIN_CREDENTIALS')) {
+                        return { valid: false, notFound: true };
+                    }
+                    return { valid: false }; // wrong password
+                }
+                saveCloudAuth({
+                    uid: authData.localId,
+                    email: derivedEmail,
+                    idToken: authData.idToken,
+                    refreshToken: authData.refreshToken,
+                    idTokenExpiry: Date.now() + (parseInt(authData.expiresIn, 10) * 1000)
+                });
+                let snapshot;
+                try {
+                    snapshot = await fetchPublicBusinessSnapshot(cloudAuth.uid);
+                } catch (e) {
+                    return { valid: false, networkError: true };
+                }
+                rebuildLocalDataFromSnapshot(snapshot);
+                const adminSalt = genSalt();
+                const newAccounts = {
+                    admin: { username, salt: adminSalt, hash: await pbkdf2Hash(password, adminSalt) },
+                    clients: [null, null]
+                };
+                const existingLocal = getAccounts();
+                if (existingLocal && existingLocal.clients) newAccounts.clients = existingLocal.clients;
+                localStorage.setItem(AUTH_KEY, JSON.stringify(newAccounts));
+                startCloudListener();
+                renderCloudSyncUI && renderCloudSyncUI();
+                return { valid: true, displayName: username };
+            }
+
+            // For client/staff: look up via the public directory using company+username pointer.
             // lookupUsernameDirectory swallows network errors internally and returns null either
             // way, so it can't distinguish "no such entry" from "couldn't reach the cloud" once
             // we're past the explicit offline check above (e.g. DNS failure, server unreachable
             // despite navigator.onLine reporting true) — best-effort fetch first, the explicit
             // online check above is what mainly protects the "no login without connection" rule.
-            const entry = await lookupUsernameDirectory(username);
+            const entry = await lookupUsernameDirectory(username, role);
             if (!entry || entry.role !== role) {
                 return { valid: false, notFound: true };
             }
@@ -2450,14 +2651,10 @@
                 const adminSalt = genSalt();
                 const newAccounts = {
                     admin: { username: entry.username || username, salt: adminSalt, hash: await pbkdf2Hash(password, adminSalt) },
-                    client: null
+                    clients: [null, null]
                 };
-                // If the cloud directory also has a client account for this business, restore it
-                // too (so the staff member doesn't have to also cloud-sign-in separately later).
-                // We can't enumerate the directory by uid client-side, so this is best-effort and
-                // only fills in if the admin previously signed in on this same device before.
                 const existingLocal = getAccounts();
-                if (existingLocal && existingLocal.client) newAccounts.client = existingLocal.client;
+                if (existingLocal && existingLocal.clients) newAccounts.clients = existingLocal.clients;
                 localStorage.setItem(AUTH_KEY, JSON.stringify(newAccounts));
                 startCloudListener();
                 renderCloudSyncUI && renderCloudSyncUI();
@@ -2483,9 +2680,14 @@
             // pre-check on the next login, but the loginForm handler always re-verifies against
             // the live directory entry afterward — login still requires reaching the cloud.
             const existingLocal = getAccounts();
+            const existingClients = (existingLocal && existingLocal.clients) || [null, null];
+            // Place this staff member in whichever slot already matches their username, or the first empty slot
+            const slotIdx = existingClients.findIndex(c => c && c.username.toLowerCase() === username.toLowerCase());
+            const targetIdx = slotIdx !== -1 ? slotIdx : existingClients.findIndex(c => !c);
+            if (targetIdx !== -1) existingClients[targetIdx] = { username, salt: entry.salt, hash: entry.hash };
             const newAccounts = {
                 admin: (existingLocal && existingLocal.admin) || null,
-                client: { username, salt: entry.salt, hash: entry.hash }
+                clients: existingClients
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(newAccounts));
             return { valid: true, displayName: username };
@@ -3636,5 +3838,98 @@
         showLanding();
 
     </script>
+    <!-- TERMS OF SERVICE MODAL -->
+    <div id="modal-tos" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;">
+        <div style="background:#fff;border-radius:var(--radius-lg);max-width:640px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                <h2 style="font-size:1.1rem;font-weight:800;color:var(--primary-dark);">📄 Terms of Service</h2>
+                <button onclick="closeModal('modal-tos')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="overflow-y:auto;padding:1.5rem;font-size:.875rem;line-height:1.75;color:var(--text);">
+                <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:1.25rem;">Effective Date: 1 July 2025 &nbsp;|&nbsp; NEXLITE DIGITAL SOLUTIONS LIMITED</p>
+
+                <p style="margin-bottom:1rem;">By accessing or using <strong>ZamAgro Track</strong>, you agree to be bound by these Terms of Service. Please read them carefully before creating an account.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">1. Service Description</h4>
+                <p>ZamAgro Track is a cloud-based agro shop management system provided by NEXLITE DIGITAL SOLUTIONS LIMITED ("we", "us", or "our"). It is designed for use by agro retailers, distributors, and related businesses operating in Zambia.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">2. Account Registration</h4>
+                <p>You must provide accurate and complete information when creating an account. You are responsible for maintaining the confidentiality of your admin credentials. You may not share your account with any unauthorised person.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">3. Subscription &amp; Payment</h4>
+                <p>ZamAgro Track is offered on subscription plans (Starter, Standard, Pro) and a one-time Lifetime plan. Subscription fees are payable in advance via Mobile Money or bank transfer to the numbers/accounts provided at checkout. Fees are non-refundable once a license key has been activated. We reserve the right to change pricing with 30 days' notice.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">4. Acceptable Use</h4>
+                <p>You agree not to use ZamAgro Track to store false, misleading, or fraudulent business records; to attempt to reverse-engineer, copy, or redistribute the software; or to engage in any activity that disrupts the service for other users.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">5. Data Ownership</h4>
+                <p>All business data you enter into ZamAgro Track (inventory, sales, customers, etc.) remains your property. We do not claim ownership of your data. We store it on your behalf using Firebase (Google Cloud) infrastructure.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">6. Service Availability</h4>
+                <p>We strive for high availability but do not guarantee uninterrupted access. We are not liable for downtime caused by internet connectivity issues, Firebase infrastructure, or scheduled maintenance.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">7. Termination</h4>
+                <p>We reserve the right to suspend or terminate your account if you violate these Terms or fail to renew an expired subscription. You may stop using the service at any time. Upon termination, you may export your data via the backup feature before your access ends.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">8. Limitation of Liability</h4>
+                <p>To the maximum extent permitted by Zambian law, NEXLITE DIGITAL SOLUTIONS LIMITED shall not be liable for any indirect, incidental, or consequential damages arising from your use of ZamAgro Track, including loss of revenue or data.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">9. Governing Law</h4>
+                <p>These Terms are governed by the laws of the Republic of Zambia. Any disputes shall be resolved through good-faith negotiation, or if necessary, through the courts of Zambia.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">10. Contact</h4>
+                <p>For questions about these Terms, contact us at <strong>0977 638 790 / 0960 271 128</strong> (WhatsApp / Call).</p>
+            </div>
+            <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;">
+                <button onclick="closeModal('modal-tos')" class="btn btn-primary btn-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="modal-privacy" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;">
+        <div style="background:#fff;border-radius:var(--radius-lg);max-width:640px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                <h2 style="font-size:1.1rem;font-weight:800;color:var(--primary-dark);">🔒 Privacy Policy</h2>
+                <button onclick="closeModal('modal-privacy')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="overflow-y:auto;padding:1.5rem;font-size:.875rem;line-height:1.75;color:var(--text);">
+                <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:1.25rem;">Effective Date: 1 July 2025 &nbsp;|&nbsp; NEXLITE DIGITAL SOLUTIONS LIMITED</p>
+
+                <p style="margin-bottom:1rem;">NEXLITE DIGITAL SOLUTIONS LIMITED ("we", "us", or "our") is committed to protecting the privacy of users of <strong>ZamAgro Track</strong>. This policy explains what data we collect, how we use it, and your rights.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">1. Data We Collect</h4>
+                <p>We collect only the data you enter into the application, including: business name, admin and staff usernames (hashed passwords — we never store plain-text passwords), inventory records, sales, purchases, expenses, FISP claims, credit records, and settings. We do not collect names, email addresses, or phone numbers of end users unless you choose to enter them as customer data.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">2. How We Use Your Data</h4>
+                <p>Your data is used solely to operate the ZamAgro Track service — to display your records, sync across your devices, and generate reports. We do not sell, rent, or share your data with third parties for marketing purposes.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">3. Data Storage</h4>
+                <p>Data is stored in Google Firebase Realtime Database, hosted on Google Cloud infrastructure. Firebase is compliant with international data protection standards. Your data is stored under a unique identifier (UID) tied to your account and is not accessible to other ZamAgro Track users.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">4. Data Security</h4>
+                <p>All passwords are hashed using PBKDF2 with SHA-256 (100,000 iterations) before storage — we cannot recover your password. Data in transit is encrypted via HTTPS/TLS. Access to your cloud data requires a valid authenticated session.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">5. Data Retention</h4>
+                <p>Your data is retained for as long as your account is active. If you choose to stop using ZamAgro Track, you may export a full backup of your data using the built-in backup feature. We do not automatically delete inactive accounts, but reserve the right to do so after 12 months of inactivity with prior notice.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">6. Your Rights</h4>
+                <p>You have the right to access, correct, or delete your data at any time. To request deletion of your account and all associated data from our servers, contact us directly via the number below.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">7. Third-Party Services</h4>
+                <p>ZamAgro Track uses Google Firebase for authentication and data storage. Firebase's own privacy policy applies to data processed through their infrastructure. We use no advertising networks or analytics trackers.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">8. Changes to This Policy</h4>
+                <p>We may update this Privacy Policy from time to time. Changes will be reflected in the app with an updated effective date. Continued use of the service after changes constitutes acceptance.</p>
+
+                <h4 style="color:var(--primary-dark);margin:.75rem 0 .35rem;">9. Contact</h4>
+                <p>For privacy concerns or data deletion requests, contact us at <strong>0977 638 790 / 0960 271 128</strong> (WhatsApp / Call).</p>
+            </div>
+            <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;">
+                <button onclick="closeModal('modal-privacy')" class="btn btn-primary btn-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
