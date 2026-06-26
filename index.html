@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZamAgro Track - Integrated System</title>
+    <title>ZamAgro Track v3.5 - Integrated System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -81,6 +81,7 @@
             pointer-events: none;
         }
         .landing-header { padding: 20px 40px; width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+        .landing-header-wrap { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); background: rgba(15,61,31,0.7); border-bottom: 1px solid rgba(255,255,255,0.08); }
         .landing-logo { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.5px; }
         .landing-logo span { color: var(--secondary); }
         .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; position: relative; z-index: 1; }
@@ -115,7 +116,7 @@
         .cta-btn { margin-top: 1.25rem; padding: 13px 42px; font-size: 1rem; border-radius: var(--radius); }
 
         /* --- LOGIN / SETUP --- */
-        .auth-bg { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #e8f0e4 0%, #d4e3cc 100%); }
+        .auth-bg { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 53px); background: linear-gradient(135deg, #e8f0e4 0%, #d4e3cc 100%); }
         .login-box {
             background: var(--surface);
             padding: 2.5rem;
@@ -375,10 +376,14 @@
 
     <!-- --- LANDING PAGE --- -->
     <section id="landing-page" class="hidden">
-        <header class="landing-header">
-            <div class="landing-logo">ZamAgro<span>Track</span></div>
-            <button onclick="showLogin()" class="btn btn-secondary">Log In →</button>
-        </header>
+        <div class="landing-header-wrap">
+            <header class="landing-header">
+                <div class="landing-logo">ZamAgro<span>Track</span></div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button onclick="showLogin()" class="btn btn-secondary">Log In / Sign Up →</button>
+                </div>
+            </header>
+        </div>
         <div class="hero">
             <div class="hero-badge">🌱 Built for Zambian Agro Businesses</div>
             <h1>Run Your Agro Shop<br>With Confidence</h1>
@@ -457,13 +462,17 @@
                     📞 To purchase or activate, contact: <strong id="landing-phone">+260 97X XXX XXX</strong> (WhatsApp / Call)<br>
                     <span style="opacity:.75;font-size:.82rem;">Mention your plan and shop name. You will receive an activation code.</span>
                 </div>
-                <button onclick="showLogin()" class="btn btn-secondary cta-btn">Login / Try Free →</button>
+                <button onclick="showLogin()" class="btn btn-secondary cta-btn">Log In / Sign Up →</button>
             </div>
         </div>
     </section>
 
     <!-- --- FIRST RUN SETUP WIZARD --- -->
     <section id="setup-page" class="hidden">
+        <div style="position:sticky;top:0;z-index:50;background:linear-gradient(90deg,#0F3D1F,#1E6B35);padding:14px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <div style="font-size:1.1rem;font-weight:800;color:#F5C050;letter-spacing:-0.3px;">ZamAgro<span style="color:white;">Track</span></div>
+            <button onclick="showLanding()" class="btn btn-secondary btn-sm">← Back to Home</button>
+        </div>
         <div class="auth-bg">
             <div class="login-box" style="max-width:440px;">
                 <div class="login-logo">🌿</div>
@@ -486,26 +495,60 @@
 
     <!-- --- LOGIN PAGE --- -->
     <section id="login-page" class="hidden">
+        <div style="position:sticky;top:0;z-index:50;background:linear-gradient(90deg,#0F3D1F,#1E6B35);padding:14px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <div style="font-size:1.1rem;font-weight:800;color:#F5C050;letter-spacing:-0.3px;">ZamAgro<span style="color:white;">Track</span></div>
+            <button onclick="showLanding()" class="btn btn-secondary btn-sm">← Back to Home</button>
+        </div>
         <div class="auth-bg">
-            <div class="login-box">
+            <div class="login-box" style="max-width:440px;">
                 <div class="login-logo">🌿</div>
                 <div class="login-title">ZamAgro Track</div>
-                <p class="login-sub">Sign in to continue</p>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="loginRole">
-                            <option value="admin">Administrator</option>
-                            <option value="client">Client / Staff</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter username" required autocomplete="username"/></div>
-                    <div class="form-group" style="position:relative;"><label>Password</label><input type="password" id="password" placeholder="Enter password" required autocomplete="current-password"/><button type="button" onclick="togglePw('password',this)" style="position:absolute;right:.75rem;top:2.1rem;background:none;border:none;cursor:pointer;color:var(--gray);">&#128065;</button></div>
-                    <div id="login-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
-                    <div id="login-lockout" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
-                    <button type="submit" class="btn btn-primary" style="width:100%" id="login-btn">Login</button>
-                    <p class="text-center" style="margin-top:1rem;"><a href="#" onclick="showLanding()" style="color:var(--primary);">&#8592; Back</a></p>
-                </form>
+
+                <!-- Tab switcher -->
+                <div style="display:flex;border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:1.5rem;">
+                    <button id="tab-signin" onclick="switchAuthTab('signin')"
+                        style="flex:1;padding:9px;font-weight:700;font-size:.88rem;border:none;background:var(--primary);color:white;cursor:pointer;transition:all .15s;">
+                        Sign In
+                    </button>
+                    <button id="tab-signup" onclick="switchAuthTab('signup')"
+                        style="flex:1;padding:9px;font-weight:700;font-size:.88rem;border:none;background:var(--surface-2);color:var(--text-muted);cursor:pointer;transition:all .15s;">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- SIGN IN PANEL -->
+                <div id="auth-signin-panel">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="loginRole">
+                                <option value="admin">Administrator</option>
+                                <option value="client">Client / Staff</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="Enter username" required autocomplete="username"/></div>
+                        <div class="form-group" style="position:relative;"><label>Password</label><input type="password" id="password" placeholder="Enter password" required autocomplete="current-password"/><button type="button" onclick="togglePw('password',this)" style="position:absolute;right:.75rem;top:2.1rem;background:none;border:none;cursor:pointer;color:var(--gray);">&#128065;</button></div>
+                        <div id="login-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                        <div id="login-lockout" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                        <button type="submit" class="btn btn-primary" style="width:100%" id="login-btn">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- CREATE ACCOUNT PANEL -->
+                <div id="auth-signup-panel" style="display:none;">
+                    <form id="signupForm" onsubmit="handleSignup(event)">
+                        <div class="form-group"><label>Business / Company Name</label><input type="text" id="signup-company-name" placeholder="e.g. Chanda Agro Supplies" required autocomplete="organization"/></div>
+                        <hr style="margin:.85rem 0;border-color:#ddd;"/>
+                        <p style="font-weight:700;margin-bottom:.75rem;color:var(--primary-dark);font-size:.88rem;">Administrator Account</p>
+                        <div class="form-group"><label>Admin Username</label><input type="text" id="signup-admin-user" placeholder="e.g. admin" required autocomplete="off"/></div>
+                        <div class="form-group"><label>Admin Password</label><input type="password" id="signup-admin-pw" placeholder="Min 6 characters" required/></div>
+                        <div class="form-group"><label>Confirm Password</label><input type="password" id="signup-admin-pw2" placeholder="Repeat password" required/></div>
+                        <div id="signup-error" style="display:none;color:var(--danger);font-size:.85rem;margin-bottom:.75rem;padding:.5rem;background:#ffebee;border-radius:4px;"></div>
+                        <div id="signup-cloud-status" style="display:none;font-size:.82rem;margin-bottom:.75rem;padding:.5rem;border-radius:4px;"></div>
+                        <button type="submit" class="btn btn-primary" style="width:100%" id="signup-btn">Create Account &amp; Connect Cloud →</button>
+                    </form>
+                </div>
+
             </div>
         </div>
     </section>
@@ -615,7 +658,7 @@
             <!-- 2. INVENTORY VIEW -->
             <div id="view-inventory" class="hidden">
                 <div class="view-toolbar">
-                    <button class="btn btn-primary" onclick="openModal('modal-inv')">+ Add Stock Item</button>
+                    <button class="btn btn-primary" onclick="openAddStockModal()">+ Add Stock Item</button>
                     <input type="text" id="search-inventory" placeholder="Search inventory..." onkeyup="renderTable('inventory')">
                 </div>
                 <div class="table-container">
@@ -671,11 +714,11 @@
             <!-- 6. FISP VIEW -->
             <div id="view-fisp" class="hidden">
                 <div class="view-toolbar">
-                    <button class="btn btn-primary" onclick="openModal('modal-fisp')">+ Add FISP Claim</button>
+                    <button class="btn btn-primary" onclick="prepareFISPModal()">+ Add FISP Claim</button>
                     <input type="text" id="search-fisp" placeholder="Search FISP claims..." onkeyup="renderTable('fisp')">
                 </div>
                 <div class="table-container">
-                    <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer/Camp</th><th>Voucher</th><th>Value (ZMW)</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table>
+                    <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer Name</th><th>NRC/ID</th><th>Camp/Area</th><th>Voucher No.</th><th>Product(s)</th><th>Qty</th><th>Value (ZMW)</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
@@ -709,7 +752,7 @@
                             ⬆ Restore from Backup
                             <input type="file" id="restore-file-input" accept=".json" onchange="restoreJSON(event)" style="display:none;">
                         </label>
-                        <span style="font-size:0.78rem;color:var(--text-muted);">Backup protects against data loss. Restore replaces ALL current data.</span>
+                        <span style="font-size:0.78rem;color:var(--text-muted);">Backup protects against data loss. Cloud sync must be active to backup or restore.</span>
                     </div>
                     <table id="table-pl"><thead><tr><th>Category</th><th id="pl-col-header">All Time (ZMW)</th></tr></thead><tbody></tbody></table>
                 </div>
@@ -768,19 +811,20 @@
                 </div>
 
 
-                <!-- CLOUD BACKUP CARD -->
+                <!-- CLOUD SYNC STATUS (connection is automatic via login; Upload/Restore are manual force-sync actions) -->
                 <div class="card" style="margin-bottom: 2rem; border-left-color:#1565C0;">
-                    <h3 style="margin-bottom:.5rem;color:#1565C0;">&#9729;&#65039; Cloud Backup</h3>
-                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:.75rem;">Your data is automatically linked to your account. Use these to manually push or pull.</p>
+                    <h3 style="margin-bottom:.5rem;color:#1565C0;">☁️ Cloud Sync</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:.75rem;">Your data syncs to the cloud automatically using your login. Use these if you ever want to force a sync.</p>
                     <div id="cloud-sync-status-box" style="background:#f9f9f9;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.88rem;">
                         <span id="cloud-sync-status-text">Checking...</span>
                     </div>
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
-                        <button class="btn btn-primary btn-sm" onclick="cloudUploadData()">&#8593; Upload to Cloud</button>
-                        <button class="btn btn-sm" style="background:#e8f3fc;color:var(--accent);border:1.5px solid #c5dff5;" onclick="cloudDownloadData()">&#8595; Restore from Cloud</button>
+                        <button class="btn btn-primary btn-sm" onclick="cloudUploadData()">↑ Upload to Cloud</button>
+                        <button class="btn btn-sm" style="background:#e8f3fc;color:var(--accent);border:1.5px solid #c5dff5;" onclick="cloudDownloadData()">↓ Restore from Cloud</button>
+                        <span id="cloud-pending-badge" style="display:none;font-size:.75rem;background:#fff3e0;color:#e65100;border-radius:20px;padding:2px 10px;font-weight:700;"></span>
                     </div>
-                    <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;"><strong>Upload</strong> saves your current data to the cloud. <strong>Restore</strong> replaces all local data with the latest cloud backup &mdash; useful on a new or reset device.</p>
-                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:.4rem;">Last synced: <span id="cloud-last-synced">&mdash;</span></div>
+                    <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;"><strong>Upload</strong> pushes your current data to the cloud now. <strong>Restore</strong> replaces all local data with the latest cloud backup — useful on a new or reset device.</p>
+                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:.4rem;">Last synced: <span id="cloud-last-synced">—</span></div>
                 </div>
 
                 <div class="card" style="margin-bottom: 2rem;">
@@ -814,6 +858,18 @@
                         VAT: 16%, calculated assuming all prices entered in Sales/Inventory/Purchases are <strong>VAT-inclusive</strong>.<br>
                         These regimes are mutually exclusive under ZRA rules — selecting one disables the other in the P&amp;L. Rates and thresholds may change; confirm with ZRA or your accountant before filing.
                     </p>
+                </div>
+                <div class="card" style="margin-bottom: 2rem; border-left-color: var(--primary-light);">
+                    <h3 style="margin-bottom:.5rem;">🏷️ Stock Categories</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">Define the categories available when adding or editing stock items.</p>
+                    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;" id="cat-tags-container"></div>
+                    <div style="display:flex;gap:.6rem;align-items:center;max-width:400px;">
+                        <input type="text" id="new-cat-input" placeholder="e.g. Pesticide" maxlength="40"
+                            style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;outline:none;"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();addStockCategory();}">
+                        <button class="btn btn-primary btn-sm" onclick="addStockCategory()">+ Add</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;">Click ✕ on a tag to remove it. Built-in defaults can also be removed.</p>
                 </div>
                 <div class="card" style="margin-bottom: 2rem;">
                     <h3>Product Management</h3>
@@ -865,7 +921,7 @@
             <form onsubmit="handleAddInventory(event)">
                 <div class="form-group"><input type="text" id="inv-name" placeholder="Product Name" required></div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-group"><select id="inv-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
+                    <div class="form-group"><select id="inv-cat"><option value="">— Select Category —</option></select></div>
                     <div class="form-group"><input type="text" id="inv-unit" placeholder="Unit (e.g. bag)" required></div>
                 </div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
@@ -941,15 +997,41 @@
 
     <!-- Add FISP -->
     <div id="modal-fisp" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:540px;">
             <h3>Add FISP Claim</h3><br>
             <form onsubmit="handleAddFISP(event)">
-                <div class="form-group"><input type="text" id="fisp-name" placeholder="Farmer/Camp Name" required></div>
-                <div class="form-group"><input type="text" id="fisp-voucher" placeholder="E-Voucher No." required></div>
-                <div class="form-group"><input type="number" id="fisp-val" placeholder="Claim Value (ZMW)" required></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%">Submit Claim</button>
+                <p style="font-weight:700;font-size:.85rem;color:var(--primary-dark);margin-bottom:.75rem;">Farmer Details</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Farmer Name *</label><input type="text" id="fisp-farmer-name" placeholder="e.g. John Banda" required></div>
+                    <div class="form-group" style="margin:0"><label>NRC / ID No.</label><input type="text" id="fisp-nrc" placeholder="e.g. 123456/78/9"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Phone No.</label><input type="text" id="fisp-phone" placeholder="e.g. 0977 000 000"></div>
+                    <div class="form-group" style="margin:0"><label>Camp / Area</label><input type="text" id="fisp-camp" placeholder="e.g. Mansa Central"></div>
+                </div>
+                <hr style="margin:1rem 0;">
+                <p style="font-weight:700;font-size:.85rem;color:var(--primary-dark);margin-bottom:.75rem;">Voucher & Redemption</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="form-group" style="margin:0"><label>E-Voucher No. *</label><input type="text" id="fisp-voucher" placeholder="Voucher number" required></div>
+                    <div class="form-group" style="margin:0"><label>Claim Value (ZMW) *</label><input type="number" id="fisp-val" placeholder="e.g. 500" required min="0" step="0.01"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Product Redeemed</label><select id="fisp-prod"><option value="">— Select product —</option></select></div>
+                    <div class="form-group" style="margin:0"><label>Qty Issued</label><input type="number" id="fisp-qty" placeholder="e.g. 2" min="0" step="1"></div>
+                </div>
+                <div class="form-group" style="margin-top:.75rem;"><label>Notes / Remarks</label><input type="text" id="fisp-notes" placeholder="Optional remarks"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">Submit FISP Claim</button>
             </form>
-            <button onclick="closeModal('modal-fisp')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+            <button onclick="closeModal('modal-fisp')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- FISP Detail Modal -->
+    <div id="modal-fisp-detail" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:520px;">
+            <h3>FISP Claim Details</h3>
+            <div id="fisp-detail-body" style="margin-top:1rem;"></div>
+            <button onclick="closeModal('modal-fisp-detail')" class="btn btn-sm" style="margin-top:1.25rem;width:100%">Close</button>
         </div>
     </div>
 
@@ -960,7 +1042,7 @@
             <form onsubmit="handleEditSave(event)">
                 <input type="hidden" id="edit-id">
                 <div class="form-group"><label>Product Name</label><input type="text" id="edit-name" required></div>
-                <div class="form-group"><label>Category</label><select id="edit-cat"><option>Fertilizer</option><option>Seed</option><option>Chemical</option><option>Tool</option></select></div>
+                <div class="form-group"><label>Category</label><select id="edit-cat"><option value="">— Select Category —</option></select></div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                     <div class="form-group"><label>Unit Cost</label><input type="number" id="edit-cost" required></div>
                     <div class="form-group"><label>Selling Price</label><input type="number" id="edit-price" required></div>
@@ -1037,7 +1119,7 @@
             expenses:  [],
             fisp:      [],
             credit:    [],
-            settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none' }
+            settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none', stockCategories: ['Fertilizer','Seed','Chemical','Tool'] }
         };
 
         // Load a collection from localStorage, falling back to seed data on first run.
@@ -1114,18 +1196,33 @@
         //      "rules": {
         //        "businesses": {
         //          "$uid": {
-        //            ".read":  "auth != null && auth.uid === $uid",
+        //            ".read":  true,
         //            ".write": "auth != null && auth.uid === $uid",
         //            "$collection": {
         //              ".validate": "$collection === 'inventory' || $collection === 'sales' || $collection === 'purchases' || $collection === 'expenses' || $collection === 'fisp' || $collection === 'credit' || $collection === 'settings'"
         //            }
         //          }
+        //        },
+        //        "usernames": {
+        //          ".read": true,
+        //          "$username": {
+        //            ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid || newData.child('uid').val() === auth.uid)"
+        //          }
         //        }
         //      }
         //    }
-        //    This denies everyone by default and only ever lets a signed-in account read/write
-        //    its OWN business node — there is no path under which one customer's data is
-        //    readable or writable by another, even if they guess another business's UID.
+        //    WRITES stay locked down exactly as before — only a signed-in account can ever write
+        //    its own business node or its own directory entries; nothing here weakens that.
+        //    READS of a business node are now PUBLIC (".read": true). This is required so a
+        //    staff/client account — which has no Firebase Auth user of its own — can pull that
+        //    business's data on a brand-new device after the app checks their password locally.
+        //    Practically: anyone who obtains a specific business's UID (a long random string,
+        //    not guessable or enumerable) could read that one business's data without a
+        //    password. Business UIDs are never displayed in the UI, but they are visible to
+        //    anyone inspecting network requests or local storage on a logged-in device.
+        //    The "usernames" node is a public directory mapping a username -> { uid, email,
+        //    role, salt/hash for staff } so any device can resolve "who does this username
+        //    belong to" before signing in. It is also public-read for the same reason.
         //
         // 3. Authentication → Sign-in method → enable "Email/Password".
         //
@@ -1148,12 +1245,13 @@
 
         const CLOUD_KEY       = 'za_cloud_auth';   // { uid, email, idToken, refreshToken, idTokenExpiry }
         const SYNC_QUEUE_KEY  = 'za_pending_sync'; // persistent offline-safe outbox
+        const LAST_SYNCED_KEY = 'za_last_synced';  // persisted so "Last synced" survives a page reload
         const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit'];
 
         let cloudAuth = null;
         let sseConn = null;
         let syncFlushTimer = null;
-        let lastSyncedAt = 0;
+        let lastSyncedAt = parseInt(localStorage.getItem(LAST_SYNCED_KEY) || '0', 10) || 0;
 
         function isCloudConfigured() {
             return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('YOUR_');
@@ -1228,7 +1326,14 @@
                 body: JSON.stringify({ email, password, returnSecureToken: true })
             });
             const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error?.message === 'EMAIL_NOT_FOUND' || data.error?.message === 'INVALID_PASSWORD' || data.error?.message === 'INVALID_LOGIN_CREDENTIALS' ? 'No cloud account matches that email/password.' : (data.error?.message || 'Sign-in failed'));
+            if (!resp.ok) {
+                const code = data.error?.message || 'SIGNIN_FAILED';
+                const friendly = (code === 'EMAIL_NOT_FOUND' || code === 'INVALID_PASSWORD' || code === 'INVALID_LOGIN_CREDENTIALS')
+                    ? 'No cloud account matches that email/password.' : code;
+                const err = new Error(friendly);
+                err.code = code; // preserves EMAIL_NOT_FOUND / INVALID_PASSWORD / INVALID_LOGIN_CREDENTIALS etc. for callers that need to react differently
+                throw err;
+            }
             return data;
         }
 
@@ -1298,6 +1403,30 @@
             return resp.json();
         }
 
+        // Fetches a whole business node WITHOUT any Firebase Auth session — used for staff
+        // sign-in on a brand-new device, since staff have no Firebase Auth user of their own
+        // (see Database Rules: business nodes are publicly readable, admin-only writable).
+        async function fetchPublicBusinessSnapshot(uid) {
+            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${uid}.json`);
+            if (!resp.ok) throw new Error(`Could not load cloud data (${resp.status})`);
+            return (await resp.json()) || {};
+        }
+
+        // Replaces ALL local collections + settings with the contents of a full business
+        // snapshot object (as returned by fetchPublicBusinessSnapshot, or businesses/{uid}.json).
+        function rebuildLocalDataFromSnapshot(snapshot) {
+            window.__applyingRemoteSync = true;
+            SYNC_COLLECTIONS.forEach(col => {
+                const obj = (snapshot && snapshot[col]) || {};
+                const arr = Object.values(obj);
+                localStorage.setItem(KEYS[col], JSON.stringify(arr));
+            });
+            if (snapshot && snapshot.settings) {
+                localStorage.setItem(KEYS.settings, JSON.stringify(snapshot.settings));
+            }
+            window.__applyingRemoteSync = false;
+        }
+
         // -- outbox flush: sends queued ops in order, stops at first failure so nothing is lost or reordered --
         async function flushSyncQueue() {
             if (!cloudAuth || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
@@ -1319,6 +1448,7 @@
                 }
             }
             lastSyncedAt = Date.now();
+            localStorage.setItem(LAST_SYNCED_KEY, String(lastSyncedAt));
             setSyncStatus('idle');
             updateSyncMeta();
         }
@@ -1408,10 +1538,12 @@
                 localStorage.setItem(KEYS.settings, JSON.stringify(remoteSettings));
                 window.__applyingRemoteSync = false;
                 refreshAll();
+                // Re-apply license UI — cloud settings may carry a different license tier.
+                if (typeof applyLicenseUI === 'function') applyLicenseUI();
             }
         }
 
-        // -- connect / disconnect flows --
+        // -- snapshot push/pull, used by signup and the automatic login-driven connect above --
         async function pushFullSnapshot() {
             for (const col of SYNC_COLLECTIONS) {
                 const arr = dbLoad(col);
@@ -1455,20 +1587,17 @@
             } catch (e) {
                 setSyncStatus('error', e.message);
                 showToast(e.message || 'Cloud sync failed', 'danger');
+                throw e;
             }
         }
 
-        function disconnectCloudSync() {
-            stopCloudListener();
-            clearCloudAuth();
-            saveSyncQueue([]);
-            renderCloudSyncUI();
-            showToast('Cloud sync disconnected (your local data is unaffected)');
-        }
-
-        // -- Cloud Backup: simple upload / download --
+        // -- Manual force-sync: connecting itself stays fully automatic (tied to login), but
+        // admins can still trigger an immediate push/pull instead of waiting for the queue/
+        // realtime listener. There is no separate sign-in form for this — if cloud genuinely
+        // isn't connected, the fix is to log back in (which reconnects automatically), not to
+        // re-enter credentials here.
         async function cloudUploadData() {
-            if (!cloudAuth) { showToast('Not connected to cloud. Log in again to reconnect.', 'danger'); return; }
+            if (!cloudAuth) { showToast('Not connected to cloud yet. Log out and log back in to reconnect.', 'danger'); return; }
             setSyncStatus('syncing');
             try {
                 await pushFullSnapshot();
@@ -1481,7 +1610,7 @@
         }
 
         async function cloudDownloadData() {
-            if (!cloudAuth) { showToast('Not connected to cloud. Log in again to reconnect.', 'danger'); return; }
+            if (!cloudAuth) { showToast('Not connected to cloud yet. Log out and log back in to reconnect.', 'danger'); return; }
             if (!confirm('Restore from cloud? This will replace ALL local data with the latest cloud backup.')) return;
             setSyncStatus('syncing');
             try {
@@ -1495,7 +1624,56 @@
             }
         }
 
+        // -- public username directory: lets a brand-new device resolve "username" -> "which
+        // business + how to sign in" WITHOUT knowing the company name. Written any time an
+        // admin or staff account is (re)created; readable by anyone signed out (see Database
+        // Rules), so the lookup itself never requires being logged in.
+        // Path: usernames/{lowercased username} -> { uid, email, role, salt?, hash? }
+        // (salt/hash present only for role:'client' — staff have no Firebase Auth user of their
+        // own, so their password is checked locally against the hash stored here.)
+        async function publishUsernameDirectoryEntry(idToken, username, entry) {
+            if (!idToken || !username) return;
+            const key = username.trim().toLowerCase();
+            if (!key) return;
+            try {
+                await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry)
+                });
+            } catch (e) {
+                console.warn('ZamAgro Cloud: failed to publish username directory entry', e);
+            }
+        }
+
+        async function removeUsernameDirectoryEntry(idToken, username) {
+            if (!idToken || !username) return;
+            const key = username.trim().toLowerCase();
+            if (!key) return;
+            try {
+                await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json?auth=${idToken}`, { method: 'DELETE' });
+            } catch (e) {
+                console.warn('ZamAgro Cloud: failed to remove username directory entry', e);
+            }
+        }
+
+        // Looks up a bare username with NO auth required (public read) to find which business
+        // it belongs to and how to authenticate. Returns null if not found or cloud not configured.
+        async function lookupUsernameDirectory(username) {
+            if (!isCloudConfigured()) return null;
+            const key = (username || '').trim().toLowerCase();
+            if (!key) return null;
+            try {
+                const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/usernames/${encodeURIComponent(key)}.json`);
+                if (!resp.ok) return null;
+                return await resp.json();
+            } catch (e) {
+                return null;
+            }
+        }
+
         function renderCloudSyncUI() {
+            updateSyncBadge();
             updateSyncMeta();
             setSyncStatus('idle');
         }
@@ -1511,21 +1689,34 @@
             if (!text || !box) return;
             const connected = !!cloudAuth;
             const s = {
-                idle:    { color: connected ? '#2e7d32' : '#e65100', bg: connected ? '#e8f5e9' : '#fff8e1',
-                           label: connected ? 'Connected - ' + (cloudAuth.email || 'your account') : 'Not connected - sign up to enable cloud backup.' },
-                syncing: { color: '#1565C0', bg: '#e3f2fd', label: 'Working...' },
-                error:   { color: '#c62828', bg: '#fdecea', label: 'Error: ' + (message || 'Cloud unavailable') }
+                idle:       { color: connected ? '#2e7d32' : '#e65100', bg: connected ? '#e8f5e9' : '#fff8e1',
+                              label: connected ? '✔ Connected — ' + (cloudAuth.email || 'your account') : '⚠ Not connected yet — will connect automatically once you\'re online.' },
+                connecting: { color: '#1565C0', bg: '#e3f2fd', label: '⏳ Connecting to cloud...' },
+                syncing:    { color: '#1565C0', bg: '#e3f2fd', label: '🔄 Syncing...' },
+                error:      { color: '#c62828', bg: '#fdecea', label: '✘ Error: ' + (message || 'Cloud unavailable') }
             }[state] || { color: '#2e7d32', bg: '#e8f5e9', label: '' };
             box.style.background = s.bg;
             text.style.color = s.color;
             text.textContent = s.label;
         }
 
+        function updateSyncBadge() {
+            const q = loadSyncQueue();
+            const badge = document.getElementById('cloud-pending-badge');
+            if (!badge) return;
+            if (q.length > 0) {
+                badge.textContent = q.length + ' pending';
+                badge.style.display = '';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
         // -- boot: resume an existing cloud session in the background, regardless of login state --
         document.addEventListener('DOMContentLoaded', () => {
             maybeLoadAppCheckScript();
             cloudAuth = loadCloudAuth();
-            if (cloudAuth) startCloudListener();
+            if (cloudAuth) { startCloudListener(); flushSyncQueue(); } // flush any ops queued offline last session right away, don't wait for the interval
             window.addEventListener('online', () => { flushSyncQueue(); if (cloudAuth && !sseConn) startCloudListener(); });
             setInterval(() => { if (cloudAuth) flushSyncQueue(); }, 20000);
         });
@@ -1552,20 +1743,121 @@
             document.getElementById('landing-page').classList.remove('hidden');
         }
 
-        function _showLoginPage() {
+        function _showLoginPage(tab) {
             ['landing-page','setup-page','app-layout'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('login-page').classList.remove('hidden');
             document.getElementById('login-error').style.display = 'none';
             const accounts = getAccounts();
             const roleSelect = document.getElementById('loginRole');
             const clientOption = roleSelect ? roleSelect.querySelector('option[value="client"]') : null;
-            if (clientOption) clientOption.style.display = (accounts && accounts.client) ? '' : 'none';
-            if (roleSelect && !(accounts && accounts.client)) roleSelect.value = 'admin';
+            // Show "Client / Staff" whenever a local staff account exists OR cloud sign-in is
+            // available (a staff member on a brand-new device has no local account yet, but can
+            // still sign in via the cloud directory).
+            const showClientOption = (accounts && accounts.client) || isCloudConfigured();
+            if (clientOption) clientOption.style.display = showClientOption ? '' : 'none';
+            if (roleSelect && !showClientOption) roleSelect.value = 'admin';
             checkLockoutDisplay();
+            switchAuthTab(tab || 'signin');
+        }
+
+        function switchAuthTab(tab) {
+            const signinPanel  = document.getElementById('auth-signin-panel');
+            const signupPanel  = document.getElementById('auth-signup-panel');
+            const tabSignin    = document.getElementById('tab-signin');
+            const tabSignup    = document.getElementById('tab-signup');
+            if (!signinPanel) return;
+            const isSignin = tab === 'signin';
+            signinPanel.style.display  = isSignin ? '' : 'none';
+            signupPanel.style.display  = isSignin ? 'none' : '';
+            tabSignin.style.background = isSignin ? 'var(--primary)' : 'var(--surface-2)';
+            tabSignin.style.color      = isSignin ? 'white' : 'var(--text-muted)';
+            tabSignup.style.background = isSignin ? 'var(--surface-2)' : 'var(--primary)';
+            tabSignup.style.color      = isSignin ? 'var(--text-muted)' : 'white';
+            // Show warning if account already exists when switching to signup
+            if (!isSignin) {
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const errEl    = document.getElementById('signup-error');
+            const statusEl = document.getElementById('signup-cloud-status');
+            errEl.style.display = 'none';
+            statusEl.style.display = 'none';
+
+            const companyName = document.getElementById('signup-company-name').value.trim();
+            const adminUser   = document.getElementById('signup-admin-user').value.trim();
+            const adminPw     = document.getElementById('signup-admin-pw').value;
+            const adminPw2    = document.getElementById('signup-admin-pw2').value;
+
+            if (!companyName) { errEl.textContent = 'Please enter your business name.'; errEl.style.display = 'block'; return; }
+            if (adminPw !== adminPw2) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+            if (adminPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+
+            if (!isCloudConfigured()) {
+                errEl.textContent = 'Cloud sync is not configured. Sign up is unavailable until this is fixed.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // If overwriting existing account, confirm
+            const btn = document.getElementById('signup-btn');
+            btn.disabled = true; btn.textContent = 'Connecting to cloud...';
+            statusEl.style.background = '#e3f2fd'; statusEl.style.color = '#1565C0';
+            statusEl.textContent = 'Connecting to cloud...'; statusEl.style.display = 'block';
+
+            // Cloud account creation MUST succeed before any local account is written. No
+            // offline fallback, no "connect later" — a signup that can't reach the cloud is
+            // not allowed to leave behind a local-only account, since that account would never
+            // be retrievable on any other device and would have nothing to sync to.
+            const cloudEmail = deriveCloudEmail(companyName, adminUser);
+            try {
+                await connectCloudSync(cloudEmail, adminPw, 'create');
+            } catch(err) {
+                statusEl.style.display = 'none';
+                btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud →';
+                if (err.code === 'EMAIL_EXISTS') {
+                    errEl.textContent = 'That company name + admin username is already registered. Please use a different combination.';
+                } else if (err.code) {
+                    errEl.textContent = 'Could not create cloud account: ' + (err.message || err.code);
+                } else {
+                    errEl.textContent = 'Could not reach the cloud. Check your internet connection and try again — sign up requires a connection.';
+                }
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // Cloud account exists now — safe to create the local account and proceed.
+            const adminSalt = genSalt();
+            const accounts = {
+                admin:  { username: adminUser, salt: adminSalt, hash: await pbkdf2Hash(adminPw, adminSalt) },
+                client: null
+            };
+            localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
+
+            const existingSettings = JSON.parse(localStorage.getItem('zamagro_settings') || '{}');
+            existingSettings.companyName = companyName;
+            localStorage.setItem('zamagro_settings', JSON.stringify(existingSettings));
+            // pushFullSnapshot inside connectCloudSync already ran against empty/seed data since
+            // settings.companyName wasn't saved yet at that point — push once more now that it is.
+            db.settings = existingSettings;
+
+            await publishUsernameDirectoryEntry(cloudAuth?.idToken, adminUser, {
+                uid: cloudAuth.uid, email: cloudEmail, role: 'admin', username: adminUser
+            });
+            statusEl.style.background = '#e8f5e9'; statusEl.style.color = '#2e7d32';
+            statusEl.textContent = 'Cloud connected! Redirecting...';
+
+            btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud →';
+            setTimeout(() => {
+                document.getElementById('signupForm').reset();
+                showToast('Account created! Please sign in.');
+                _showLoginPage('signin');
+            }, 1200);
         }
 
         function showLogin() {
-            if (isFirstRun()) { showSetup(); } else { _showLoginPage(); }
+            _showLoginPage('signin');
         }
 
         // ── LICENSE SYSTEM ────────────────────────────────────────────────
@@ -1597,20 +1889,43 @@
         };
 
         function getLicense() {
+            // Primary source: cloud-synced db.settings (survives device changes and clears).
+            try {
+                const s = dbLoad('settings');
+                if (s && s.licenseData && s.licenseData.tier) return s.licenseData;
+            } catch(e) {}
+            // Legacy fallback: plain localStorage key (migrates old installs on first login).
             try {
                 const raw = localStorage.getItem(LICENSE_KEY);
-                if (raw) return JSON.parse(raw);
+                if (raw) {
+                    const lic = JSON.parse(raw);
+                    // Migrate into cloud-synced settings so it survives going forward.
+                    _persistLicenseToCloud(lic);
+                    return lic;
+                }
             } catch(e) {}
-            // Default: start trial from first run
+            // Default: 30-day trial starting now.
             const trialExpiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
             const lic = { tier: 'trial', expiry: trialExpiry, activatedAt: Date.now() };
-            localStorage.setItem(LICENSE_KEY, JSON.stringify(lic));
+            _persistLicenseToCloud(lic);
             return lic;
+        }
+
+        // Internal: write license into db.settings (→ cloud) AND the legacy key.
+        function _persistLicenseToCloud(lic) {
+            try {
+                const s = dbLoad('settings');
+                s.licenseData = lic;
+                // Use writeSettings directly to avoid the getter/setter loop.
+                localStorage.setItem(KEYS.settings, JSON.stringify(s));
+                if (!window.__applyingRemoteSync) queueSettingsSync(s);
+            } catch(e) {}
+            try { localStorage.setItem(LICENSE_KEY, JSON.stringify(lic)); } catch(e) {}
         }
 
         function saveLicenseData(tier, expiryTimestamp) {
             const lic = { tier, expiry: expiryTimestamp, activatedAt: Date.now() };
-            localStorage.setItem(LICENSE_KEY, JSON.stringify(lic));
+            _persistLicenseToCloud(lic);
         }
 
         function isLicenseActive() {
@@ -1798,9 +2113,37 @@
             if (adminPw !== adminPw2) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
             if (adminPw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
 
-            const btn = document.getElementById('setup-btn');
-            btn.disabled = true; btn.textContent = 'Creating account...';
+            if (!isCloudConfigured()) {
+                errEl.textContent = 'Cloud sync is not configured. Sign up is unavailable until this is fixed.';
+                errEl.style.display = 'block';
+                return;
+            }
 
+            const btn = document.getElementById('setup-btn');
+            btn.disabled = true; btn.textContent = 'Connecting to cloud...';
+            statusEl.style.background = '#e3f2fd'; statusEl.style.color = '#1565C0';
+            statusEl.textContent = 'Connecting to cloud...'; statusEl.style.display = 'block';
+
+            // Cloud account creation MUST succeed before any local account is written — see
+            // handleSignup() for the same rule and the reasoning behind it.
+            const cloudEmail = deriveCloudEmail(companyName, adminUser);
+            try {
+                await connectCloudSync(cloudEmail, adminPw, 'create');
+            } catch(e) {
+                statusEl.style.display = 'none';
+                btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud';
+                if (e.code === 'EMAIL_EXISTS') {
+                    errEl.textContent = 'That company name + admin username is already registered. Please use a different company name or admin username.';
+                } else if (e.code) {
+                    errEl.textContent = 'Could not create cloud account: ' + (e.message || e.code);
+                } else {
+                    errEl.textContent = 'Could not reach the cloud. Check your internet connection and try again — sign up requires a connection.';
+                }
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // Cloud account exists now — safe to create the local account and proceed.
             const adminSalt = genSalt();
             const accounts = {
                 admin:  { username: adminUser, salt: adminSalt, hash: await pbkdf2Hash(adminPw, adminSalt) },
@@ -1808,38 +2151,19 @@
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
 
-            // Save company name
             const existingSettings = JSON.parse(localStorage.getItem('zamagro_settings') || '{}');
             existingSettings.companyName = companyName;
             localStorage.setItem('zamagro_settings', JSON.stringify(existingSettings));
+            db.settings = existingSettings; // push company name to cloud now that a session exists
 
-            // Auto-connect cloud using derived email (companyname.adminuser@zamagro.app)
-            const cloudEmail = deriveCloudEmail(companyName, adminUser);
-            statusEl.style.background = '#e3f2fd'; statusEl.style.color = '#1565C0';
-            statusEl.textContent = 'Connecting to cloud...'; statusEl.style.display = 'block';
-
-            try {
-                await connectCloudSync(cloudEmail, adminPw, 'create');
-                statusEl.style.background = '#e8f5e9'; statusEl.style.color = '#2e7d32';
-                statusEl.textContent = 'Cloud connected! Redirecting...';
-            } catch(e) {
-                if (e.code === 'EMAIL_EXISTS') {
-                    // Duplicate — block signup, clear local data
-                    localStorage.removeItem(AUTH_KEY);
-                    localStorage.removeItem('zamagro_settings');
-                    statusEl.style.display = 'none';
-                    errEl.textContent = 'That company name + admin username is already registered. Please use a different company name or admin username.';
-                    errEl.style.display = 'block';
-                    btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud';
-                    return;
-                }
-                // No internet - non-blocking, proceed offline
-                statusEl.style.background = '#fff8e1'; statusEl.style.color = '#e65100';
-                statusEl.textContent = 'No internet - cloud skipped. Connect later in Settings.';
-            }
+            await publishUsernameDirectoryEntry(cloudAuth?.idToken, adminUser, {
+                uid: cloudAuth.uid, email: cloudEmail, role: 'admin', username: adminUser
+            });
+            statusEl.style.background = '#e8f5e9'; statusEl.style.color = '#2e7d32';
+            statusEl.textContent = 'Cloud connected! Redirecting...';
 
             btn.disabled = false; btn.textContent = 'Create Account & Connect Cloud';
-            setTimeout(() => { showToast('Account created! Please log in.'); _showLoginPage(); }, 1200);
+            setTimeout(() => { showToast('Account created! Please log in.'); _showLoginPage('signin'); }, 1200);
         });
 
         // --- STAFF ACCOUNT MANAGEMENT ---
@@ -1872,10 +2196,26 @@
             if (accounts && accounts.admin && accounts.admin.username.toLowerCase() === newUser.toLowerCase()) {
                 errEl.textContent = 'Staff username must differ from admin username.'; errEl.style.display = 'block'; return;
             }
+            // If this staff username previously pointed to a different business in the cloud
+            // directory (e.g. reused after being removed elsewhere), clean that up first so
+            // sign-in resolves to THIS business.
+            const oldClient = accounts && accounts.client;
+            if (oldClient && oldClient.username.toLowerCase() !== newUser.toLowerCase() && cloudAuth) {
+                const idTok = await getFreshIdToken();
+                await removeUsernameDirectoryEntry(idTok, oldClient.username);
+            }
             const salt = genSalt();
             const hash = await pbkdf2Hash(newPw, salt);
             accounts.client = { username: newUser, salt, hash };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
+            // Publish to the cloud username directory so this staff member can sign in
+            // cloud-first on a brand-new device. No-ops silently if not connected to cloud yet.
+            if (cloudAuth) {
+                const idTok = await getFreshIdToken();
+                await publishUsernameDirectoryEntry(idTok, newUser, {
+                    uid: cloudAuth.uid, email: cloudAuth.email, role: 'client', salt, hash
+                });
+            }
             document.getElementById('staff-new-user').value = '';
             document.getElementById('staff-new-pw').value = '';
             document.getElementById('staff-new-pw2').value = '';
@@ -1883,10 +2223,15 @@
             showToast('Staff account saved.');
         }
 
-        function removeStaffAccount() {
+        async function removeStaffAccount() {
             if (!confirm('Remove the staff account? They will no longer be able to log in.')) return;
             const accounts = getAccounts();
+            const removedUsername = accounts && accounts.client && accounts.client.username;
             if (accounts) { accounts.client = null; localStorage.setItem(AUTH_KEY, JSON.stringify(accounts)); }
+            if (removedUsername && cloudAuth) {
+                const idTok = await getFreshIdToken();
+                await removeUsernameDirectoryEntry(idTok, removedUsername);
+            }
             renderStaffAccountUI();
             showToast('Staff account removed.');
         }
@@ -1912,6 +2257,8 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const errEl = document.getElementById('login-error');
+            errEl.style.display = 'none';
+            errEl.textContent = '';
             const lk = getLockout();
             if (lk.until > Date.now()) { checkLockoutDisplay(); return; }
 
@@ -1923,11 +2270,108 @@
             const btn = document.getElementById('login-btn');
             btn.disabled = true; btn.textContent = 'Checking…';
 
+            if (!isCloudConfigured()) {
+                btn.disabled = false; btn.textContent = 'Login';
+                errEl.textContent = 'Cloud sync is not configured. Login is unavailable until this is fixed.';
+                errEl.style.display = 'block';
+                return;
+            }
+
             const acct = accounts ? accounts[role] : null;
             let valid = false;
+            let displayName = null;
+
             if (acct && acct.username.toLowerCase() === u.toLowerCase()) {
-                const hash = await pbkdf2Hash(p, acct.salt);
-                valid = hash === acct.hash;
+                // A local account exists for this role+username on this device. Local hash check
+                // first — a quick, free way to reject an obviously wrong password without
+                // spending a network round-trip. It is NOT sufficient on its own: login is only
+                // granted once the cloud check below also succeeds, so a login can never go
+                // through while offline or while the cloud account can't be verified.
+                const localHash = await pbkdf2Hash(p, acct.salt);
+                if (localHash !== acct.hash) {
+                    valid = false;
+                } else {
+                    btn.textContent = 'Verifying with cloud…';
+                    try {
+                        if (role === 'admin') {
+                            const companyName = (db.settings && db.settings.companyName) || '';
+                            const email = deriveCloudEmail(companyName, u);
+                            const data = await cloudSignIn(email, p);
+                            saveCloudAuth({
+                                uid: data.localId,
+                                email,
+                                idToken: data.idToken,
+                                refreshToken: data.refreshToken,
+                                idTokenExpiry: Date.now() + (parseInt(data.expiresIn, 10) * 1000)
+                            });
+                            await pullFullSnapshot(); // safe merge, not a destructive overwrite — this device may have its own unsynced local edits
+                            startCloudListener();
+                            valid = true;
+                            displayName = acct.username;
+                        } else {
+                            // Staff have no Firebase Auth user of their own — verify against the
+                            // live public directory entry instead (requires reaching the cloud
+                            // either way, so this already can't succeed offline). Note
+                            // lookupUsernameDirectory returns null both when the entry genuinely
+                            // doesn't exist AND when the network request itself fails, so check
+                            // connectivity explicitly to give an accurate error either way.
+                            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                                throw new TypeError('offline');
+                            }
+                            const entry = await lookupUsernameDirectory(u);
+                            if (!entry || entry.role !== 'client' || !entry.salt || !entry.hash) {
+                                valid = false;
+                            } else {
+                                const dirHash = await pbkdf2Hash(p, entry.salt);
+                                if (dirHash !== entry.hash) {
+                                    valid = false;
+                                } else {
+                                    const snapshot = await fetchPublicBusinessSnapshot(entry.uid);
+                                    window.__applyingRemoteSync = true;
+                                    SYNC_COLLECTIONS.forEach(col => {
+                                        const remote = (snapshot && snapshot[col]) || {};
+                                        mergeRemoteCollection(col, remote);
+                                    });
+                                    if (snapshot && snapshot.settings) mergeRemoteSettings(snapshot.settings);
+                                    window.__applyingRemoteSync = false;
+                                    valid = true;
+                                    displayName = acct.username;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // Wrong cloud password, account removed, or offline/unreachable — any of
+                        // these blocks login even though the local hash matched. A stale local
+                        // hash (e.g. password changed elsewhere) must never grant access on its own.
+                        valid = false;
+                        const isNetworkErr = e instanceof TypeError || (e && (e.code === 'NETWORK_ERROR' || e.code === 'NETWORK_REQUEST_FAILED' || String(e.message).toLowerCase().includes('network') || String(e.message).toLowerCase().includes('fetch')));
+                        if (isNetworkErr) {
+                            errEl.textContent = 'Could not reach the cloud. Check your connection and try again — login requires a connection.';
+                            errEl.style.display = 'block';
+                        } else if (e && (e.code === 'INVALID_PASSWORD' || e.code === 'EMAIL_NOT_FOUND')) {
+                            errEl.textContent = 'Incorrect username or password.';
+                            errEl.style.display = 'block';
+                        }
+                    }
+                }
+            } else {
+                // No local account matches — this is likely a brand-new device. Try resolving
+                // the username via the cloud directory and pulling that business's data down.
+                btn.textContent = 'Looking up account…';
+                try {
+                    const result = await cloudFirstLogin(role, u, p);
+                    valid = result.valid;
+                    displayName = result.displayName;
+                    if (result.notFound) {
+                        errEl.textContent = 'No account found with that username. If this is a new device, make sure you are online.';
+                        errEl.style.display = 'block';
+                    } else if (result.networkError) {
+                        errEl.textContent = 'Could not reach the cloud. Check your connection and try again.';
+                        errEl.style.display = 'block';
+                    }
+                } catch (e) {
+                    console.error('ZamAgro: cloud-first login failed', e);
+                }
             }
 
             btn.disabled = false; btn.textContent = 'Login';
@@ -1937,10 +2381,11 @@
                 currentUser = role;
                 document.getElementById('login-page').classList.add('hidden');
                 document.getElementById('app-layout').classList.remove('hidden');
-                document.getElementById('user-display-name').textContent = acct.username;
+                document.getElementById('user-display-name').textContent = displayName;
                 // Gate admin-only elements via a class on the layout root
                 document.getElementById('app-layout').dataset.role = role;
                 applyLicenseUI();
+                renderCloudSyncUI();
                 refreshAll();
                 nav('dashboard');
             } else {
@@ -1950,11 +2395,101 @@
                     checkLockoutDisplay();
                 } else {
                     saveLockout({ attempts, until: 0 });
-                    errEl.textContent = `Incorrect username or password. ${MAX_ATTEMPTS - attempts} attempt${MAX_ATTEMPTS-attempts===1?'':'s'} remaining.`;
+                    if (!errEl.textContent || errEl.style.display === 'none') {
+                        errEl.textContent = `Incorrect username or password. ${MAX_ATTEMPTS - attempts} attempt${MAX_ATTEMPTS-attempts===1?'':'s'} remaining.`;
+                    }
                     errEl.style.display = 'block';
                 }
             }
         });
+
+        // Cloud-first sign-in for a username with no matching local account on this device.
+        // Resolves the username via the public directory, authenticates against the cloud,
+        // pulls the business's data down, and rebuilds the local account(s) from it.
+        // Returns { valid, displayName, notFound?, networkError? }.
+        async function cloudFirstLogin(role, username, password) {
+            if (!isCloudConfigured()) return { valid: false, notFound: true };
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                return { valid: false, networkError: true };
+            }
+
+            // lookupUsernameDirectory swallows network errors internally and returns null either
+            // way, so it can't distinguish "no such entry" from "couldn't reach the cloud" once
+            // we're past the explicit offline check above (e.g. DNS failure, server unreachable
+            // despite navigator.onLine reporting true) — best-effort fetch first, the explicit
+            // online check above is what mainly protects the "no login without connection" rule.
+            const entry = await lookupUsernameDirectory(username);
+            if (!entry || entry.role !== role) {
+                return { valid: false, notFound: true };
+            }
+
+            if (role === 'admin') {
+                let authData;
+                try {
+                    authData = await cloudSignIn(entry.email, password);
+                } catch (e) {
+                    return { valid: false }; // wrong password — fall through to normal lockout/error message
+                }
+                saveCloudAuth({
+                    uid: authData.localId,
+                    email: entry.email,
+                    idToken: authData.idToken,
+                    refreshToken: authData.refreshToken,
+                    idTokenExpiry: Date.now() + (parseInt(authData.expiresIn, 10) * 1000)
+                });
+                let snapshot;
+                try {
+                    snapshot = await fetchPublicBusinessSnapshot(cloudAuth.uid);
+                } catch (e) {
+                    return { valid: false, networkError: true };
+                }
+                rebuildLocalDataFromSnapshot(snapshot);
+                // Recreate the local admin (and client, if any) accounts so future logins on
+                // this device can skip the directory lookup next time (still requires a live
+                // cloud check to actually log in — see loginForm handler — but saves a lookup).
+                const adminSalt = genSalt();
+                const newAccounts = {
+                    admin: { username: entry.username || username, salt: adminSalt, hash: await pbkdf2Hash(password, adminSalt) },
+                    client: null
+                };
+                // If the cloud directory also has a client account for this business, restore it
+                // too (so the staff member doesn't have to also cloud-sign-in separately later).
+                // We can't enumerate the directory by uid client-side, so this is best-effort and
+                // only fills in if the admin previously signed in on this same device before.
+                const existingLocal = getAccounts();
+                if (existingLocal && existingLocal.client) newAccounts.client = existingLocal.client;
+                localStorage.setItem(AUTH_KEY, JSON.stringify(newAccounts));
+                startCloudListener();
+                renderCloudSyncUI && renderCloudSyncUI();
+                return { valid: true, displayName: newAccounts.admin.username };
+            }
+
+            // role === 'client': staff have no Firebase Auth user of their own. Verify the
+            // password locally against the hash stored in the public directory, then read the
+            // business's data via the public (no-auth) read path.
+            if (!entry.salt || !entry.hash) return { valid: false };
+            const hash = await pbkdf2Hash(password, entry.salt);
+            if (hash !== entry.hash) return { valid: false };
+
+            let snapshot;
+            try {
+                snapshot = await fetchPublicBusinessSnapshot(entry.uid);
+            } catch (e) {
+                return { valid: false, networkError: true };
+            }
+            rebuildLocalDataFromSnapshot(snapshot);
+            // Recreate local accounts: this staff member as client, admin left absent (staff
+            // never has the admin's password). The local hash is still used as a quick
+            // pre-check on the next login, but the loginForm handler always re-verifies against
+            // the live directory entry afterward — login still requires reaching the cloud.
+            const existingLocal = getAccounts();
+            const newAccounts = {
+                admin: (existingLocal && existingLocal.admin) || null,
+                client: { username, salt: entry.salt, hash: entry.hash }
+            };
+            localStorage.setItem(AUTH_KEY, JSON.stringify(newAccounts));
+            return { valid: true, displayName: username };
+        }
 
         function logout() {
             currentUser = null;
@@ -2066,6 +2601,7 @@
             updateBrand();
             renderCloudSyncUI();
             renderStaffAccountUI();
+            renderCatTags();
             document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-ZM');
         }
 
@@ -2150,7 +2686,24 @@
                     row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cat)}</td><td>${esc(item.desc)}</td><td>${formatZMW(item.amt)}</td></tr>`;
                 } else if (type === 'fisp') {
                     let badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
-                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.name)}</td><td>${esc(item.voucher)}</td><td>${formatZMW(item.val)}</td><td><span class="badge ${badge}">${esc(item.status)}</span></td><td><button class="btn btn-sm btn-primary" onclick="payFISP('${esc(item.id)}')">Mark Paid</button></td></tr>`;
+                    const prodName = item.prodId ? (db.inventory.find(i => i.id === item.prodId)?.name || item.prodName || '—') : (item.prodName || '—');
+                    const markPaidBtn = item.status !== 'Paid' ? `<button class="btn btn-sm btn-primary" onclick="payFISP('${esc(item.id)}')">Mark Paid</button>` : '';
+                    row = `<tr>
+                        <td>${esc(item.id)}</td>
+                        <td>${esc(item.date)}</td>
+                        <td><strong>${esc(item.farmerName || item.name || '—')}</strong></td>
+                        <td style="font-size:.82rem;color:var(--text-muted);">${esc(item.nrc || '—')}</td>
+                        <td style="font-size:.82rem;">${esc(item.camp || item.name || '—')}</td>
+                        <td style="font-family:monospace;font-size:.85rem;">${esc(item.voucher)}</td>
+                        <td style="font-size:.85rem;">${esc(prodName)}</td>
+                        <td style="font-size:.85rem;">${item.qty ? esc(String(item.qty)) : '—'}</td>
+                        <td>${formatZMW(item.val)}</td>
+                        <td><span class="badge ${badge}">${esc(item.status)}</span></td>
+                        <td style="white-space:nowrap;display:flex;gap:4px;">
+                            <button class="btn btn-sm" style="background:#eee;" onclick="viewFISPDetail('${esc(item.id)}')">👁 View</button>
+                            ${markPaidBtn}
+                        </td>
+                    </tr>`;
                 } else if (type === 'credit') {
                     if (creditFilter === 'outstanding' && item.status !== 'Outstanding') return;
                     if (creditFilter === 'paid' && item.status !== 'Paid') return;
@@ -2332,6 +2885,63 @@
             showToast(`Tax regime set to: ${labels[val]}`);
         }
 
+        // ── STOCK CATEGORIES ─────────────────────────────────────────────
+        function getStockCategories() {
+            const cats = db.settings.stockCategories;
+            return Array.isArray(cats) && cats.length ? cats : ['Fertilizer','Seed','Chemical','Tool'];
+        }
+
+        function populateCatSelect(selectId, currentVal) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const cats = getStockCategories();
+            sel.innerHTML = '<option value="">— Select Category —</option>';
+            cats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c;
+                if (c === currentVal) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function renderCatTags() {
+            const container = document.getElementById('cat-tags-container');
+            if (!container) return;
+            const cats = getStockCategories();
+            container.innerHTML = cats.map(c => `
+                <span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.83rem;font-weight:600;">
+                    ${esc(c)}
+                    <button onclick="removeStockCategory('${esc(c)}')" title="Remove" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:.9rem;line-height:1;padding:0 2px;">&times;</button>
+                </span>`).join('');
+        }
+
+        function addStockCategory() {
+            const input = document.getElementById('new-cat-input');
+            const val = input.value.trim();
+            if (!val) return;
+            const s = db.settings;
+            const cats = getStockCategories();
+            if (cats.map(c => c.toLowerCase()).includes(val.toLowerCase())) {
+                showToast('Category already exists', 'danger'); return;
+            }
+            cats.push(val);
+            s.stockCategories = cats;
+            db.settings = s;
+            input.value = '';
+            renderCatTags();
+            showToast(`Category "${val}" added`);
+        }
+
+        function removeStockCategory(cat) {
+            const inUse = db.inventory.some(i => i.cat === cat);
+            if (inUse && !confirm(`"${cat}" is used by existing products. Remove it anyway?`)) return;
+            const s = db.settings;
+            s.stockCategories = getStockCategories().filter(c => c !== cat);
+            db.settings = s;
+            renderCatTags();
+            showToast(`Category "${cat}" removed`);
+        }
+
         const EDIT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
         function renderSettingsTable() {
@@ -2380,6 +2990,7 @@
 
             document.getElementById('edit-id').value = p.id;
             document.getElementById('edit-name').value = p.name;
+            populateCatSelect('edit-cat', p.cat);
             document.getElementById('edit-cat').value = p.cat;
             document.getElementById('edit-cost').value = p.cost;
             document.getElementById('edit-price').value = p.price || '';
@@ -2728,6 +3339,10 @@
         // --- JSON BACKUP & RESTORE ---
 
         function backupJSON() {
+            if (!cloudAuth) {
+                showToast('Log in first — cloud connection is required to download a backup.', 'danger');
+                return;
+            }
             const snapshot = {};
             Object.keys(KEYS).forEach(k => {
                 snapshot[k] = db[k];
@@ -2750,6 +3365,11 @@
         function restoreJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
+            if (!cloudAuth) {
+                showToast('Cloud sync is required before restoring a backup. Log in first.', 'danger');
+                event.target.value = '';
+                return;
+            }
             if (!file.name.endsWith('.json')) {
                 showToast('Please select a valid .json backup file', 'danger');
                 event.target.value = '';
@@ -2767,19 +3387,30 @@
                         return;
                     }
                     if (!confirm(`⚠️ This will REPLACE all current data with the backup from ${data._meta?.exportedAt?.slice(0,10) || 'unknown date'}.\n\nAre you sure?`)) return;
+                    // Route through the db setters (not a raw localStorage write) so that, if
+                    // cloud sync is connected, every restored record gets diffed and queued for
+                    // upload — otherwise a local backup restore would silently never reach the
+                    // cloud or other devices until someone separately clicked "Upload to Cloud".
                     knownKeys.forEach(k => {
                         if (k in data) {
-                            localStorage.setItem(KEYS[k], JSON.stringify(data[k]));
+                            if (k === 'settings') db.settings = data[k];
+                            else db[k] = data[k];
                         }
                     });
                     refreshAll();
-                    showToast('Data restored from backup successfully');
+                    showToast('Data restored — syncing to cloud...');
+                    flushSyncQueue();
                 } catch(err) {
                     showToast('Failed to parse backup file: ' + err.message, 'danger');
                 }
                 event.target.value = ''; // reset so same file can be selected again
             };
             reader.readAsText(file);
+        }
+
+        function openAddStockModal() {
+            populateCatSelect('inv-cat', '');
+            openModal('modal-inv');
         }
 
         function prepareSaleModal() {
@@ -2911,16 +3542,64 @@
             showToast("Expense Added to P&L");
         }
 
+        function prepareFISPModal() {
+            // Populate product dropdown
+            const sel = document.getElementById('fisp-prod');
+            sel.innerHTML = '<option value="">— Select product —</option>';
+            db.inventory.forEach(i => {
+                sel.innerHTML += `<option value="${esc(i.id)}">${esc(i.name)}</option>`;
+            });
+            openModal('modal-fisp');
+        }
+
+        function viewFISPDetail(id) {
+            const item = db.fisp.find(f => f.id === id);
+            if (!item) return;
+            const prodName = item.prodId ? (db.inventory.find(i => i.id === item.prodId)?.name || item.prodName || '—') : (item.prodName || '—');
+            const badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
+            const markPaidBtn = item.status !== 'Paid'
+                ? `<button class="btn btn-primary" style="width:100%;margin-top:1rem;" onclick="payFISP('${esc(item.id)}');closeModal('modal-fisp-detail');refreshAll();">✔ Mark as Paid</button>`
+                : '';
+            document.getElementById('fisp-detail-body').innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem 1.5rem;font-size:.88rem;">
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Claim ID</span><div style="font-family:monospace;font-weight:700;">${esc(item.id)}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Date</span><div>${esc(item.date)}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Farmer Name</span><div style="font-weight:700;">${esc(item.farmerName || item.name || '—')}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">NRC / ID</span><div>${esc(item.nrc || '—')}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Phone</span><div>${esc(item.phone || '—')}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Camp / Area</span><div>${esc(item.camp || '—')}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Voucher No.</span><div style="font-family:monospace;">${esc(item.voucher)}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Claim Value</span><div style="font-weight:700;color:var(--primary);">${formatZMW(item.val)}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Product Redeemed</span><div>${esc(prodName)}</div></div>
+                    <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Qty Issued</span><div>${item.qty ? esc(String(item.qty)) : '—'}</div></div>
+                    <div style="grid-column:1/-1;"><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Notes</span><div>${esc(item.notes || '—')}</div></div>
+                    <div style="grid-column:1/-1;"><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Status</span><div><span class="badge ${badge}" style="font-size:.85rem;">${esc(item.status)}</span></div></div>
+                </div>
+                ${markPaidBtn}
+            `;
+            openModal('modal-fisp-detail');
+        }
+
         function handleAddFISP(e) {
             e.preventDefault();
             const fisp = db.fisp;
+            const prodId  = document.getElementById('fisp-prod').value;
+            const prodEl  = document.getElementById('fisp-prod');
+            const prodName = prodId && prodEl.selectedOptions[0] ? prodEl.selectedOptions[0].text : '';
             fisp.push({
-                id: uid('FISP'),
-                date: new Date().toLocaleDateString('en-GB'),
-                name: document.getElementById('fisp-name').value,
-                voucher: document.getElementById('fisp-voucher').value,
-                val: parseFloat(document.getElementById('fisp-val').value),
-                status: "Pending"
+                id:         uid('FISP'),
+                date:       new Date().toLocaleDateString('en-GB'),
+                farmerName: document.getElementById('fisp-farmer-name').value.trim(),
+                nrc:        document.getElementById('fisp-nrc').value.trim(),
+                phone:      document.getElementById('fisp-phone').value.trim(),
+                camp:       document.getElementById('fisp-camp').value.trim(),
+                voucher:    document.getElementById('fisp-voucher').value.trim(),
+                val:        parseFloat(document.getElementById('fisp-val').value),
+                prodId:     prodId,
+                prodName:   prodName,
+                qty:        document.getElementById('fisp-qty').value ? parseInt(document.getElementById('fisp-qty').value) : null,
+                notes:      document.getElementById('fisp-notes').value.trim(),
+                status:     "Pending"
             });
             db.fisp = fisp;
             closeModal('modal-fisp');
