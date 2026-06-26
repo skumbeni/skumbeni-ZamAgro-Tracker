@@ -132,7 +132,7 @@
 
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; font-size: 0.83rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-        .form-group input, .form-group select {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 10px 13px;
             border: 1.5px solid var(--border);
@@ -144,7 +144,7 @@
             transition: border-color 0.15s, box-shadow 0.15s;
             outline: none;
         }
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(30,107,53,0.12);
         }
@@ -408,6 +408,7 @@
                             <li class="unavailable">✘ Stock Adjustment Log</li>
                         </ul>
                         <div class="plan-note">Best for solo operators &amp; small kiosks</div>
+                        <button class="btn btn-sm btn-secondary" style="width:100%;margin-top:.9rem;" onclick="openSubRequest('starter')">Request Plan →</button>
                     </div>
                     <!-- Standard -->
                     <div class="pricing-card" style="border-top:4px solid #E8A020;">
@@ -425,6 +426,7 @@
                             <li class="unavailable">✘ Multi-user Access</li>
                         </ul>
                         <div class="plan-note">Ideal for established agro shops</div>
+                        <button class="btn btn-sm btn-secondary" style="width:100%;margin-top:.9rem;" onclick="openSubRequest('standard')">Request Plan →</button>
                     </div>
                     <!-- Pro -->
                     <div class="pricing-card" style="border-top:4px solid #1A7FB5;">
@@ -440,6 +442,7 @@
                             <li class="unavailable">✘ Lifetime Access</li>
                         </ul>
                         <div class="plan-note">For growing agro businesses &amp; chains</div>
+                        <button class="btn btn-sm btn-secondary" style="width:100%;margin-top:.9rem;" onclick="openSubRequest('pro')">Request Plan →</button>
                     </div>
                     <!-- Lifetime -->
                     <div class="pricing-card" style="border-top:4px solid #6A1B9A;background:linear-gradient(160deg,#f5eeff,#fff);">
@@ -456,6 +459,7 @@
                             <li>✔ No Monthly Renewals</li>
                         </ul>
                         <div class="plan-note">For businesses that want to own their software</div>
+                        <button class="btn btn-sm btn-secondary" style="width:100%;margin-top:.9rem;border-color:#6A1B9A;color:#6A1B9A;" onclick="openSubRequest('lifetime')">Request Plan →</button>
                     </div>
                 </div>
                 <div class="contact-box">
@@ -577,7 +581,43 @@
                 📞 Contact: <strong id="expired-phone">0977 638 790 / 0960 271 128</strong><br>
                 <span style="color:#888;font-size:.82rem;">WhatsApp or Call to renew your plan</span>
             </div>
-            <button onclick="logout()" class="btn btn-primary" style="width:100%">Back to Home</button>
+            <button onclick="openSubRequest(null, true)" class="btn btn-primary" style="width:100%;margin-bottom:.75rem;">📨 Request Renewal</button>
+            <button onclick="logout()" class="btn" style="width:100%;background:#f0f0f0;color:#555;">Back to Home</button>
+        </div>
+    </div>
+
+    <!-- ── SUBSCRIPTION REQUEST MODAL ── -->
+    <div id="modal-sub-request" class="modal-overlay hidden">
+        <div class="modal" style="max-width:400px;width:90%;background:#fff;border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-lg);">
+            <h3 style="margin-bottom:.5rem;color:var(--primary-dark);">📨 Request Subscription</h3>
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem;">We'll receive your request and activate your plan after payment confirmation.</p>
+            <div style="margin-bottom:1rem;">
+                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">PLAN REQUESTED</label>
+                <select id="subreq-tier" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;">
+                    <option value="starter">Starter — K200/mo</option>
+                    <option value="standard">Standard — K500/mo</option>
+                    <option value="pro">Pro — K1,000/mo</option>
+                    <option value="lifetime">Lifetime — K3,500 once-off</option>
+                </select>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">YOUR PHONE / WHATSAPP</label>
+                <input type="tel" id="subreq-phone" placeholder="e.g. 0977 000 000" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;"/>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">NOTE (optional)</label>
+                <input type="text" id="subreq-note" placeholder="e.g. Will pay via Airtel Money" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;"/>
+            </div>
+            <div id="subreq-err" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.75rem;"></div>
+            <div id="subreq-success" style="display:none;background:#e8f5e9;border-radius:8px;padding:1rem;text-align:center;margin-bottom:.75rem;">
+                <div style="font-size:1.5rem">✅</div>
+                <div style="font-weight:700;color:#2e7d32;margin:.3rem 0;">Request Sent!</div>
+                <div style="font-size:.82rem;color:#555;">We'll contact you shortly to confirm payment and activate your plan.</div>
+            </div>
+            <div id="subreq-actions" style="display:flex;gap:.75rem;margin-top:.5rem;">
+                <button onclick="closeModal('modal-sub-request')" class="btn" style="flex:1;background:#f0f0f0;color:#555;">Cancel</button>
+                <button onclick="submitSubRequest()" class="btn btn-primary" style="flex:1;" id="subreq-btn">Send Request</button>
+            </div>
         </div>
     </div>
 
@@ -601,6 +641,7 @@
                 <li><a href="#" onclick="nav('expenses')" id="nav-expenses">Expenses</a></li>
                 <li><a href="#" onclick="nav('fisp')" id="nav-fisp">FISP Tracker</a></li>
                 <li><a href="#" onclick="nav('credit')" id="nav-credit">Credit Tracker</a></li>
+                <li><a href="#" onclick="nav('customers')" id="nav-customers">👤 Customers</a></li>
                 <li><a href="#" onclick="nav('reports')" id="nav-reports">Reports (P&L)</a></li>
                 <li class="admin-only"><a href="#" onclick="nav('settings')" id="nav-settings" style="color: var(--secondary)">⚙️ Settings</a></li>
             </ul>
@@ -671,12 +712,34 @@
 
             <!-- 2. INVENTORY VIEW -->
             <div id="view-inventory" class="hidden">
-                <div class="view-toolbar">
-                    <button class="btn btn-primary" onclick="openAddStockModal()">+ Add Stock Item</button>
-                    <input type="text" id="search-inventory" placeholder="Search inventory..." onkeyup="renderTable('inventory')">
+                <!-- Tab switcher -->
+                <div style="display:flex;gap:.5rem;margin-bottom:1rem;border-bottom:2px solid var(--border);padding-bottom:.5rem;">
+                    <button id="inv-tab-stock" onclick="switchInvTab('stock')" class="btn btn-sm" style="background:var(--primary);color:white;">Stock Items</button>
+                    <button id="inv-tab-adjustments" onclick="switchInvTab('adjustments')" class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);">📋 Adjustment Log</button>
                 </div>
-                <div class="table-container">
-                    <table id="table-inventory"><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost (ZMW)</th><th>Sell Price (ZMW)</th><th>Margin</th><th>Total Val</th><th>Status</th></tr></thead><tbody></tbody></table>
+                <!-- Stock Items sub-view -->
+                <div id="inv-panel-stock">
+                    <div class="view-toolbar">
+                        <button class="btn btn-primary" onclick="openAddStockModal()">+ Add Stock Item</button>
+                        <button class="btn btn-sm" style="background:var(--warning);color:white;" onclick="openAdjustmentModal()">⚠️ Stock Adjustment</button>
+                        <input type="text" id="search-inventory" placeholder="Search inventory..." onkeyup="renderTable('inventory')">
+                    </div>
+                    <div class="table-container">
+                        <table id="table-inventory"><thead><tr><th>ID</th><th>Product</th><th>Category</th><th>Qty</th><th>Cost (ZMW)</th><th>Sell Price (ZMW)</th><th>Margin</th><th>Total Val</th><th>Status</th></tr></thead><tbody></tbody></table>
+                    </div>
+                </div>
+                <!-- Adjustment Log sub-view -->
+                <div id="inv-panel-adjustments" class="hidden">
+                    <div class="view-toolbar">
+                        <button class="btn btn-sm" style="background:var(--warning);color:white;" onclick="openAdjustmentModal()">⚠️ New Adjustment</button>
+                        <input type="text" id="search-adjustments" placeholder="Search adjustments..." onkeyup="renderAdjustments()">
+                    </div>
+                    <div class="table-container">
+                        <table id="table-adjustments">
+                            <thead><tr><th>ID</th><th>Date</th><th>Product</th><th>Type</th><th>Qty Change</th><th>Loss Value</th><th>Reason</th><th>Notes</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -684,6 +747,7 @@
             <div id="view-sales" class="hidden">
                 <div class="view-toolbar">
                     <button class="btn btn-primary" onclick="prepareSaleModal()">+ New Sale</button>
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="openInvoiceBuilder()">🧾 Invoice / Quotation</button>
                     <input type="text" id="search-sales" placeholder="Search sales..." onkeyup="renderTable('sales')">
                     <input type="date" id="date-from-sales" onchange="renderTable('sales')" title="From">
                     <span class="arrow">→</span>
@@ -691,7 +755,7 @@
                     <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('sales')">Clear</button>
                 </div>
                 <div class="table-container">
-                    <table id="table-sales"><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Product</th><th>Qty</th><th>Total (ZMW)</th><th>Method</th><th>Receipt</th></tr></thead><tbody></tbody></table>
+                    <table id="table-sales"><thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Items</th><th>Total (ZMW)</th><th>Method</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
@@ -704,9 +768,10 @@
                     <span class="arrow">→</span>
                     <input type="date" id="date-to-purchases" onchange="renderTable('purchases')" title="To">
                     <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('purchases')">Clear</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportCSV('purchases')">⬇ CSV</button>
                 </div>
                 <div class="table-container">
-                    <table id="table-purchases"><thead><tr><th>ID</th><th>Date</th><th>Supplier</th><th>Product</th><th>Qty In</th><th>Total Cost (ZMW)</th></tr></thead><tbody></tbody></table>
+                    <table id="table-purchases"><thead><tr><th>ID</th><th>Date</th><th>Supplier</th><th>Product</th><th>Qty In</th><th>Total Cost (ZMW)</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
@@ -719,9 +784,10 @@
                     <span class="arrow">→</span>
                     <input type="date" id="date-to-expenses" onchange="renderTable('expenses')" title="To">
                     <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('expenses')">Clear</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportCSV('expenses')">⬇ CSV</button>
                 </div>
                 <div class="table-container">
-                    <table id="table-expenses"><thead><tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount (ZMW)</th></tr></thead><tbody></tbody></table>
+                    <table id="table-expenses"><thead><tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount (ZMW)</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
@@ -748,6 +814,23 @@
                 </div>
             </div>
 
+
+            <!-- 7b. CUSTOMERS VIEW -->
+            <div id="view-customers" class="hidden">
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Add Customer</button>
+                    <input type="text" id="search-customers" placeholder="Search customers..." onkeyup="renderCustomers()">
+                </div>
+                <!-- Customer exposure summary cards -->
+                <div id="customer-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
+                <div class="table-container">
+                    <table id="table-customers">
+                        <thead><tr><th>Name</th><th>Phone</th><th>Location</th><th>Outstanding Credit</th><th>Total Credit</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- 8. REPORTS VIEW -->
             <div id="view-reports" class="hidden">
                 <div class="table-container">
@@ -757,6 +840,8 @@
                         <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="document.getElementById('pl-month').value=''; renderPL();">All Time</button>
                         <button class="btn btn-sm btn-primary" onclick="exportPLcsv()">⬇ P&amp;L CSV</button>
                         <button class="btn btn-sm btn-primary" onclick="exportCSV('sales')">⬇ Sales CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportCSV('purchases')">⬇ Purchases CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportCSV('expenses')">⬇ Expenses CSV</button>
                         <button class="btn btn-sm btn-primary" onclick="exportCSV('inventory')">⬇ Stock CSV</button>
                     </div>
                     <div style="padding:0.75rem 1.25rem 1rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;border-top:1px solid var(--border);">
@@ -974,29 +1059,39 @@
         </div>
     </div>
 
-    <!-- Add Sale -->
+    <!-- Add Sale (multi-item) -->
     <div id="modal-sale" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3>New Sale</h3><br>
-            <form onsubmit="handleAddSale(event)">
-                <div class="form-group"><input type="text" id="sale-cust" placeholder="Customer Name" required></div>
-                <div class="form-group"><select id="sale-prod" required></select></div>
-                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="form-group"><input type="number" id="sale-qty" placeholder="Qty" min="1" required></div>
-                    <div class="form-group"><input type="number" id="sale-price" placeholder="Unit Price" required></div>
-                </div>
-                <div class="form-group"><select id="sale-method" onchange="toggleMomoField()">
+        <div class="modal-content" style="max-width:560px;max-height:92vh;overflow-y:auto;">
+            <h3>🛒 New Sale</h3>
+            <p style="color:var(--text-muted);font-size:.82rem;margin:.35rem 0 1rem;">Add one or more products to this sale transaction.</p>
+            <div class="form-group"><label style="font-weight:600;">Customer Name</label><input type="text" id="sale-cust" placeholder="Customer Name" list="customer-datalist" autocomplete="off" required></div>
+            <datalist id="customer-datalist"></datalist>
+
+            <!-- Item rows -->
+            <label style="font-weight:600;color:var(--primary-dark);font-size:.9rem;">Items</label>
+            <div id="sale-items-rows" style="margin-top:.5rem;"></div>
+            <button type="button" class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);margin-bottom:1rem;" onclick="addSaleItemRow()">+ Add Item</button>
+
+            <!-- Running total -->
+            <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:.6rem;margin-bottom:1rem;padding:.6rem .75rem;background:var(--surface-2);border-radius:var(--radius-sm);border:1.5px solid var(--border);">
+                <span style="color:var(--text-muted);font-size:.85rem;font-weight:600;">SALE TOTAL:</span>
+                <span id="sale-items-total" style="font-size:1.15rem;font-weight:800;color:var(--primary-dark);">K0.00</span>
+            </div>
+
+            <div class="form-group"><label style="font-weight:600;">Payment Method</label>
+                <select id="sale-method" onchange="toggleMomoField()">
                     <option value="Cash">Cash</option>
                     <option value="Mobile Money">Mobile Money</option>
                     <option value="Credit">Credit (Add to Tracker)</option>
                     <option value="E-Voucher">E-Voucher</option>
-                </select></div>
-                <div class="form-group hidden" id="momo-ref-group">
-                    <input type="text" id="sale-momo-ref" placeholder="MoMo Transaction ID (e.g. MP240625.1234.A56789)">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%">Complete Sale</button>
-            </form>
-            <button onclick="closeModal('modal-sale')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+                </select>
+            </div>
+            <div class="form-group hidden" id="momo-ref-group">
+                <label style="font-weight:600;">MoMo Transaction ID</label>
+                <input type="text" id="sale-momo-ref" placeholder="e.g. MP240625.1234.A56789">
+            </div>
+            <button type="button" class="btn btn-primary" style="width:100%" onclick="submitMultiSale()">Complete Sale</button>
+            <button onclick="closeModal('modal-sale')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
         </div>
     </div>
 
@@ -1009,7 +1104,7 @@
                 <div class="form-group"><select id="pur-prod" required></select></div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div class="form-group"><input type="number" id="pur-qty" placeholder="Qty Bought" required></div>
-                    <div class="form-group"><input type="number" id="pur-cost" placeholder="Unit Cost" required></div>
+                    <div class="form-group"><input type="number" id="pur-cost" placeholder="Unit Cost (updates inventory)" required></div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%">Record</button>
             </form>
@@ -1071,6 +1166,232 @@
         </div>
     </div>
 
+    <!-- Edit Sale Modal -->
+    <div id="modal-edit-sale" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:560px;max-height:92vh;overflow-y:auto;">
+            <h3>✏️ Edit Sale</h3>
+            <p style="color:var(--text-muted);font-size:.82rem;margin:.35rem 0 1rem;">Editing restores original stock and recalculates from the new values.</p>
+            <form onsubmit="handleEditSale(event)">
+                <input type="hidden" id="edit-sale-id">
+                <!-- Hidden prod/qty/price kept for fallback compat but not shown -->
+                <input type="hidden" id="edit-sale-prod">
+                <input type="hidden" id="edit-sale-qty">
+                <input type="hidden" id="edit-sale-price">
+                <div class="form-group"><label>Customer Name</label><input type="text" id="edit-sale-cust" list="customer-datalist" autocomplete="off" required></div>
+
+                <label style="font-weight:600;color:var(--primary-dark);font-size:.9rem;">Items</label>
+                <div id="edit-sale-items-rows" style="margin-top:.5rem;"></div>
+                <button type="button" class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);margin-bottom:1rem;" onclick="addEditSaleItemRow()">+ Add Item</button>
+
+                <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:.6rem;margin-bottom:1rem;padding:.6rem .75rem;background:var(--surface-2);border-radius:var(--radius-sm);border:1.5px solid var(--border);">
+                    <span style="color:var(--text-muted);font-size:.85rem;font-weight:600;">SALE TOTAL:</span>
+                    <span id="edit-sale-items-total" style="font-size:1.15rem;font-weight:800;color:var(--primary-dark);">K0.00</span>
+                </div>
+
+                <div class="form-group"><label>Payment Method</label>
+                    <select id="edit-sale-method" onchange="toggleEditSaleMomo()">
+                        <option value="Cash">Cash</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Credit">Credit</option>
+                        <option value="E-Voucher">E-Voucher</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="edit-momo-ref-group">
+                    <label>MoMo Ref</label><input type="text" id="edit-sale-momo-ref">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-sale')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Purchase Modal -->
+    <div id="modal-edit-purchase" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:480px;">
+            <h3>✏️ Edit Purchase</h3><br>
+            <form onsubmit="handleEditPurchase(event)">
+                <input type="hidden" id="edit-pur-id">
+                <div class="form-group"><label>Supplier</label><input type="text" id="edit-pur-sup" required></div>
+                <div class="form-group"><label>Product</label><select id="edit-pur-prod" required></select></div>
+                <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;">
+                    <div class="form-group"><label>Qty</label><input type="number" id="edit-pur-qty" min="1" required></div>
+                    <div class="form-group"><label>Unit Cost (ZMW)</label><input type="number" id="edit-pur-cost" min="0" step="0.01" required></div>
+                </div>
+                <p style="font-size:.78rem;color:var(--warning);margin-bottom:.75rem;">⚠️ Editing reverses original stock addition and recalculates from the new values.</p>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-purchase')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div id="modal-edit-expense" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>✏️ Edit Expense</h3><br>
+            <form onsubmit="handleEditExpense(event)">
+                <input type="hidden" id="edit-exp-id">
+                <div class="form-group"><label>Category</label>
+                    <select id="edit-exp-cat"><option>Transport</option><option>Rent</option><option>Salaries</option><option>Utilities</option><option>Marketing</option><option>Maintenance</option></select>
+                </div>
+                <div class="form-group"><label>Description</label><input type="text" id="edit-exp-desc" required></div>
+                <div class="form-group"><label>Amount (ZMW)</label><input type="number" id="edit-exp-amt" min="0" step="0.01" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-expense')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit FISP Modal -->
+    <div id="modal-edit-fisp" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:540px;">
+            <h3>✏️ Edit FISP Claim</h3><br>
+            <form onsubmit="handleEditFISP(event)">
+                <input type="hidden" id="edit-fisp-id">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Farmer Name *</label><input type="text" id="edit-fisp-farmer-name" required></div>
+                    <div class="form-group" style="margin:0"><label>NRC / ID No.</label><input type="text" id="edit-fisp-nrc"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Phone No.</label><input type="text" id="edit-fisp-phone"></div>
+                    <div class="form-group" style="margin:0"><label>Camp / Area</label><input type="text" id="edit-fisp-camp"></div>
+                </div>
+                <hr style="margin:1rem 0;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="form-group" style="margin:0"><label>E-Voucher No. *</label><input type="text" id="edit-fisp-voucher" required></div>
+                    <div class="form-group" style="margin:0"><label>Claim Value (ZMW) *</label><input type="number" id="edit-fisp-val" min="0" step="0.01" required></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Product Redeemed</label><select id="edit-fisp-prod"><option value="">— Select product —</option></select></div>
+                    <div class="form-group" style="margin:0"><label>Qty Issued</label><input type="number" id="edit-fisp-qty" min="0" step="1"></div>
+                </div>
+                <div class="form-group" style="margin-top:.75rem;"><label>Status</label>
+                    <select id="edit-fisp-status"><option value="Pending">Pending</option><option value="Paid">Paid</option></select>
+                </div>
+                <div class="form-group"><label>Notes</label><input type="text" id="edit-fisp-notes"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-fisp')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Credit Modal -->
+    <div id="modal-edit-credit" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>✏️ Edit Credit Record</h3><br>
+            <form onsubmit="handleEditCredit(event)">
+                <input type="hidden" id="edit-crd-id">
+                <div class="form-group"><label>Customer</label><input type="text" id="edit-crd-cust" list="customer-datalist" autocomplete="off" required></div>
+                <div class="form-group"><label>Product / Description</label><input type="text" id="edit-crd-prod" required></div>
+                <div class="form-group"><label>Amount Due (ZMW)</label><input type="number" id="edit-crd-amt" min="0" step="0.01" required></div>
+                <div class="form-group"><label>Due Date</label><input type="date" id="edit-crd-due" required></div>
+                <div class="form-group"><label>Status</label>
+                    <select id="edit-crd-status"><option value="Outstanding">Outstanding</option><option value="Paid">Paid</option></select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-credit')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+
+    <!-- Add Customer Modal -->
+    <div id="modal-add-customer" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>👤 Add Customer</h3><br>
+            <form onsubmit="handleAddCustomer(event)">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="cust-name" placeholder="e.g. Chanda Mwale" required></div>
+                <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="cust-phone" placeholder="e.g. 0977 123 456"></div>
+                <div class="form-group"><label>Location / Area</label><input type="text" id="cust-location" placeholder="e.g. Mansa Central"></div>
+                <div class="form-group"><label>Notes</label><input type="text" id="cust-notes" placeholder="Optional notes"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Customer</button>
+            </form>
+            <button onclick="closeModal('modal-add-customer')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div id="modal-edit-customer" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>✏️ Edit Customer</h3><br>
+            <form onsubmit="handleEditCustomer(event)">
+                <input type="hidden" id="edit-cust-id">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="edit-cust-name" required></div>
+                <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="edit-cust-phone"></div>
+                <div class="form-group"><label>Location / Area</label><input type="text" id="edit-cust-location"></div>
+                <div class="form-group"><label>Notes</label><input type="text" id="edit-cust-notes"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-customer')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Stock Adjustment Modal -->
+    <div id="modal-adjustment" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:460px;">
+            <h3>⚠️ Stock Adjustment</h3>
+            <p style="color:var(--text-muted);font-size:.82rem;margin:.35rem 0 1rem;">Record spoilage, breakage, theft, donation, or a stock count correction. This creates an audit trail and adjusts inventory.</p>
+            <form onsubmit="handleAddAdjustment(event)">
+                <div class="form-group">
+                    <label>Product *</label>
+                    <select id="adj-prod" onchange="onAdjProdChange()" required>
+                        <option value="">— Select product —</option>
+                    </select>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                    <div class="form-group">
+                        <label>Adjustment Type *</label>
+                        <select id="adj-type" onchange="onAdjTypeChange()">
+                            <option value="write-off">Write-Off (loss)</option>
+                            <option value="correction-down">Count Correction (down)</option>
+                            <option value="correction-up">Count Correction (up)</option>
+                            <option value="donation">Donation / Sample</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Qty *</label>
+                        <input type="number" id="adj-qty" min="1" placeholder="e.g. 5" required oninput="onAdjQtyChange()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Reason *</label>
+                    <select id="adj-reason" required>
+                        <option value="Spoilage / Expiry">Spoilage / Expiry</option>
+                        <option value="Breakage / Damage">Breakage / Damage</option>
+                        <option value="Theft / Shrinkage">Theft / Shrinkage</option>
+                        <option value="Stock Count Correction">Stock Count Correction</option>
+                        <option value="Donation / Sample">Donation / Sample</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="adj-notes" placeholder="Optional details">
+                </div>
+                <div id="adj-loss-row" style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem;margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem;">
+                        <span style="color:var(--text-muted);font-weight:600;">Estimated Loss Value</span>
+                        <span id="adj-loss-preview" style="font-weight:800;color:var(--danger);">K0.00</span>
+                    </div>
+                    <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">Based on current cost price × qty. This will be recorded in P&L as a write-off expense.</div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;background:var(--warning);color:#1A2016;">Record Adjustment</button>
+            </form>
+            <button onclick="closeModal('modal-adjustment')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Admin Password Re-auth Modal (for deletes) -->
+    <div id="modal-admin-reauth" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:380px;">
+            <h3>🔒 Confirm Delete</h3>
+            <p style="color:var(--text-muted);font-size:.88rem;margin:.75rem 0;">Enter your admin password to permanently delete this record. This cannot be undone.</p>
+            <div class="form-group"><label>Admin Password</label><input type="password" id="reauth-pw" placeholder="Admin password" autocomplete="off"></div>
+            <div id="reauth-error" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.75rem;"></div>
+            <button class="btn btn-danger" style="width:100%" onclick="confirmReauthDelete()">Delete Record</button>
+            <button onclick="closeModal('modal-admin-reauth');_reauthPending=null;" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
     <!-- Edit Product (NEW) -->
     <div id="modal-edit-product" class="modal-overlay hidden">
         <div class="modal-content">
@@ -1107,12 +1428,57 @@
         </div>
     </div>
 
+    <!-- Invoice / Quotation Builder Modal -->
+    <div id="modal-invoice-builder" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:560px;max-height:88vh;overflow-y:auto;">
+            <h3>New Invoice / Quotation</h3><br>
+            <div class="form-group">
+                <label>Document Type</label>
+                <select id="inv-doc-type">
+                    <option value="Invoice">Invoice</option>
+                    <option value="Quotation">Quotation</option>
+                </select>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>Customer Name</label><input type="text" id="inv-doc-cust" placeholder="Customer Name" required></div>
+                <div class="form-group"><label>Phone (optional)</label><input type="text" id="inv-doc-phone" placeholder="e.g. +260 97X XXX XXX"></div>
+            </div>
+
+            <label style="font-weight:600;color:var(--primary-dark);font-size:.9rem;">Items</label>
+            <div id="invoice-items-rows" style="margin-top:.5rem;"></div>
+            <button type="button" class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);margin-bottom:1rem;" onclick="addInvoiceItemRow()">+ Add Item</button>
+
+            <div style="display:flex;justify-content:flex-end;gap:.6rem;align-items:baseline;margin-bottom:1rem;">
+                <span style="color:var(--text-muted);font-size:.85rem;font-weight:600;">TOTAL:</span>
+                <span id="invoice-items-total" style="font-size:1.1rem;font-weight:800;color:var(--primary-dark);">K0.00</span>
+            </div>
+
+            <div class="form-group"><label>Notes / Terms (optional)</label><textarea id="inv-doc-notes" rows="2" placeholder="e.g. 50% deposit required, prices valid for 14 days"></textarea></div>
+
+            <button type="button" class="btn btn-primary" style="width: 100%" onclick="generateInvoiceDoc()">Generate Document</button>
+            <button onclick="closeModal('modal-invoice-builder')" class="btn btn-sm" style="margin-top: 10px; width: 100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Invoice / Quotation Print Preview Modal -->
+    <div id="modal-invoice-print" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 460px;">
+            <div id="invoice-print-body">
+                <!-- populated by generateInvoiceDoc() -->
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;" id="invoice-print-actions">
+                <button class="btn btn-primary" style="flex:1;" onclick="window.print()">🖨 Print</button>
+                <button class="btn btn-sm" style="flex:1; background:#eee;" onclick="closeModal('modal-invoice-print')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <style>
         @media print {
-            body > *:not(#modal-receipt) { display: none !important; }
-            #modal-receipt { position: static !important; background: none !important; display: block !important; }
+            body > *:not(#modal-receipt):not(#modal-invoice-print) { display: none !important; }
+            #modal-receipt:not(.hidden), #modal-invoice-print:not(.hidden) { position: static !important; background: none !important; display: block !important; }
             .modal-content { box-shadow: none !important; max-width: 100% !important; }
-            #receipt-actions { display: none !important; }
+            #receipt-actions, #invoice-print-actions { display: none !important; }
             .receipt-divider { border-top: 1px dashed #000; margin: 8px 0; }
         }
         .receipt-divider { border-top: 1px dashed #ccc; margin: 8px 0; }
@@ -1122,6 +1488,21 @@
         #receipt-body .receipt-logo { display: block; margin: 0 auto 6px; max-width: 64px; max-height: 64px; object-fit: contain; }
         #receipt-body .receipt-sub { text-align: center; color: #555; font-size: 0.8rem; margin-bottom: 8px; }
         #receipt-body .receipt-total { font-weight: bold; font-size: 1rem; }
+
+        /* --- INVOICE / QUOTATION DOCUMENT --- */
+        #invoice-print-body { font-size: 0.85rem; line-height: 1.5; }
+        #invoice-print-body .invoice-header { text-align: center; margin-bottom: 10px; }
+        #invoice-print-body .invoice-logo { display: block; margin: 0 auto 6px; max-width: 64px; max-height: 64px; object-fit: contain; }
+        #invoice-print-body .invoice-co-name { font-weight: 800; font-size: 1.05rem; }
+        #invoice-print-body .invoice-co-sub { color: #555; font-size: 0.78rem; }
+        #invoice-print-body .invoice-doc-title { text-align: center; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; margin: 10px 0 8px; padding: 4px 0; border-top: 1.5px solid #ccc; border-bottom: 1.5px solid #ccc; }
+        #invoice-print-body .invoice-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        #invoice-print-body .invoice-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.82rem; }
+        #invoice-print-body .invoice-table th { text-align: left; border-bottom: 1.5px solid #999; padding: 4px 2px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.4px; color: #555; }
+        #invoice-print-body .invoice-table td { padding: 5px 2px; border-bottom: 1px solid #eee; vertical-align: top; }
+        #invoice-print-body .invoice-grand-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; border-top: 1.5px solid #333; padding-top: 6px; margin-top: 4px; }
+        #invoice-print-body .invoice-notes { margin-top: 10px; font-size: 0.78rem; color: #444; background: #f7f7f7; padding: 6px 8px; border-radius: 4px; }
+        #invoice-print-body .invoice-footer { text-align: center; font-size: 0.78rem; margin-top: 12px; color: #555; }
     </style>
 
     <script>
@@ -1145,7 +1526,9 @@
             expenses:  'za_expenses',
             fisp:      'za_fisp',
             credit:    'za_credit',
-            settings:  'za_settings'
+            customers:   'za_customers',
+            adjustments: 'za_adjustments',
+            settings:    'za_settings'
         };
 
         const DEFAULTS = {
@@ -1155,6 +1538,8 @@
             expenses:  [],
             fisp:      [],
             credit:    [],
+            customers:    [],
+            adjustments:  [],
             settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none', stockCategories: ['Fertilizer','Seed','Chemical','Tool'] }
         };
 
@@ -1193,7 +1578,11 @@
             set fisp(v)     { writeCollection('fisp', v); },
             get credit()    { return dbLoad('credit'); },
             set credit(v)   { writeCollection('credit', v); },
-            get settings()  { return dbLoad('settings'); },
+            get customers()    { return dbLoad('customers'); },
+            set customers(v)   { writeCollection('customers', v); },
+            get adjustments()  { return dbLoad('adjustments'); },
+            set adjustments(v) { writeCollection('adjustments', v); },
+            get settings()     { return dbLoad('settings'); },
             set settings(v) { writeSettings(v); }
         };
 
@@ -1282,7 +1671,7 @@
         const CLOUD_KEY       = 'za_cloud_auth';   // { uid, email, idToken, refreshToken, idTokenExpiry }
         const SYNC_QUEUE_KEY  = 'za_pending_sync'; // persistent offline-safe outbox
         const LAST_SYNCED_KEY = 'za_last_synced';  // persisted so "Last synced" survives a page reload
-        const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit'];
+        const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit', 'customers', 'adjustments'];
 
         let cloudAuth = null;
         let sseConn = null;
@@ -2757,7 +3146,7 @@
             if(activeLink) activeLink.classList.add('active');
 
             // Titles
-            const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", reports: "Financial Reports", settings: "System Settings" };
+            const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", customers: "Customer Register", reports: "Financial Reports", settings: "System Settings" };
             document.getElementById('page-title').textContent = titles[view] || "ZamAgro Track";
 
             // Pre-select current month on Reports
@@ -2768,6 +3157,9 @@
                     inp.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 }
                 renderPL();
+            }
+            if (view === 'customers') {
+                renderCustomers();
             }
         }
 
@@ -2784,6 +3176,8 @@
             renderTable('expenses');
             renderTable('fisp');
             renderTable('credit');
+            renderCustomers();
+            renderAdjustments();
             renderPL();
             renderSettingsTable(); // New
             const thresholdInput = document.getElementById('setting-threshold');
@@ -2817,10 +3211,11 @@
             const expenses = db.expenses.reduce((sum, exp) => sum + exp.amt, 0);
             document.getElementById('kpi-expenses').textContent = formatZMW(expenses);
 
-            const purchasesTotal = db.purchases.reduce((sum, pur) => sum + pur.total, 0);
-            const netPL = revenue - purchasesTotal - expenses;
-            document.getElementById('kpi-pl').textContent = formatZMW(netPL);
-            document.getElementById('kpi-pl').className = netPL >= 0 ? 'value text-success' : 'value text-danger';
+            // Net P/L now reads from the same computePL() engine as the Reports (P&L) tab
+            // and the P&L CSV export, so all three always agree (All-Time view).
+            const pl = computePL('');
+            document.getElementById('kpi-pl').textContent = formatZMW(pl.net);
+            document.getElementById('kpi-pl').className = pl.net >= 0 ? 'value text-success' : 'value text-danger';
 
             const fispOut = db.fisp.filter(f => f.status !== 'Paid').reduce((sum, f) => sum + f.val, 0);
             document.getElementById('kpi-fisp').textContent = formatZMW(fispOut);
@@ -2876,16 +3271,36 @@
                     const sellPrice = item.price ? formatZMW(item.price) : `<span style="color:var(--warning);font-size:.8rem;">Not set</span>`;
                     row = `<tr><td>${esc(item.id)}</td><td>${esc(item.name)}</td><td>${esc(item.cat)}</td><td>${esc(item.qty)}</td><td>${esc(item.cost)}</td><td>${sellPrice}</td><td>${marginBadge}</td><td>${formatZMW(item.qty * item.cost)}</td><td><span class="badge status-ok">${esc(item.status)}</span></td></tr>`;
                 } else if (type === 'sales') {
-                    const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
+                    // Support both multi-item sales (items[]) and legacy single-product sales
+                    let itemsCell;
+                    if (item.items && item.items.length > 0) {
+                        const first = item.items[0];
+                        const firstName = db.inventory.find(i => i.id === first.prodId)?.name || first.prodName || '—';
+                        itemsCell = item.items.length === 1
+                            ? `${esc(firstName)} × ${first.qty}`
+                            : `${esc(firstName)} × ${first.qty} <span class="badge" style="background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);">+${item.items.length - 1} more</span>`;
+                    } else {
+                        const legacyName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName || '—';
+                        itemsCell = `${esc(legacyName)} × ${item.qty}`;
+                    }
                     const methodCell = item.momoRef
-                        ? `${esc(item.method)}<br><span style="font-size:.72rem;color:var(--gray);">Ref: ${esc(item.momoRef)}</span>`
+                        ? `${esc(item.method)}<br><span style="font-size:.72rem;color:var(--text-muted);">Ref: ${esc(item.momoRef)}</span>`
                         : esc(item.method);
-                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cust)}</td><td>${esc(currentProdName)}</td><td>${esc(item.qty)}</td><td>${formatZMW(item.total)}</td><td>${methodCell}</td><td><button class="btn btn-sm" style="background:#eee;" onclick="printReceipt('${esc(item.id)}')">🖨</button></td></tr>`;
+                    const saleActions = currentUser === 'admin'
+                        ? `<button class="btn btn-sm btn-primary" onclick="openEditSaleModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('sales','${esc(item.id)}')">🗑</button>`
+                        : '';
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cust)}</td><td>${itemsCell}</td><td>${formatZMW(item.total)}</td><td>${methodCell}</td><td style="white-space:nowrap;display:flex;gap:4px;"><button class="btn btn-sm" style="background:#eee;" onclick="printReceipt('${esc(item.id)}')">🖨</button>${saleActions}</td></tr>`;
                 } else if (type === 'purchases') {
                     const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
-                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.supplier)}</td><td>${esc(currentProdName)}</td><td>${esc(item.qty)}</td><td>${formatZMW(item.total)}</td></tr>`;
+                    const purActions = currentUser === 'admin'
+                        ? `<button class="btn btn-sm btn-primary" onclick="openEditPurchaseModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('purchases','${esc(item.id)}')">🗑</button>`
+                        : '';
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.supplier)}</td><td>${esc(currentProdName)}</td><td>${esc(item.qty)}</td><td>${formatZMW(item.total)}</td><td style="white-space:nowrap;display:flex;gap:4px;">${purActions}&nbsp;</td></tr>`;
                 } else if (type === 'expenses') {
-                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cat)}</td><td>${esc(item.desc)}</td><td>${formatZMW(item.amt)}</td></tr>`;
+                    const expActions = currentUser === 'admin'
+                        ? `<button class="btn btn-sm btn-primary" onclick="openEditExpenseModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('expenses','${esc(item.id)}')">🗑</button>`
+                        : '';
+                    row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cat)}</td><td>${esc(item.desc)}</td><td>${formatZMW(item.amt)}</td><td style="white-space:nowrap;display:flex;gap:4px;">${expActions}&nbsp;</td></tr>`;
                 } else if (type === 'fisp') {
                     let badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
                     const prodName = item.prodId ? (db.inventory.find(i => i.id === item.prodId)?.name || item.prodName || '—') : (item.prodName || '—');
@@ -2904,6 +3319,7 @@
                         <td style="white-space:nowrap;display:flex;gap:4px;">
                             <button class="btn btn-sm" style="background:#eee;" onclick="viewFISPDetail('${esc(item.id)}')">👁 View</button>
                             ${markPaidBtn}
+                            ${currentUser === 'admin' ? `<button class="btn btn-sm btn-primary" onclick="openEditFISPModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('fisp','${esc(item.id)}')">🗑</button>` : ''}
                         </td>
                     </tr>`;
                 } else if (type === 'credit') {
@@ -2915,7 +3331,10 @@
                     const actionBtn = item.status === 'Outstanding'
                         ? `<button class="btn btn-sm btn-primary" onclick="payCredit('${esc(item.id)}')">Pay</button>`
                         : `<span style="color:var(--gray);font-size:.85rem;">—</span>`;
-                    row = `<tr><td>${esc(item.cust)}</td><td>${esc(item.prod)}</td><td>${formatZMW(item.amt)}</td><td>${esc(item.dueDate)}</td><td>${statusBadge}</td><td>${actionBtn}</td></tr>`;
+                    const crdAdminActions = currentUser === 'admin'
+                        ? `<button class="btn btn-sm btn-primary" onclick="openEditCreditModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('credit','${esc(item.id)}')">🗑</button>`
+                        : '';
+                    row = `<tr><td>${esc(item.cust)}</td><td>${esc(item.prod)}</td><td>${formatZMW(item.amt)}</td><td>${esc(item.dueDate)}</td><td>${statusBadge}</td><td style="white-space:nowrap;display:flex;gap:4px;">${actionBtn}${crdAdminActions}</td></tr>`;
                 }
                 tbody.innerHTML += row;
             });
@@ -3282,48 +3701,75 @@
             return { lines, taxDeduction, revenueExclVat, regime };
         }
 
-        function renderPL() {
-            const tbody = document.querySelector(`#table-pl tbody`);
-            tbody.innerHTML = '';
-
-            const monthVal = document.getElementById('pl-month')?.value; // "YYYY-MM" or ""
-
-            // Records use DD/MM/YYYY — parse month as "MM/YYYY"
+        // --- UNIFIED P&L CALCULATION LAYER ---
+        // Single source of truth for all profit/loss figures. The Dashboard "Net P/L" KPI,
+        // the Reports (P&L) tab, and the P&L CSV export all call this — so they can never
+        // drift out of sync with each other again.
+        function computePL(monthVal) {
+            // Records use DD/MM/YYYY — matches month as "MM/YYYY" when monthVal = "YYYY-MM"
             function matchesMonth(dateStr) {
                 if (!monthVal) return true;
                 const [day, mon, yr] = dateStr.split('/');
                 return `${yr}-${mon}` === monthVal;
             }
 
-            const colHeader = document.getElementById('pl-col-header');
-            if (monthVal) {
-                const [yr, mon] = monthVal.split('-');
-                const label = new Date(yr, mon - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-                colHeader.textContent = `${label} (ZMW)`;
-            } else {
-                colHeader.textContent = 'All Time (ZMW)';
-            }
-
-            const revenue  = db.sales.filter(s => matchesMonth(s.date)).reduce((sum, s) => sum + s.total, 0);
+            const revenue   = db.sales.filter(s => matchesMonth(s.date)).reduce((sum, s) => sum + s.total, 0);
             const purchases = db.purchases.filter(p => matchesMonth(p.date)).reduce((sum, p) => sum + p.total, 0);
             const expenses  = db.expenses.filter(e => matchesMonth(e.date)).reduce((sum, e) => sum + e.amt, 0);
-            const gross = revenue - purchases;
+            // Write-off losses: downward adjustments that have a lossValue (spoilage, breakage, theft, donation)
+            const writeoffs = db.adjustments.filter(a => matchesMonth(a.date) && a.direction === 'down' && a.lossValue > 0).reduce((sum, a) => sum + a.lossValue, 0);
 
-            const tax = calcTaxLines(revenue, purchases, monthVal);
-            const net = gross - expenses - tax.taxDeduction;
+            // Closing stock = live inventory value (qty x cost)
+            const closingStock = db.inventory.reduce((sum, i) => sum + (i.qty * i.cost), 0);
 
-            const rows = [
-                { label: "Total Revenue",              val: revenue,   color: "text-success" },
-                { label: "Cost of Purchases (COGS)",   val: purchases, color: "text-danger"  },
-                { label: "Gross Profit",               val: gross,     color: ""             },
-                { label: "Total Operating Expenses",   val: expenses,  color: "text-danger"  },
-                ...tax.lines,
-                { label: "NET PROFIT / LOSS",          val: net,       color: net >= 0 ? "text-success" : "text-danger" }
-            ];
+            // COGS = Purchases in period - Closing Stock still on hand (floor at 0)
+            const cogs  = Math.max(0, purchases - closingStock);
+            const gross = revenue - cogs;
+            const tax   = calcTaxLines(revenue, cogs, monthVal);
+            const net   = gross - expenses - writeoffs - tax.taxDeduction;
 
-            rows.forEach(r => {
-                tbody.innerHTML += `<tr><td class="font-bold">${r.label}</td><td class="${r.color} font-bold">${formatZMW(r.val)}</td></tr>`;
-            });
+            const period = monthVal
+                ? new Date(monthVal + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })
+                : 'All Time';
+
+            return { monthVal, period, revenue, purchases, expenses, writeoffs, closingStock, cogs, gross, tax, net };
+        }
+
+        function renderPL() {
+            const tbody = document.querySelector(`#table-pl tbody`);
+            tbody.innerHTML = '';
+
+            const monthVal = document.getElementById('pl-month')?.value; // "YYYY-MM" or ""
+            const pl = computePL(monthVal);
+
+            const colHeader = document.getElementById('pl-col-header');
+            colHeader.textContent = monthVal ? `${pl.period} (ZMW)` : 'All Time (ZMW)';
+
+            function divRow(label) {
+                tbody.innerHTML += `<tr style="background:var(--surface-2);"><td colspan="2" style="font-size:.72rem;font-weight:700;letter-spacing:.8px;color:var(--text-muted);text-transform:uppercase;padding:6px 14px;">${label}</td></tr>`;
+            }
+            function row(label, val, cls, indent) {
+                tbody.innerHTML += `<tr><td class="font-bold" style="${indent ? 'padding-left:1.8rem;color:var(--text-muted);font-weight:500;' : ''}">${label}</td><td class="${cls} font-bold">${formatZMW(val)}</td></tr>`;
+            }
+
+            divRow('Revenue');
+            row('Total Sales Revenue', pl.revenue, 'text-success');
+
+            divRow('Cost of Goods Sold (COGS)');
+            row('Total Purchases (Stock Bought)', pl.purchases, 'text-danger', true);
+            row('Less: Closing Stock Value (Inventory)', pl.closingStock, 'text-success', true);
+            row('Net COGS', pl.cogs, 'text-danger');
+
+            divRow('Gross Profit');
+            row('Gross Profit  (Revenue minus COGS)', pl.gross, pl.gross >= 0 ? 'text-success' : 'text-danger');
+
+            divRow('Operating Expenses');
+            row('Total Operating Expenses', pl.expenses, 'text-danger');
+            if (pl.writeoffs > 0) row('Stock Write-Offs (Spoilage / Loss)', pl.writeoffs, 'text-danger', true);
+            pl.tax.lines.forEach(l => row(l.label, l.val, 'text-danger', true));
+
+            divRow('Net Result');
+            tbody.innerHTML += `<tr style="border-top:2px solid var(--border);"><td style="font-weight:800;font-size:1rem;">NET PROFIT / LOSS</td><td class="${pl.net >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:800;font-size:1rem;">${formatZMW(pl.net)}</td></tr>`;
         }
 
         // --- CSV EXPORT ---
@@ -3345,32 +3791,63 @@
 
         function exportPLcsv() {
             const monthVal = document.getElementById('pl-month')?.value;
+            const pl = computePL(monthVal);
+            const coName = getCompanyInfo().name;
+
             function matchesMonth(dateStr) {
                 if (!monthVal) return true;
-                const [, mon, yr] = dateStr.split('/');
+                const [day, mon, yr] = dateStr.split('/');
                 return `${yr}-${mon}` === monthVal;
             }
-            const revenue   = db.sales.filter(s => matchesMonth(s.date)).reduce((sum, s) => sum + s.total, 0);
-            const purchases = db.purchases.filter(p => matchesMonth(p.date)).reduce((sum, p) => sum + p.total, 0);
-            const expenses  = db.expenses.filter(e => matchesMonth(e.date)).reduce((sum, e) => sum + e.amt, 0);
-            const gross = revenue - purchases;
-            const tax = calcTaxLines(revenue, purchases, monthVal);
-            const net = gross - expenses - tax.taxDeduction;
-            const period = monthVal
-                ? new Date(monthVal + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })
-                : 'All Time';
+
+            // Summary section
             const rows = [
-                [`${getCompanyInfo().name} — P&L Report (${period})`],
+                [`${coName} — P&L Report (${pl.period})`],
                 [],
-                ['Category', 'Amount (ZMW)'],
-                ['Total Revenue',            revenue.toFixed(2)],
-                ['Cost of Purchases (COGS)', purchases.toFixed(2)],
-                ['Gross Profit',             gross.toFixed(2)],
-                ['Total Operating Expenses', expenses.toFixed(2)],
-                ...tax.lines.map(l => [l.label, l.val.toFixed(2)]),
-                ['NET PROFIT / LOSS',        net.toFixed(2)],
+                ['SUMMARY', 'Amount (ZMW)'],
+                ['Total Sales Revenue',                   pl.revenue.toFixed(2)],
+                ['Total Purchases (Stock Bought)',         pl.purchases.toFixed(2)],
+                ['Less: Closing Stock Value (Inventory)', pl.closingStock.toFixed(2)],
+                ['Net COGS',                              pl.cogs.toFixed(2)],
+                ['Gross Profit',                          pl.gross.toFixed(2)],
+                ['Total Operating Expenses',              pl.expenses.toFixed(2)],
+                ...(pl.writeoffs > 0 ? [['Stock Write-Offs (Spoilage / Loss)', pl.writeoffs.toFixed(2)]] : []),
+                ...pl.tax.lines.map(l => [l.label, l.val.toFixed(2)]),
+                ['NET PROFIT / LOSS',                     pl.net.toFixed(2)],
             ];
-            downloadCSV(`ZamAgro_PL_${period.replace(/\s/g,'_')}.csv`, rows);
+
+            // Purchase detail section
+            const periodPurchases = db.purchases.filter(p => matchesMonth(p.date));
+            if (periodPurchases.length > 0) {
+                rows.push([], [`PURCHASE DETAIL (${pl.period})`]);
+                rows.push(['ID', 'Date', 'Supplier', 'Product', 'Qty', 'Unit Cost (ZMW)', 'Total Cost (ZMW)']);
+                periodPurchases.forEach(p => {
+                    const prodName = db.inventory.find(i => i.id === p.prodId)?.name || p.prodName || '';
+                    const unitCost = p.qty > 0 ? (p.total / p.qty) : 0;
+                    rows.push([p.id, p.date, p.supplier || '', prodName, p.qty, unitCost.toFixed(2), p.total.toFixed(2)]);
+                });
+                rows.push(['', '', '', '', '', 'TOTAL', pl.purchases.toFixed(2)]);
+            }
+
+            // Expense detail section
+            const periodExpenses = db.expenses.filter(e => matchesMonth(e.date));
+            if (periodExpenses.length > 0) {
+                rows.push([], [`EXPENSE DETAIL (${pl.period})`]);
+                rows.push(['ID', 'Date', 'Category', 'Description', 'Amount (ZMW)']);
+                periodExpenses.forEach(e => rows.push([e.id, e.date, e.cat, e.desc || '', e.amt.toFixed(2)]));
+                rows.push(['', '', '', 'TOTAL', pl.expenses.toFixed(2)]);
+            }
+
+            // Write-off detail section
+            const periodAdj = db.adjustments.filter(a => matchesMonth(a.date) && a.direction === 'down' && a.lossValue > 0);
+            if (periodAdj.length > 0) {
+                rows.push([], [`STOCK WRITE-OFF DETAIL (${pl.period})`]);
+                rows.push(['ID', 'Date', 'Product', 'Reason', 'Qty', 'Cost at Time (ZMW)', 'Loss Value (ZMW)', 'Notes']);
+                periodAdj.forEach(a => rows.push([a.id, a.date, a.prodName, a.reason, a.qty, (a.costAtTime||0).toFixed(2), (a.lossValue||0).toFixed(2), a.notes||'']));
+                rows.push(['', '', '', '', '', 'TOTAL LOSS', pl.writeoffs.toFixed(2)]);
+            }
+
+            downloadCSV(`ZamAgro_PL_${pl.period.replace(/\s/g,'_')}.csv`, rows);
         }
 
         function exportCSV(type) {
@@ -3379,13 +3856,50 @@
                 headers = ['ID', 'Product', 'Category', 'Unit', 'Qty', 'Unit Cost (ZMW)', 'Total Value (ZMW)', 'Status'];
                 rows = db.inventory.map(i => [i.id, i.name, i.cat, i.unit, i.qty, i.cost.toFixed(2), (i.qty * i.cost).toFixed(2), i.status]);
             } else if (type === 'sales') {
-                headers = ['ID', 'Date', 'Customer', 'Product', 'Qty', 'Total (ZMW)', 'Method'];
-                rows = db.sales.map(s => {
-                    const prod = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName;
-                    return [s.id, s.date, s.cust, prod, s.qty, s.total.toFixed(2), s.method];
+                headers = ['ID', 'Date', 'Customer', 'Product', 'Qty', 'Unit Price (ZMW)', 'Line Total (ZMW)', 'Method'];
+                rows = [];
+                db.sales.forEach(s => {
+                    if (s.items && s.items.length > 0) {
+                        s.items.forEach((li, idx) => {
+                            const prod = db.inventory.find(i => i.id === li.prodId)?.name || li.prodName;
+                            rows.push([
+                                idx === 0 ? s.id : '',
+                                idx === 0 ? s.date : '',
+                                idx === 0 ? s.cust : '',
+                                prod, li.qty,
+                                li.unitPrice.toFixed(2),
+                                li.lineTotal.toFixed(2),
+                                idx === 0 ? s.method : ''
+                            ]);
+                        });
+                        // Grand total row for multi-item
+                        if (s.items.length > 1) rows.push(['', '', '', 'SALE TOTAL', '', '', s.total.toFixed(2), '']);
+                    } else {
+                        const prod = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName;
+                        const unitPrice = s.qty > 0 ? (s.total / s.qty) : 0;
+                        rows.push([s.id, s.date, s.cust, prod, s.qty, unitPrice.toFixed(2), s.total.toFixed(2), s.method]);
+                    }
                 });
+            } else if (type === 'purchases') {
+                headers = ['ID', 'Date', 'Supplier', 'Product', 'Qty', 'Unit Cost (ZMW)', 'Total Cost (ZMW)'];
+                rows = db.purchases.map(p => {
+                    const unitCost = p.qty > 0 ? (p.total / p.qty) : 0;
+                    const prodName = db.inventory.find(i => i.id === p.prodId)?.name || p.prodName || '';
+                    return [p.id, p.date, p.supplier || '', prodName, p.qty, unitCost.toFixed(2), p.total.toFixed(2)];
+                });
+            } else if (type === 'expenses') {
+                headers = ['ID', 'Date', 'Category', 'Description', 'Amount (ZMW)'];
+                rows = db.expenses.map(e => [e.id, e.date, e.cat, e.desc || '', e.amt.toFixed(2)]);
+            } else if (type === 'adjustments') {
+                headers = ['ID', 'Date', 'Product', 'Type', 'Direction', 'Qty', 'Cost at Time (ZMW)', 'Loss Value (ZMW)', 'Reason', 'Notes'];
+                rows = db.adjustments.map(a => [
+                    a.id, a.date, a.prodName, a.adjType, a.direction, a.qty,
+                    (a.costAtTime || 0).toFixed(2), (a.lossValue || 0).toFixed(2),
+                    a.reason, a.notes || ''
+                ]);
             }
-            const label = type === 'inventory' ? 'Stock' : 'Sales';
+            const labelMap = { inventory: 'Stock', sales: 'Sales', purchases: 'Purchases', expenses: 'Expenses', adjustments: 'Adjustments' };
+            const label = labelMap[type] || type;
             const coName = getCompanyInfo().name;
             downloadCSV(`ZamAgro_${label}_${new Date().toISOString().slice(0,10)}.csv`, [
                 [`${coName} — ${label} Export ${new Date().toLocaleDateString('en-GB')}`],
@@ -3398,15 +3912,27 @@
         function printReceipt(saleId) {
             const sale = db.sales.find(s => s.id === saleId);
             if (!sale) return;
-            const prodName = db.inventory.find(i => i.id === sale.prodId)?.name || sale.prodName;
-            const unitPrice = sale.qty > 0 ? (sale.total / sale.qty) : 0;
-            const momoRow = sale.momoRef
-                ? `<div class="receipt-row"><span>MoMo Ref:</span><span>${esc(sale.momoRef)}</span></div>`
-                : '';
             const co = getCompanyInfo();
-            const logoRow   = co.logo    ? `<img src="${co.logo}" class="receipt-logo" alt="">` : '';
+            const logoRow    = co.logo    ? `<img src="${co.logo}" class="receipt-logo" alt="">` : '';
             const phoneRow   = co.phone   ? `<div style="text-align:center;font-size:.78rem;color:#555;">${esc(co.phone)}</div>` : '';
             const addressRow = co.address ? `<div style="text-align:center;font-size:.78rem;color:#555;">${esc(co.address)}</div>` : '';
+            const momoRow    = sale.momoRef
+                ? `<div class="receipt-row"><span>MoMo Ref:</span><span>${esc(sale.momoRef)}</span></div>` : '';
+
+            // Build item lines — support both multi-item (items[]) and legacy single-product
+            let itemLines = '';
+            if (sale.items && sale.items.length > 0) {
+                itemLines = sale.items.map(li => {
+                    const name = db.inventory.find(p => p.id === li.prodId)?.name || li.prodName;
+                    return `<div class="receipt-row"><span>${esc(name)}</span></div>
+                            <div class="receipt-row"><span>&nbsp;&nbsp;${li.qty} × ${formatZMW(li.unitPrice)}</span><span>${formatZMW(li.lineTotal)}</span></div>`;
+                }).join('');
+            } else {
+                const prodName  = db.inventory.find(i => i.id === sale.prodId)?.name || sale.prodName;
+                const unitPrice = sale.qty > 0 ? (sale.total / sale.qty) : 0;
+                itemLines = `<div class="receipt-row"><span>${esc(prodName)}</span></div>
+                             <div class="receipt-row"><span>&nbsp;&nbsp;${sale.qty} × ${formatZMW(unitPrice)}</span><span>${formatZMW(sale.total)}</span></div>`;
+            }
 
             document.getElementById('receipt-body').innerHTML = `
                 ${logoRow}
@@ -3422,14 +3948,177 @@
                 ${momoRow}
                 <hr class="receipt-divider">
                 <div class="receipt-row"><span><strong>Item</strong></span><span><strong>ZMW</strong></span></div>
-                <div class="receipt-row"><span>${esc(prodName)}</span></div>
-                <div class="receipt-row"><span>&nbsp;&nbsp;${esc(sale.qty)} × ${formatZMW(unitPrice)}</span><span>${formatZMW(sale.total)}</span></div>
+                ${itemLines}
                 <hr class="receipt-divider">
                 <div class="receipt-row receipt-total"><span>TOTAL</span><span>${formatZMW(sale.total)}</span></div>
                 <hr class="receipt-divider">
                 <div style="text-align:center; font-size:0.78rem; margin-top:8px; color:#555;">Thank you for your business!<br>Powered by ZamAgro Track</div>
             `;
             openModal('modal-receipt');
+        }
+
+        // --- INVOICE / QUOTATION GENERATOR ---
+        // Standalone document builder: pulls product names & prices from inventory,
+        // but does NOT touch stock levels or create a sale record — it's purely a
+        // printable/shareable customer-facing document (a quote may never close).
+
+        let invoiceItems = [];
+
+        function openInvoiceBuilder() {
+            if (db.inventory.length === 0) {
+                showToast('Add at least one product to Inventory first', 'danger');
+                return;
+            }
+            invoiceItems = [{ prodId: '', qty: 1, price: 0 }];
+            document.getElementById('inv-doc-type').value = 'Invoice';
+            document.getElementById('inv-doc-cust').value = '';
+            document.getElementById('inv-doc-phone').value = '';
+            document.getElementById('inv-doc-notes').value = '';
+            renderInvoiceItemRows();
+            openModal('modal-invoice-builder');
+        }
+
+        function renderInvoiceItemRows() {
+            const wrap = document.getElementById('invoice-items-rows');
+            const prodOptions = (selectedId) => db.inventory.map(i =>
+                `<option value="${esc(i.id)}" ${selectedId === i.id ? 'selected' : ''}>${esc(i.name)} (Qty: ${i.qty})</option>`
+            ).join('');
+
+            wrap.innerHTML = invoiceItems.map((item, idx) => `
+                <div class="invoice-item-row" style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.6rem;flex-wrap:wrap;">
+                    <div class="form-group" style="margin:0;flex:2;min-width:150px;">
+                        <select onchange="setInvoiceItemProduct(${idx}, this)">
+                            <option value="">Select Product</option>
+                            ${prodOptions(item.prodId)}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:60px;">
+                        <input type="number" min="1" value="${item.qty}" placeholder="Qty" oninput="updateInvoiceItemField(${idx}, 'qty', this.value)">
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:85px;">
+                        <input type="number" min="0" step="0.01" value="${item.price}" placeholder="Price" oninput="updateInvoiceItemField(${idx}, 'price', this.value)">
+                    </div>
+                    <div id="invoice-line-total-${idx}" style="flex:1;min-width:85px;font-weight:700;text-align:right;padding-bottom:10px;">${formatZMW((item.qty || 0) * (item.price || 0))}</div>
+                    <button type="button" class="btn btn-sm btn-danger" style="padding:9px 11px;margin-bottom:1rem;" onclick="removeInvoiceItemRow(${idx})">✕</button>
+                </div>
+            `).join('');
+
+            updateInvoiceGrandTotal();
+        }
+
+        function setInvoiceItemProduct(idx, selectEl) {
+            const prod = db.inventory.find(i => i.id === selectEl.value);
+            invoiceItems[idx].prodId = selectEl.value;
+            invoiceItems[idx].price = prod ? (prod.price || 0) : 0;
+            if (!invoiceItems[idx].qty) invoiceItems[idx].qty = 1;
+            renderInvoiceItemRows();
+        }
+
+        function updateInvoiceItemField(idx, field, value) {
+            invoiceItems[idx][field] = field === 'qty' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
+            const item = invoiceItems[idx];
+            const lineTotalEl = document.getElementById(`invoice-line-total-${idx}`);
+            if (lineTotalEl) lineTotalEl.textContent = formatZMW((item.qty || 0) * (item.price || 0));
+            updateInvoiceGrandTotal();
+        }
+
+        function updateInvoiceGrandTotal() {
+            const total = invoiceItems.reduce((sum, i) => sum + (i.qty || 0) * (i.price || 0), 0);
+            const totalEl = document.getElementById('invoice-items-total');
+            if (totalEl) totalEl.textContent = formatZMW(total);
+        }
+
+        function addInvoiceItemRow() {
+            invoiceItems.push({ prodId: '', qty: 1, price: 0 });
+            renderInvoiceItemRows();
+        }
+
+        function removeInvoiceItemRow(idx) {
+            if (invoiceItems.length <= 1) {
+                showToast('At least one item is required', 'danger');
+                return;
+            }
+            invoiceItems.splice(idx, 1);
+            renderInvoiceItemRows();
+        }
+
+        function generateInvoiceDoc() {
+            const type = document.getElementById('inv-doc-type').value; // 'Invoice' | 'Quotation'
+            const cust = document.getElementById('inv-doc-cust').value.trim();
+            const phone = document.getElementById('inv-doc-phone').value.trim();
+            const notes = document.getElementById('inv-doc-notes').value.trim();
+
+            if (!cust) {
+                showToast('Customer name is required', 'danger');
+                return;
+            }
+            const validItems = invoiceItems.filter(i => i.prodId && i.qty > 0);
+            if (validItems.length === 0) {
+                showToast('Add at least one product line', 'danger');
+                return;
+            }
+
+            const lines = validItems.map(i => {
+                const prod = db.inventory.find(p => p.id === i.prodId);
+                return {
+                    name: prod ? prod.name : '(product removed)',
+                    unit: prod ? (prod.unit || '') : '',
+                    qty: i.qty,
+                    price: i.price,
+                    total: i.qty * i.price
+                };
+            });
+            const grandTotal = lines.reduce((sum, l) => sum + l.total, 0);
+
+            const docNo = uid(type === 'Invoice' ? 'INV' : 'QUO');
+            const docDate = new Date().toLocaleDateString('en-GB');
+            let validUntilRow = '';
+            if (type === 'Quotation') {
+                const d = new Date();
+                d.setDate(d.getDate() + 14);
+                validUntilRow = `<div class="invoice-row"><span>Valid Until:</span><span>${esc(d.toLocaleDateString('en-GB'))}</span></div>`;
+            }
+
+            const co = getCompanyInfo();
+            const logoRow      = co.logo    ? `<img src="${co.logo}" class="invoice-logo" alt="">` : '';
+            const phoneRowCo    = co.phone   ? `<div class="invoice-co-sub">${esc(co.phone)}</div>` : '';
+            const addressRowCo  = co.address ? `<div class="invoice-co-sub">${esc(co.address)}</div>` : '';
+            const customerPhoneRow = phone ? `<div class="invoice-row"><span>Phone:</span><span>${esc(phone)}</span></div>` : '';
+            const notesBlock = notes ? `<div class="invoice-notes"><strong>Notes:</strong> ${esc(notes)}</div>` : '';
+
+            const itemRows = lines.map(l => `
+                <tr>
+                    <td>${esc(l.name)}</td>
+                    <td style="text-align:center;">${esc(l.qty)}${l.unit ? ' ' + esc(l.unit) : ''}</td>
+                    <td style="text-align:right;">${formatZMW(l.price)}</td>
+                    <td style="text-align:right;">${formatZMW(l.total)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('invoice-print-body').innerHTML = `
+                <div class="invoice-header">
+                    ${logoRow}
+                    <div class="invoice-co-name">${co.logo ? '' : '🌱 '}${esc(co.name)}</div>
+                    ${phoneRowCo}
+                    ${addressRowCo}
+                </div>
+                <div class="invoice-doc-title">${type === 'Invoice' ? 'INVOICE' : 'QUOTATION'}</div>
+                <div class="invoice-row"><span>No:</span><span>${esc(docNo)}</span></div>
+                <div class="invoice-row"><span>Date:</span><span>${esc(docDate)}</span></div>
+                ${validUntilRow}
+                <div class="invoice-row"><span>Customer:</span><span>${esc(cust)}</span></div>
+                ${customerPhoneRow}
+                <table class="invoice-table">
+                    <thead><tr><th>Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit Price</th><th style="text-align:right;">Total</th></tr></thead>
+                    <tbody>${itemRows}</tbody>
+                </table>
+                <div class="invoice-grand-total"><span>GRAND TOTAL</span><span>${formatZMW(grandTotal)}</span></div>
+                ${notesBlock}
+                <div class="invoice-footer">${type === 'Invoice' ? 'Thank you for your business!' : 'Thank you for considering us — we look forward to working with you.'}<br>Powered by ZamAgro Track</div>
+            `;
+
+            closeModal('modal-invoice-builder');
+            openModal('modal-invoice-print');
         }
 
         function handleAddInventory(e) {
@@ -3487,7 +4176,11 @@
             renderCashFlow();
         }
 
-        function renderCashFlow() {
+        // --- CASH FLOW CALCULATION LAYER ---
+        // Same pattern as computePL(): calculation kept separate from DOM rendering,
+        // so the numbers can be reused (e.g. a future export) without ever drifting
+        // out of sync with what's shown on screen.
+        function computeCashFlow(period) {
             // Parse DD/MM/YYYY → comparable ISO string YYYY-MM-DD
             function toISO(ddmmyyyy) {
                 const [d, m, y] = ddmmyyyy.split('/');
@@ -3505,14 +4198,16 @@
 
             function inPeriod(dateStr) {
                 const iso = toISO(dateStr);
-                if (cashFlowPeriod === 'today') return iso === todayISO;
+                if (period === 'today') return iso === todayISO;
                 return iso >= weekStartISO && iso <= todayISO;
             }
 
+            const salesInPeriod = db.sales.filter(s => inPeriod(s.date));
+
             // Cash IN: sales (exclude pure Credit — no cash received yet)
-            const salesToday = db.sales.filter(s => inPeriod(s.date) && s.method !== 'Credit');
-            const cashIn  = salesToday.reduce((sum, s) => sum + s.total, 0);
-            const txnCount = db.sales.filter(s => inPeriod(s.date)).length; // all txns incl credit
+            const cashSales = salesInPeriod.filter(s => s.method !== 'Credit');
+            const cashIn    = cashSales.reduce((sum, s) => sum + s.total, 0);
+            const txnCount  = salesInPeriod.length; // all txns incl credit
 
             // Cash OUT: purchases + expenses
             const cashOutPur = db.purchases.filter(p => inPeriod(p.date)).reduce((sum, p) => sum + p.total, 0);
@@ -3521,20 +4216,27 @@
 
             const net = cashIn - cashOut;
 
-            document.getElementById('cf-cash-in').textContent  = formatZMW(cashIn);
-            document.getElementById('cf-cash-out').textContent = formatZMW(cashOut);
-            document.getElementById('cf-txns').textContent     = txnCount;
+            const creditSales = salesInPeriod.filter(s => s.method === 'Credit');
+            const creditAmt   = creditSales.reduce((sum, s) => sum + s.total, 0);
+
+            return { period, cashIn, cashOutPur, cashOutExp, cashOut, net, txnCount, creditAmt, creditCount: creditSales.length };
+        }
+
+        function renderCashFlow() {
+            const cf = computeCashFlow(cashFlowPeriod);
+
+            document.getElementById('cf-cash-in').textContent  = formatZMW(cf.cashIn);
+            document.getElementById('cf-cash-out').textContent = formatZMW(cf.cashOut);
+            document.getElementById('cf-txns').textContent     = cf.txnCount;
 
             const netEl = document.getElementById('cf-net');
-            netEl.textContent = formatZMW(net);
-            netEl.style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
+            netEl.textContent = formatZMW(cf.net);
+            netEl.style.color = cf.net >= 0 ? 'var(--success)' : 'var(--danger)';
 
             // Credit note
-            const creditSales = db.sales.filter(s => inPeriod(s.date) && s.method === 'Credit');
-            const creditAmt   = creditSales.reduce((sum, s) => sum + s.total, 0);
             const note = document.getElementById('cf-credit-note');
-            note.textContent = creditAmt > 0
-                ? `ℹ️ ${formatZMW(creditAmt)} in credit sales not counted as cash in (${creditSales.length} txn${creditSales.length > 1 ? 's' : ''}).`
+            note.textContent = cf.creditAmt > 0
+                ? `ℹ️ ${formatZMW(cf.creditAmt)} in credit sales not counted as cash in (${cf.creditCount} txn${cf.creditCount > 1 ? 's' : ''}).`
                 : '';
         }
 
@@ -3616,9 +4318,13 @@
         }
 
         function prepareSaleModal() {
-            populateProdSelect('sale-prod');
+            if (db.inventory.length === 0) { showToast('Add at least one product to Inventory first', 'danger'); return; }
+            saleItems = [{ prodId: '', qty: 1, price: 0 }];
+            document.getElementById('sale-cust').value = '';
+            document.getElementById('sale-method').value = 'Cash';
             document.getElementById('sale-momo-ref').value = '';
             toggleMomoField();
+            renderSaleItemRows();
             openModal('modal-sale');
         }
         function toggleMomoField() {
@@ -3633,63 +4339,157 @@
             openModal('modal-purchase');
         }
 
-        function handleAddSale(e) {
-            e.preventDefault();
-            const prodId = document.getElementById('sale-prod').value;
-            const qty = parseInt(document.getElementById('sale-qty').value);
-            const price = parseFloat(document.getElementById('sale-price').value);
+        // ── MULTI-ITEM SALE ──────────────────────────────────────────────
+        let saleItems = [{ prodId: '', qty: 1, price: 0 }];
+
+        function renderSaleItemRows() {
+            const wrap = document.getElementById('sale-items-rows');
+            if (!wrap) return;
+            const inv = db.inventory;
+
+            wrap.innerHTML = saleItems.map((item, idx) => {
+                const options = inv.map(p =>
+                    `<option value="${esc(p.id)}" data-price="${p.price || 0}" ${p.id === item.prodId ? 'selected' : ''}>${esc(p.name)} (Stock: ${p.qty})</option>`
+                ).join('');
+                const lineTotal = (item.qty || 0) * (item.price || 0);
+                return `
+                <div style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.6rem;flex-wrap:wrap;">
+                    <div class="form-group" style="margin:0;flex:2;min-width:150px;">
+                        ${idx === 0 ? '<label style="font-size:.8rem;font-weight:600;">Product</label>' : ''}
+                        <select onchange="setSaleItemProduct(${idx},this)">
+                            <option value="">— Select Product —</option>
+                            ${options}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:65px;">
+                        ${idx === 0 ? '<label style="font-size:.8rem;font-weight:600;">Qty</label>' : ''}
+                        <input type="number" min="1" value="${item.qty}" placeholder="Qty"
+                            oninput="updateSaleItemField(${idx},'qty',this.value)">
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:90px;">
+                        ${idx === 0 ? '<label style="font-size:.8rem;font-weight:600;">Unit Price</label>' : ''}
+                        <input type="number" min="0" step="0.01" value="${item.price || ''}" placeholder="Price"
+                            oninput="updateSaleItemField(${idx},'price',this.value)">
+                    </div>
+                    <div id="sale-line-total-${idx}" style="flex:1;min-width:80px;font-weight:700;text-align:right;padding-bottom:10px;${idx === 0 ? 'padding-top:22px;' : ''}">${formatZMW(lineTotal)}</div>
+                    ${saleItems.length > 1
+                        ? `<button type="button" class="btn btn-sm btn-danger" style="padding:8px 11px;margin-bottom:${idx === 0 ? '0' : '0'};${idx === 0 ? 'margin-top:20px;' : ''}" onclick="removeSaleItemRow(${idx})">✕</button>`
+                        : `<div style="width:33px;${idx === 0 ? 'margin-top:20px;' : ''}"></div>`}
+                </div>`;
+            }).join('');
+
+            updateSaleGrandTotal();
+        }
+
+        function setSaleItemProduct(idx, selectEl) {
+            const price = parseFloat(selectEl.selectedOptions[0]?.dataset.price || 0);
+            saleItems[idx].prodId = selectEl.value;
+            saleItems[idx].price  = price;
+            renderSaleItemRows();
+        }
+
+        function updateSaleItemField(idx, field, value) {
+            saleItems[idx][field] = field === 'qty' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
+            const el = document.getElementById(`sale-line-total-${idx}`);
+            if (el) el.textContent = formatZMW((saleItems[idx].qty || 0) * (saleItems[idx].price || 0));
+            updateSaleGrandTotal();
+        }
+
+        function addSaleItemRow() {
+            saleItems.push({ prodId: '', qty: 1, price: 0 });
+            renderSaleItemRows();
+        }
+
+        function removeSaleItemRow(idx) {
+            if (saleItems.length <= 1) { showToast('At least one item is required', 'danger'); return; }
+            saleItems.splice(idx, 1);
+            renderSaleItemRows();
+        }
+
+        function updateSaleGrandTotal() {
+            const total = saleItems.reduce((sum, i) => sum + (i.qty || 0) * (i.price || 0), 0);
+            const el = document.getElementById('sale-items-total');
+            if (el) el.textContent = formatZMW(total);
+        }
+
+        function submitMultiSale() {
+            const cust   = (document.getElementById('sale-cust').value || '').trim();
             const method = document.getElementById('sale-method').value;
-            const cust = document.getElementById('sale-cust').value;
             const momoRef = method === 'Mobile Money' ? document.getElementById('sale-momo-ref').value.trim() : '';
 
+            if (!cust) { showToast('Customer name is required', 'danger'); return; }
+            if (method === 'Mobile Money' && !momoRef) { showToast('MoMo Transaction ID is required', 'danger'); return; }
+
+            const validItems = saleItems.filter(i => i.prodId && i.qty > 0 && i.price >= 0);
+            if (validItems.length === 0) { showToast('Add at least one product with a valid quantity', 'danger'); return; }
+
             const inv = db.inventory;
-            const product = inv.find(i => i.id === prodId);
-            if (!product || product.qty < qty) {
-                showToast("Insufficient Stock!", "danger");
-                return;
+
+            // Pre-validate all stock before touching anything
+            for (const si of validItems) {
+                const prod = inv.find(p => p.id === si.prodId);
+                if (!prod) { showToast(`Product not found — please re-select`, 'danger'); return; }
+                if (prod.qty < si.qty) { showToast(`Insufficient stock for ${prod.name} (have ${prod.qty}, need ${si.qty})`, 'danger'); return; }
             }
 
-            product.qty -= qty;
-            if(product.qty <= 0) product.status = "Out of Stock";
+            // Deduct stock for all items
+            const resolvedItems = validItems.map(si => {
+                const prod = inv.find(p => p.id === si.prodId);
+                prod.qty -= si.qty;
+                if (prod.qty <= 0) prod.status = 'Out of Stock';
+                return { prodId: si.prodId, prodName: prod.name, qty: si.qty, unitPrice: si.price, lineTotal: si.qty * si.price };
+            });
             db.inventory = inv;
 
-            const sales = db.sales;
+            const grandTotal = resolvedItems.reduce((sum, i) => sum + i.lineTotal, 0);
+
             const sale = {
-                id: uid('SAL'),
-                date: new Date().toLocaleDateString('en-GB'),
-                cust: cust,
-                prodId: prodId,
-                prodName: product.name,
-                qty: qty,
-                total: qty * price,
-                method: method,
-                momoRef: momoRef
+                id:      uid('SAL'),
+                date:    new Date().toLocaleDateString('en-GB'),
+                cust,
+                items:   resolvedItems,
+                // Legacy compat fields (first item) — so old code paths still work
+                prodId:   resolvedItems[0].prodId,
+                prodName: resolvedItems[0].prodName,
+                qty:      resolvedItems[0].qty,
+                total:    grandTotal,
+                method,
+                momoRef
             };
+
+            const sales = db.sales;
             sales.push(sale);
             db.sales = sales;
 
             if (method === 'Credit') {
+                // Auto-register customer if not already in the register
+                const customers = db.customers;
+                if (cust && !customers.find(c => c.name.toLowerCase() === cust.toLowerCase())) {
+                    customers.push({ id: uid('CST'), name: cust, phone: '', location: '', notes: '', createdAt: new Date().toLocaleDateString('en-GB') });
+                    db.customers = customers;
+                }
                 const credit = db.credit;
                 const due = new Date();
-                const creditTermDays = db.settings.creditTermDays || 30;
-                due.setDate(due.getDate() + creditTermDays);
+                due.setDate(due.getDate() + (db.settings.creditTermDays || 30));
                 credit.push({
-                    id: uid('CRD'),
-                    cust: cust,
-                    prod: product.name,
-                    amt: qty * price,
+                    id:      uid('CRD'),
+                    cust,
+                    prod:    resolvedItems.length === 1 ? resolvedItems[0].prodName : `${resolvedItems[0].prodName} +${resolvedItems.length - 1} more`,
+                    amt:     grandTotal,
                     dueDate: due.toLocaleDateString('en-GB'),
-                    status: "Outstanding"
+                    status:  'Outstanding'
                 });
                 db.credit = credit;
             }
 
             closeModal('modal-sale');
-            e.target.reset();
             refreshAll();
-            showToast("Sale Recorded & Stock Updated");
+            updateCustomerDatalist();
+            showToast('Sale Recorded & Stock Updated');
             printReceipt(sale.id);
         }
+
+        function handleAddSale(e) { if (e) e.preventDefault(); submitMultiSale(); }
 
         function handleAddPurchase(e) {
             e.preventDefault();
@@ -3701,9 +4501,16 @@
             const inv = db.inventory;
             const product = inv.find(i => i.id === prodId);
             if (product) {
+                const oldCost = product.cost || 0;
                 product.qty += qty;
+                product.cost = cost;  // Update cost price to latest purchase price
                 product.status = "Fresh";
                 db.inventory = inv;
+                if (oldCost > 0 && oldCost !== cost) {
+                    showToast(`Purchase Recorded & Cost Price Updated: K${oldCost.toFixed(2)} → K${cost.toFixed(2)}`);
+                } else {
+                    showToast("Purchase Recorded & Stock Increased");
+                }
             } else {
                 showToast("Product ID not found in Inventory", "danger");
                 return;
@@ -3724,7 +4531,6 @@
             closeModal('modal-purchase');
             e.target.reset();
             refreshAll();
-            showToast("Purchase Recorded & Stock Increased");
         }
 
         function handleAddExpense(e) {
@@ -3785,9 +4591,26 @@
         function handleAddFISP(e) {
             e.preventDefault();
             const fisp = db.fisp;
-            const prodId  = document.getElementById('fisp-prod').value;
-            const prodEl  = document.getElementById('fisp-prod');
+            const prodId   = document.getElementById('fisp-prod').value;
+            const prodEl   = document.getElementById('fisp-prod');
             const prodName = prodId && prodEl.selectedOptions[0] ? prodEl.selectedOptions[0].text : '';
+            const qtyRaw   = document.getElementById('fisp-qty').value;
+            const qty      = qtyRaw ? parseInt(qtyRaw) : null;
+
+            // Deduct stock if a product and qty are provided
+            if (prodId && qty) {
+                const inv = db.inventory;
+                const prod = inv.find(i => i.id === prodId);
+                if (!prod) { showToast('Product not found in inventory', 'danger'); return; }
+                if (prod.qty < qty) {
+                    showToast(`Insufficient stock for ${prod.name} (have ${prod.qty}, need ${qty})`, 'danger');
+                    return;
+                }
+                prod.qty -= qty;
+                if (prod.qty <= 0) prod.status = 'Out of Stock';
+                db.inventory = inv;
+            }
+
             fisp.push({
                 id:         uid('FISP'),
                 date:       new Date().toLocaleDateString('en-GB'),
@@ -3799,7 +4622,7 @@
                 val:        parseFloat(document.getElementById('fisp-val').value),
                 prodId:     prodId,
                 prodName:   prodName,
-                qty:        document.getElementById('fisp-qty').value ? parseInt(document.getElementById('fisp-qty').value) : null,
+                qty:        qty,
                 notes:      document.getElementById('fisp-notes').value.trim(),
                 status:     "Pending"
             });
@@ -3807,7 +4630,7 @@
             closeModal('modal-fisp');
             e.target.reset();
             refreshAll();
-            showToast("FISP Claim Added");
+            showToast(prodId && qty ? "FISP Claim Added & Stock Deducted" : "FISP Claim Added");
         }
 
         function payFISP(id) {
@@ -3830,6 +4653,818 @@
                 refreshAll();
                 showToast("Credit Marked as Paid");
             }
+        }
+
+        // ============================================================
+        // ✏️ EDIT / 🗑 DELETE — SALES, PURCHASES, EXPENSES, FISP, CREDIT
+        // ============================================================
+
+        // --- ADMIN RE-AUTH (for deletes) ---
+        let _reauthPending = null; // { type, id }
+
+        function deleteRecord(type, id) {
+            if (currentUser !== 'admin') { showToast('Only admins can delete records', 'danger'); return; }
+            _reauthPending = { type, id };
+            document.getElementById('reauth-pw').value = '';
+            document.getElementById('reauth-error').style.display = 'none';
+            openModal('modal-admin-reauth');
+            setTimeout(() => document.getElementById('reauth-pw').focus(), 120);
+        }
+
+        async function confirmReauthDelete() {
+            const pw = document.getElementById('reauth-pw').value;
+            const errEl = document.getElementById('reauth-error');
+            const accounts = getAccounts();
+            const isValid = accounts?.admin && await pbkdf2Hash(pw, accounts.admin.salt) === accounts.admin.hash;
+            if (!isValid) {
+                errEl.textContent = 'Incorrect password.';
+                errEl.style.display = 'block';
+                return;
+            }
+            closeModal('modal-admin-reauth');
+            if (!_reauthPending) return;
+            const { type, id } = _reauthPending;
+            _reauthPending = null;
+
+            // Reverse side-effects before removing the record
+            if (type === 'sales') {
+                const sale = db.sales.find(s => s.id === id);
+                if (sale) {
+                    const inv = db.inventory;
+                    // Restore stock for all items (multi-item or legacy)
+                    const saleLineItems = sale.items && sale.items.length > 0
+                        ? sale.items
+                        : [{ prodId: sale.prodId, qty: sale.qty }];
+                    saleLineItems.forEach(li => {
+                        const prod = inv.find(p => p.id === li.prodId);
+                        if (prod) { prod.qty += li.qty; prod.status = 'Fresh'; }
+                    });
+                    db.inventory = inv;
+                    // Remove linked credit record if it was a credit sale
+                    if (sale.method === 'Credit') {
+                        const linked = db.credit.find(c => c.cust === sale.cust && c.amt === sale.total);
+                        if (linked) db.credit = db.credit.filter(c => c !== linked);
+                    }
+                }
+                db.sales = db.sales.filter(s => s.id !== id);
+            } else if (type === 'purchases') {
+                const pur = db.purchases.find(p => p.id === id);
+                if (pur) {
+                    const inv = db.inventory;
+                    const prod = inv.find(i => i.id === pur.prodId);
+                    if (prod) {
+                        prod.qty = Math.max(0, prod.qty - pur.qty);
+                        prod.status = prod.qty > 0 ? 'Fresh' : 'Out of Stock';
+                        db.inventory = inv;
+                    }
+                }
+                db.purchases = db.purchases.filter(p => p.id !== id);
+            } else if (type === 'expenses') {
+                db.expenses = db.expenses.filter(e => e.id !== id);
+            } else if (type === 'adjustments') {
+                const adj = db.adjustments.find(a => a.id === id);
+                if (adj) {
+                    const inv  = db.inventory;
+                    const prod = inv.find(i => i.id === adj.prodId);
+                    if (prod) {
+                        // Reverse: if it was a downward adjustment, add qty back; if upward, subtract
+                        if (adj.direction === 'down') {
+                            prod.qty += adj.qty;
+                            prod.status = 'Fresh';
+                        } else {
+                            prod.qty = Math.max(0, prod.qty - adj.qty);
+                            if (prod.qty <= 0) prod.status = 'Out of Stock';
+                        }
+                        db.inventory = inv;
+                    }
+                }
+                db.adjustments = db.adjustments.filter(a => a.id !== id);
+            } else if (type === 'fisp') {
+                const fispItem = db.fisp.find(f => f.id === id);
+                if (fispItem && fispItem.prodId && fispItem.qty) {
+                    const inv = db.inventory;
+                    const prod = inv.find(i => i.id === fispItem.prodId);
+                    if (prod) {
+                        prod.qty += fispItem.qty;
+                        if (prod.qty > 0) prod.status = 'Fresh';
+                        db.inventory = inv;
+                    }
+                }
+                db.fisp = db.fisp.filter(f => f.id !== id);
+            } else if (type === 'credit') {
+                db.credit = db.credit.filter(c => c.id !== id);
+            }
+
+            refreshAll();
+            showToast('Record deleted', 'danger');
+        }
+
+        // --- EDIT SALE ---
+        function openEditSaleModal(id) {
+            const sale = db.sales.find(s => s.id === id);
+            if (!sale) return;
+            document.getElementById('edit-sale-id').value = sale.id;
+            document.getElementById('edit-sale-cust').value = sale.cust;
+            document.getElementById('edit-sale-method').value = sale.method;
+            document.getElementById('edit-sale-momo-ref').value = sale.momoRef || '';
+            toggleEditSaleMomo();
+
+            // Populate product dropdown (used for legacy single-item display)
+            const sel = document.getElementById('edit-sale-prod');
+            sel.innerHTML = '';
+            db.inventory.forEach(i => {
+                const opt = document.createElement('option');
+                opt.value = i.id; opt.textContent = `${i.name} (Stock: ${i.qty})`;
+                if (i.id === sale.prodId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+
+            // Build editSaleItems from items[] or legacy fields
+            if (sale.items && sale.items.length > 0) {
+                editSaleItems = sale.items.map(li => ({ prodId: li.prodId, qty: li.qty, price: li.unitPrice }));
+            } else {
+                const unitPrice = sale.qty > 0 ? (sale.total / sale.qty) : 0;
+                editSaleItems = [{ prodId: sale.prodId, qty: sale.qty, price: unitPrice }];
+            }
+            renderEditSaleItemRows();
+            openModal('modal-edit-sale');
+        }
+
+        function toggleEditSaleMomo() {
+            const isMomo = document.getElementById('edit-sale-method').value === 'Mobile Money';
+            document.getElementById('edit-momo-ref-group').classList.toggle('hidden', !isMomo);
+            document.getElementById('edit-sale-momo-ref').required = isMomo;
+        }
+
+        let editSaleItems = [];
+
+        function renderEditSaleItemRows() {
+            const wrap = document.getElementById('edit-sale-items-rows');
+            if (!wrap) return;
+            const inv = db.inventory;
+            wrap.innerHTML = editSaleItems.map((item, idx) => {
+                const options = inv.map(p =>
+                    `<option value="${esc(p.id)}" data-price="${p.price || 0}" ${p.id === item.prodId ? 'selected' : ''}>${esc(p.name)} (Stock: ${p.qty})</option>`
+                ).join('');
+                const lineTotal = (item.qty || 0) * (item.price || 0);
+                return `
+                <div style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.6rem;flex-wrap:wrap;">
+                    <div class="form-group" style="margin:0;flex:2;min-width:150px;">
+                        <select onchange="setEditSaleItemProduct(${idx},this)">
+                            <option value="">— Select Product —</option>
+                            ${options}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:65px;">
+                        <input type="number" min="1" value="${item.qty}" oninput="updateEditSaleItemField(${idx},'qty',this.value)">
+                    </div>
+                    <div class="form-group" style="margin:0;flex:1;min-width:90px;">
+                        <input type="number" min="0" step="0.01" value="${item.price || ''}" oninput="updateEditSaleItemField(${idx},'price',this.value)">
+                    </div>
+                    <div id="edit-sale-line-total-${idx}" style="flex:1;min-width:80px;font-weight:700;text-align:right;padding-bottom:10px;">${formatZMW(lineTotal)}</div>
+                    ${editSaleItems.length > 1
+                        ? `<button type="button" class="btn btn-sm btn-danger" style="padding:8px 11px;" onclick="removeEditSaleItemRow(${idx})">✕</button>`
+                        : '<div style="width:33px;"></div>'}
+                </div>`;
+            }).join('');
+            updateEditSaleGrandTotal();
+        }
+
+        function setEditSaleItemProduct(idx, selectEl) {
+            const price = parseFloat(selectEl.selectedOptions[0]?.dataset.price || 0);
+            editSaleItems[idx].prodId = selectEl.value;
+            editSaleItems[idx].price  = price;
+            renderEditSaleItemRows();
+        }
+
+        function updateEditSaleItemField(idx, field, value) {
+            editSaleItems[idx][field] = field === 'qty' ? (parseInt(value) || 0) : (parseFloat(value) || 0);
+            const el = document.getElementById(`edit-sale-line-total-${idx}`);
+            if (el) el.textContent = formatZMW((editSaleItems[idx].qty || 0) * (editSaleItems[idx].price || 0));
+            updateEditSaleGrandTotal();
+        }
+
+        function addEditSaleItemRow() {
+            editSaleItems.push({ prodId: '', qty: 1, price: 0 });
+            renderEditSaleItemRows();
+        }
+
+        function removeEditSaleItemRow(idx) {
+            if (editSaleItems.length <= 1) { showToast('At least one item is required', 'danger'); return; }
+            editSaleItems.splice(idx, 1);
+            renderEditSaleItemRows();
+        }
+
+        function updateEditSaleGrandTotal() {
+            const total = editSaleItems.reduce((sum, i) => sum + (i.qty || 0) * (i.price || 0), 0);
+            const el = document.getElementById('edit-sale-items-total');
+            if (el) el.textContent = formatZMW(total);
+        }
+
+        function handleEditSale(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-sale-id').value;
+            const sales = db.sales;
+            const sale = sales.find(s => s.id === id);
+            if (!sale) return;
+
+            const newMethod = document.getElementById('edit-sale-method').value;
+            const newMomo   = newMethod === 'Mobile Money' ? document.getElementById('edit-sale-momo-ref').value.trim() : '';
+            const newCust   = document.getElementById('edit-sale-cust').value.trim();
+
+            const validItems = editSaleItems.filter(i => i.prodId && i.qty > 0);
+            if (validItems.length === 0) { showToast('At least one valid product is required', 'danger'); return; }
+
+            // Restore original stock
+            const inv = db.inventory;
+            const originalItems = sale.items && sale.items.length > 0
+                ? sale.items
+                : [{ prodId: sale.prodId, qty: sale.qty }];
+            originalItems.forEach(li => {
+                const prod = inv.find(p => p.id === li.prodId);
+                if (prod) { prod.qty += li.qty; prod.status = 'Fresh'; }
+            });
+
+            // Pre-validate new stock
+            for (const si of validItems) {
+                const prod = inv.find(p => p.id === si.prodId);
+                if (!prod) { showToast('Product not found', 'danger'); return; }
+                if (prod.qty < si.qty) {
+                    // Roll back restore
+                    originalItems.forEach(li => { const p = inv.find(q => q.id === li.prodId); if (p) { p.qty -= li.qty; if (p.qty <= 0) p.status = 'Out of Stock'; } });
+                    showToast(`Insufficient stock for ${prod.name} (have ${prod.qty}, need ${si.qty})`, 'danger');
+                    return;
+                }
+            }
+
+            // Deduct new stock
+            const resolvedItems = validItems.map(si => {
+                const prod = inv.find(p => p.id === si.prodId);
+                prod.qty -= si.qty;
+                if (prod.qty <= 0) prod.status = 'Out of Stock';
+                return { prodId: si.prodId, prodName: prod.name, qty: si.qty, unitPrice: si.price, lineTotal: si.qty * si.price };
+            });
+            db.inventory = inv;
+
+            const grandTotal = resolvedItems.reduce((sum, i) => sum + i.lineTotal, 0);
+            sale.cust     = newCust;
+            sale.items    = resolvedItems;
+            sale.prodId   = resolvedItems[0].prodId;
+            sale.prodName = resolvedItems[0].prodName;
+            sale.qty      = resolvedItems[0].qty;
+            sale.total    = grandTotal;
+            sale.method   = newMethod;
+            sale.momoRef  = newMomo;
+            db.sales = sales;
+
+            closeModal('modal-edit-sale');
+            refreshAll();
+            showToast('Sale updated');
+        }
+
+        // --- EDIT PURCHASE ---
+        function openEditPurchaseModal(id) {
+            const pur = db.purchases.find(p => p.id === id);
+            if (!pur) return;
+            document.getElementById('edit-pur-id').value = pur.id;
+            document.getElementById('edit-pur-sup').value = pur.supplier;
+            document.getElementById('edit-pur-qty').value = pur.qty;
+            document.getElementById('edit-pur-cost').value = pur.total > 0 ? (pur.total / pur.qty).toFixed(2) : '';
+            const sel = document.getElementById('edit-pur-prod');
+            sel.innerHTML = '';
+            db.inventory.forEach(i => {
+                const opt = document.createElement('option');
+                opt.value = i.id; opt.textContent = i.name;
+                if (i.id === pur.prodId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            openModal('modal-edit-purchase');
+        }
+
+        function handleEditPurchase(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-pur-id').value;
+            const purchases = db.purchases;
+            const pur = purchases.find(p => p.id === id);
+            if (!pur) return;
+
+            const newProdId = document.getElementById('edit-pur-prod').value;
+            const newQty    = parseInt(document.getElementById('edit-pur-qty').value);
+            const newCost   = parseFloat(document.getElementById('edit-pur-cost').value);
+            const newSup    = document.getElementById('edit-pur-sup').value.trim();
+
+            // Reverse old stock addition
+            const inv = db.inventory;
+            const oldProd = inv.find(i => i.id === pur.prodId);
+            if (oldProd) {
+                oldProd.qty = Math.max(0, oldProd.qty - pur.qty);
+                oldProd.status = oldProd.qty > 0 ? 'Fresh' : 'Out of Stock';
+            }
+
+            // Apply new stock addition
+            const newProd = inv.find(i => i.id === newProdId);
+            if (!newProd) { showToast('Product not found', 'danger'); return; }
+            newProd.qty += newQty;
+            newProd.status = 'Fresh';
+            db.inventory = inv;
+
+            pur.prodId   = newProdId;
+            pur.prodName = newProd.name;
+            pur.supplier = newSup;
+            pur.qty      = newQty;
+            pur.total    = newQty * newCost;
+            db.purchases = purchases;
+
+            closeModal('modal-edit-purchase');
+            refreshAll();
+            showToast('Purchase updated');
+        }
+
+        // --- EDIT EXPENSE ---
+        function openEditExpenseModal(id) {
+            const exp = db.expenses.find(e => e.id === id);
+            if (!exp) return;
+            document.getElementById('edit-exp-id').value  = exp.id;
+            document.getElementById('edit-exp-cat').value = exp.cat;
+            document.getElementById('edit-exp-desc').value= exp.desc;
+            document.getElementById('edit-exp-amt').value = exp.amt;
+            openModal('modal-edit-expense');
+        }
+
+        function handleEditExpense(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-exp-id').value;
+            const expenses = db.expenses;
+            const exp = expenses.find(e => e.id === id);
+            if (!exp) return;
+            exp.cat  = document.getElementById('edit-exp-cat').value;
+            exp.desc = document.getElementById('edit-exp-desc').value.trim();
+            exp.amt  = parseFloat(document.getElementById('edit-exp-amt').value);
+            db.expenses = expenses;
+            closeModal('modal-edit-expense');
+            refreshAll();
+            showToast('Expense updated');
+        }
+
+        // --- EDIT FISP ---
+        function openEditFISPModal(id) {
+            const item = db.fisp.find(f => f.id === id);
+            if (!item) return;
+            document.getElementById('edit-fisp-id').value           = item.id;
+            document.getElementById('edit-fisp-farmer-name').value  = item.farmerName || item.name || '';
+            document.getElementById('edit-fisp-nrc').value          = item.nrc || '';
+            document.getElementById('edit-fisp-phone').value        = item.phone || '';
+            document.getElementById('edit-fisp-camp').value         = item.camp || '';
+            document.getElementById('edit-fisp-voucher').value      = item.voucher || '';
+            document.getElementById('edit-fisp-val').value          = item.val || '';
+            document.getElementById('edit-fisp-qty').value          = item.qty || '';
+            document.getElementById('edit-fisp-notes').value        = item.notes || '';
+            document.getElementById('edit-fisp-status').value       = item.status || 'Pending';
+            // Product dropdown
+            const sel = document.getElementById('edit-fisp-prod');
+            sel.innerHTML = '<option value="">— Select product —</option>';
+            db.inventory.forEach(i => {
+                const opt = document.createElement('option');
+                opt.value = i.id; opt.textContent = i.name;
+                if (i.id === item.prodId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            openModal('modal-edit-fisp');
+        }
+
+        function handleEditFISP(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-fisp-id').value;
+            const fisp = db.fisp;
+            const item = fisp.find(f => f.id === id);
+            if (!item) return;
+            const newProdId  = document.getElementById('edit-fisp-prod').value;
+            const prodEl     = document.getElementById('edit-fisp-prod');
+            const newProdName = newProdId && prodEl.selectedOptions[0] ? prodEl.selectedOptions[0].text : '';
+            const newQty     = document.getElementById('edit-fisp-qty').value ? parseInt(document.getElementById('edit-fisp-qty').value) : null;
+
+            // Reconcile inventory: restore old deduction, apply new one
+            const oldProdId = item.prodId;
+            const oldQty    = item.qty;
+            const inv = db.inventory;
+
+            // Restore old deduction (if it had one)
+            if (oldProdId && oldQty) {
+                const oldProd = inv.find(i => i.id === oldProdId);
+                if (oldProd) {
+                    oldProd.qty += oldQty;
+                    if (oldProd.qty > 0) oldProd.status = 'Fresh';
+                }
+            }
+
+            // Apply new deduction (if product + qty set)
+            if (newProdId && newQty) {
+                const newProd = inv.find(i => i.id === newProdId);
+                if (!newProd) { showToast('Product not found in inventory', 'danger'); return; }
+                if (newProd.qty < newQty) {
+                    // Rollback the restore we just did before returning
+                    if (oldProdId && oldQty) {
+                        const rollbackProd = inv.find(i => i.id === oldProdId);
+                        if (rollbackProd) { rollbackProd.qty -= oldQty; }
+                    }
+                    showToast(`Insufficient stock for ${newProd.name} (have ${newProd.qty}, need ${newQty})`, 'danger');
+                    return;
+                }
+                newProd.qty -= newQty;
+                if (newProd.qty <= 0) newProd.status = 'Out of Stock';
+            }
+
+            db.inventory = inv;
+
+            item.farmerName = document.getElementById('edit-fisp-farmer-name').value.trim();
+            item.nrc        = document.getElementById('edit-fisp-nrc').value.trim();
+            item.phone      = document.getElementById('edit-fisp-phone').value.trim();
+            item.camp       = document.getElementById('edit-fisp-camp').value.trim();
+            item.voucher    = document.getElementById('edit-fisp-voucher').value.trim();
+            item.val        = parseFloat(document.getElementById('edit-fisp-val').value);
+            item.qty        = newQty;
+            item.notes      = document.getElementById('edit-fisp-notes').value.trim();
+            item.status     = document.getElementById('edit-fisp-status').value;
+            item.prodId     = newProdId;
+            item.prodName   = newProdName;
+            db.fisp = fisp;
+            closeModal('modal-edit-fisp');
+            refreshAll();
+            showToast('FISP claim updated & stock reconciled');
+        }
+
+        // --- EDIT CREDIT ---
+        function openEditCreditModal(id) {
+            const crd = db.credit.find(c => c.id === id);
+            if (!crd) return;
+            document.getElementById('edit-crd-id').value     = crd.id;
+            document.getElementById('edit-crd-cust').value   = crd.cust;
+            document.getElementById('edit-crd-prod').value   = crd.prod;
+            document.getElementById('edit-crd-amt').value    = crd.amt;
+            document.getElementById('edit-crd-status').value = crd.status;
+            // Convert DD/MM/YYYY to YYYY-MM-DD for date input
+            if (crd.dueDate) {
+                const [d, m, y] = crd.dueDate.split('/');
+                document.getElementById('edit-crd-due').value = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            } else {
+                document.getElementById('edit-crd-due').value = '';
+            }
+            openModal('modal-edit-credit');
+        }
+
+        function handleEditCredit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-crd-id').value;
+            const credit = db.credit;
+            const crd = credit.find(c => c.id === id);
+            if (!crd) return;
+            crd.cust   = document.getElementById('edit-crd-cust').value.trim();
+            crd.prod   = document.getElementById('edit-crd-prod').value.trim();
+            crd.amt    = parseFloat(document.getElementById('edit-crd-amt').value);
+            crd.status = document.getElementById('edit-crd-status').value;
+            // Convert YYYY-MM-DD back to DD/MM/YYYY
+            const raw = document.getElementById('edit-crd-due').value;
+            if (raw) {
+                const [y, m, d] = raw.split('-');
+                crd.dueDate = `${d}/${m}/${y}`;
+            }
+            db.credit = credit;
+            closeModal('modal-edit-credit');
+            refreshAll();
+            showToast('Credit record updated');
+        }
+
+
+
+        // ============================================================
+        // ⚠️ STOCK ADJUSTMENTS
+        // ============================================================
+
+        function switchInvTab(tab) {
+            const isStock = tab === 'stock';
+            document.getElementById('inv-panel-stock').classList.toggle('hidden', !isStock);
+            document.getElementById('inv-panel-adjustments').classList.toggle('hidden', isStock);
+            document.getElementById('inv-tab-stock').style.cssText       = isStock ? 'background:var(--primary);color:white;' : 'background:var(--surface-2);border:1.5px solid var(--border);';
+            document.getElementById('inv-tab-adjustments').style.cssText = !isStock ? 'background:var(--primary);color:white;' : 'background:var(--surface-2);border:1.5px solid var(--border);';
+            if (!isStock) renderAdjustments();
+        }
+
+        function openAdjustmentModal() {
+            const sel = document.getElementById('adj-prod');
+            sel.innerHTML = '<option value="">— Select product —</option>';
+            db.inventory.forEach(i => {
+                sel.innerHTML += `<option value="${esc(i.id)}" data-cost="${i.cost||0}" data-qty="${i.qty}">${esc(i.name)} (Stock: ${i.qty})</option>`;
+            });
+            document.getElementById('adj-qty').value    = '';
+            document.getElementById('adj-notes').value  = '';
+            document.getElementById('adj-loss-preview').textContent = 'K0.00';
+            document.getElementById('adj-loss-row').style.display = '';
+            openModal('modal-adjustment');
+        }
+
+        function onAdjProdChange() { onAdjQtyChange(); }
+
+        function onAdjTypeChange() {
+            const type = document.getElementById('adj-type').value;
+            // Loss value only makes sense for downward adjustments
+            const showLoss = type !== 'correction-up';
+            document.getElementById('adj-loss-row').style.display = showLoss ? '' : 'none';
+            // Sync reason dropdown to type
+            const reasonSel = document.getElementById('adj-reason');
+            if (type === 'write-off')        reasonSel.value = 'Spoilage / Expiry';
+            if (type === 'correction-down')  reasonSel.value = 'Stock Count Correction';
+            if (type === 'correction-up')    reasonSel.value = 'Stock Count Correction';
+            if (type === 'donation')         reasonSel.value = 'Donation / Sample';
+            onAdjQtyChange();
+        }
+
+        function onAdjQtyChange() {
+            const prodEl  = document.getElementById('adj-prod');
+            const qty     = parseInt(document.getElementById('adj-qty').value) || 0;
+            const opt     = prodEl.selectedOptions[0];
+            const cost    = parseFloat(opt?.dataset.cost || 0);
+            const type    = document.getElementById('adj-type').value;
+            const loss    = type !== 'correction-up' ? qty * cost : 0;
+            document.getElementById('adj-loss-preview').textContent = formatZMW(loss);
+        }
+
+        function handleAddAdjustment(e) {
+            e.preventDefault();
+            const prodEl   = document.getElementById('adj-prod');
+            const prodId   = prodEl.value;
+            const adjType  = document.getElementById('adj-type').value;
+            const qty      = parseInt(document.getElementById('adj-qty').value);
+            const reason   = document.getElementById('adj-reason').value;
+            const notes    = document.getElementById('adj-notes').value.trim();
+
+            if (!prodId)   { showToast('Select a product', 'danger'); return; }
+            if (!qty || qty < 1) { showToast('Qty must be at least 1', 'danger'); return; }
+
+            const inv  = db.inventory;
+            const prod = inv.find(i => i.id === prodId);
+            if (!prod) { showToast('Product not found', 'danger'); return; }
+
+            const isDown = adjType !== 'correction-up';
+
+            // Stock validation for downward adjustments
+            if (isDown && prod.qty < qty) {
+                showToast(`Only ${prod.qty} units available — cannot adjust down by ${qty}`, 'danger');
+                return;
+            }
+
+            // Calculate loss value (cost × qty, only for downward)
+            const lossValue = isDown ? qty * (prod.cost || 0) : 0;
+
+            // Apply qty change
+            if (isDown) {
+                prod.qty -= qty;
+                if (prod.qty <= 0) prod.status = 'Out of Stock';
+            } else {
+                prod.qty += qty;
+                prod.status = 'Fresh';
+            }
+            db.inventory = inv;
+
+            // Record the adjustment
+            const adjustments = db.adjustments;
+            adjustments.push({
+                id:        uid('ADJ'),
+                date:      new Date().toLocaleDateString('en-GB'),
+                prodId,
+                prodName:  prod.name,
+                adjType,
+                qty,
+                direction: isDown ? 'down' : 'up',
+                lossValue,
+                costAtTime: prod.cost || 0,
+                reason,
+                notes
+            });
+            db.adjustments = adjustments;
+
+            closeModal('modal-adjustment');
+            e.target.reset();
+            refreshAll();
+            const msg = isDown
+                ? `Adjustment recorded — stock reduced by ${qty}, loss value ${formatZMW(lossValue)}`
+                : `Adjustment recorded — stock increased by ${qty}`;
+            showToast(msg);
+        }
+
+        function renderAdjustments() {
+            const tbody = document.querySelector('#table-adjustments tbody');
+            if (!tbody) return;
+            const search = (document.getElementById('search-adjustments')?.value || '').toLowerCase();
+            const adjs   = db.adjustments.filter(a =>
+                !search ||
+                (a.prodName||'').toLowerCase().includes(search) ||
+                (a.reason||'').toLowerCase().includes(search) ||
+                (a.notes||'').toLowerCase().includes(search)
+            ).slice().reverse(); // most recent first
+
+            if (adjs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:2rem;">No adjustments recorded yet.</td></tr>';
+                return;
+            }
+
+            const typeLabels = {
+                'write-off':       '🗑 Write-Off',
+                'correction-down': '📉 Correction (−)',
+                'correction-up':   '📈 Correction (+)',
+                'donation':        '🤝 Donation'
+            };
+
+            tbody.innerHTML = adjs.map(a => {
+                const qtyCell = a.direction === 'down'
+                    ? `<span style="color:var(--danger);font-weight:700;">−${a.qty}</span>`
+                    : `<span style="color:var(--success);font-weight:700;">+${a.qty}</span>`;
+                const lossCell = a.lossValue > 0
+                    ? `<span style="color:var(--danger);font-weight:600;">${formatZMW(a.lossValue)}</span>`
+                    : '<span style="color:var(--text-muted);">—</span>';
+                const adminBtns = currentUser === 'admin'
+                    ? `<button class="btn btn-sm btn-danger" onclick="deleteRecord('adjustments','${esc(a.id)}')">🗑</button>`
+                    : '';
+                return `<tr>
+                    <td style="font-family:monospace;font-size:.8rem;">${esc(a.id)}</td>
+                    <td>${esc(a.date)}</td>
+                    <td style="font-weight:600;">${esc(a.prodName)}</td>
+                    <td>${typeLabels[a.adjType] || esc(a.adjType)}</td>
+                    <td>${qtyCell}</td>
+                    <td>${lossCell}</td>
+                    <td>${esc(a.reason)}</td>
+                    <td style="color:var(--text-muted);font-size:.85rem;">${esc(a.notes||'—')}</td>
+                    <td>${adminBtns}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============================================================
+        // 👤 CUSTOMER REGISTER
+        // ============================================================
+
+        function updateCustomerDatalist() {
+            const dl = document.getElementById('customer-datalist');
+            if (!dl) return;
+            dl.innerHTML = db.customers.map(c => `<option value="${esc(c.name)}">`).join('');
+        }
+
+        function openAddCustomerModal() {
+            document.getElementById('cust-name').value     = '';
+            document.getElementById('cust-phone').value    = '';
+            document.getElementById('cust-location').value = '';
+            document.getElementById('cust-notes').value    = '';
+            openModal('modal-add-customer');
+        }
+
+        function handleAddCustomer(e) {
+            e.preventDefault();
+            const name = document.getElementById('cust-name').value.trim();
+            if (!name) { showToast('Customer name is required', 'danger'); return; }
+            // Prevent duplicates (case-insensitive)
+            const exists = db.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+            if (exists) { showToast('A customer with this name already exists', 'danger'); return; }
+            const customers = db.customers;
+            customers.push({
+                id:       uid('CST'),
+                name,
+                phone:    document.getElementById('cust-phone').value.trim(),
+                location: document.getElementById('cust-location').value.trim(),
+                notes:    document.getElementById('cust-notes').value.trim(),
+                createdAt: new Date().toLocaleDateString('en-GB')
+            });
+            db.customers = customers;
+            closeModal('modal-add-customer');
+            e.target.reset();
+            renderCustomers();
+            updateCustomerDatalist();
+            showToast('Customer added');
+        }
+
+        function openEditCustomerModal(id) {
+            const c = db.customers.find(x => x.id === id);
+            if (!c) return;
+            document.getElementById('edit-cust-id').value       = c.id;
+            document.getElementById('edit-cust-name').value     = c.name;
+            document.getElementById('edit-cust-phone').value    = c.phone || '';
+            document.getElementById('edit-cust-location').value = c.location || '';
+            document.getElementById('edit-cust-notes').value    = c.notes || '';
+            openModal('modal-edit-customer');
+        }
+
+        function handleEditCustomer(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-cust-id').value;
+            const customers = db.customers;
+            const c = customers.find(x => x.id === id);
+            if (!c) return;
+            const newName = document.getElementById('edit-cust-name').value.trim();
+            if (!newName) { showToast('Customer name is required', 'danger'); return; }
+            // Check duplicate (excluding self)
+            const duplicate = customers.find(x => x.id !== id && x.name.toLowerCase() === newName.toLowerCase());
+            if (duplicate) { showToast('Another customer already has this name', 'danger'); return; }
+            const oldName = c.name;
+            c.name     = newName;
+            c.phone    = document.getElementById('edit-cust-phone').value.trim();
+            c.location = document.getElementById('edit-cust-location').value.trim();
+            c.notes    = document.getElementById('edit-cust-notes').value.trim();
+            db.customers = customers;
+            // Cascade name update to credit records if name changed
+            if (oldName !== newName) {
+                const credit = db.credit;
+                let updated = false;
+                credit.forEach(cr => { if (cr.cust === oldName) { cr.cust = newName; updated = true; } });
+                if (updated) db.credit = credit;
+                // Cascade to sales records too
+                const sales = db.sales;
+                let salesUpdated = false;
+                sales.forEach(s => { if (s.cust === oldName) { s.cust = newName; salesUpdated = true; } });
+                if (salesUpdated) db.sales = sales;
+            }
+            closeModal('modal-edit-customer');
+            renderCustomers();
+            updateCustomerDatalist();
+            renderTable('credit');
+            showToast('Customer updated');
+        }
+
+        function deleteCustomer(id) {
+            if (currentUser !== 'admin') { showToast('Only admins can delete customers', 'danger'); return; }
+            const c = db.customers.find(x => x.id === id);
+            if (!c) return;
+            const outstanding = db.credit.filter(cr => cr.cust === c.name && cr.status === 'Outstanding');
+            if (outstanding.length > 0) {
+                showToast(`Cannot delete — ${c.name} has ${outstanding.length} outstanding credit record(s)`, 'danger');
+                return;
+            }
+            if (!confirm(`Delete customer "${c.name}"? This cannot be undone.`)) return;
+            db.customers = db.customers.filter(x => x.id !== id);
+            renderCustomers();
+            updateCustomerDatalist();
+            showToast('Customer deleted', 'danger');
+        }
+
+        function renderCustomers() {
+            const tbody = document.querySelector('#table-customers tbody');
+            if (!tbody) return;
+            const search = (document.getElementById('search-customers')?.value || '').toLowerCase();
+            const credit = db.credit;
+            const customers = db.customers;
+
+            // Refresh datalist too
+            updateCustomerDatalist();
+
+            // Build summary cards — top debtors
+            const summaryEl = document.getElementById('customer-summary-cards');
+            if (summaryEl) {
+                const debtors = customers.map(c => {
+                    const outstanding = credit.filter(cr => cr.cust === c.name && cr.status === 'Outstanding').reduce((s,cr) => s + (cr.amt||0), 0);
+                    return { name: c.name, outstanding };
+                }).filter(d => d.outstanding > 0).sort((a,b) => b.outstanding - a.outstanding).slice(0, 4);
+
+                const totalOutstanding = credit.filter(cr => cr.status === 'Outstanding').reduce((s,cr) => s + (cr.amt||0), 0);
+
+                summaryEl.innerHTML = `
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--danger);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">Total Outstanding</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--danger);">${formatZMW(totalOutstanding)}</div>
+                    </div>
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--accent);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">Registered Customers</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--accent);">${customers.length}</div>
+                    </div>
+                    ${debtors.map(d => `
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--warning);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">${esc(d.name)}</div>
+                        <div style="font-size:1.2rem;font-weight:800;color:var(--warning);">${formatZMW(d.outstanding)} owed</div>
+                    </div>`).join('')}
+                `;
+            }
+
+            // Filter and render table
+            const filtered = customers.filter(c => !search || c.name.toLowerCase().includes(search) || (c.phone||'').includes(search) || (c.location||'').toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No customers found. Add your first customer above.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(c => {
+                const custCredit = credit.filter(cr => cr.cust === c.name);
+                const outstanding = custCredit.filter(cr => cr.status === 'Outstanding').reduce((s,cr) => s + (cr.amt||0), 0);
+                const total       = custCredit.reduce((s,cr) => s + (cr.amt||0), 0);
+                const outStyle    = outstanding > 0 ? 'color:var(--danger);font-weight:700;' : 'color:var(--text-muted);';
+                const adminBtns   = currentUser === 'admin'
+                    ? `<button class="btn btn-sm btn-primary" onclick="openEditCustomerModal('${esc(c.id)}')">✏️</button> <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${esc(c.id)}')">🗑</button>`
+                    : '';
+                return `<tr>
+                    <td style="font-weight:600;">${esc(c.name)}</td>
+                    <td>${esc(c.phone||'—')}</td>
+                    <td>${esc(c.location||'—')}</td>
+                    <td style="${outStyle}">${outstanding > 0 ? formatZMW(outstanding) : '—'}</td>
+                    <td>${total > 0 ? formatZMW(total) : '—'}</td>
+                    <td style="white-space:nowrap;">${adminBtns}</td>
+                </tr>`;
+            }).join('');
         }
 
         // loginForm submit handled by secure auth above
