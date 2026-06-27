@@ -7,6 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Export libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <style>
         /* --- CSS VARIABLES & RESET --- */
         :root {
@@ -638,12 +642,14 @@
                 <li><a href="#" onclick="nav('inventory')" id="nav-inventory">Inventory</a></li>
                 <li><a href="#" onclick="nav('sales')" id="nav-sales">Sales</a></li>
                 <li><a href="#" onclick="nav('purchases')" id="nav-purchases">Purchases</a></li>
+                <li><a href="#" onclick="nav('suppliers')" id="nav-suppliers">🏭 Suppliers</a></li>
                 <li><a href="#" onclick="nav('expenses')" id="nav-expenses">Expenses</a></li>
                 <li><a href="#" onclick="nav('fisp')" id="nav-fisp">FISP Tracker</a></li>
                 <li><a href="#" onclick="nav('credit')" id="nav-credit">Credit Tracker</a></li>
                 <li><a href="#" onclick="nav('customers')" id="nav-customers">👤 Customers</a></li>
                 <li><a href="#" onclick="nav('reports')" id="nav-reports">Reports (P&L)</a></li>
                 <li class="admin-only"><a href="#" onclick="nav('settings')" id="nav-settings" style="color: var(--secondary)">⚙️ Settings</a></li>
+                <li class="admin-only"><a href="#" onclick="nav('activitylog')" id="nav-activitylog" style="color:var(--accent);">📋 Activity Log</a></li>
             </ul>
             <div class="user-profile" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #fff3;">
                 <span id="user-display-name">User</span>
@@ -667,11 +673,20 @@
 
             <!-- 1. DASHBOARD VIEW -->
             <div id="view-dashboard">
+                <!-- KPI Period Toggle -->
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+                    <span style="font-size:.82rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">KPI Period</span>
+                    <div style="display:flex;gap:.4rem;">
+                        <button class="btn btn-sm" id="kpi-btn-alltime" onclick="setKpiPeriod('alltime')" style="background:var(--primary);color:white;">All Time</button>
+                        <button class="btn btn-sm" id="kpi-btn-month"   onclick="setKpiPeriod('month')"   style="background:#eee;">This Month</button>
+                        <button class="btn btn-sm" id="kpi-btn-season"  onclick="setKpiPeriod('season')"  style="background:#eee;">This Season</button>
+                    </div>
+                </div>
                 <div class="kpi-grid">
                     <div class="card"><h3>Stock Value</h3><div class="value" id="kpi-stock">0</div></div>
-                    <div class="card success"><h3>Total Revenue</h3><div class="value" id="kpi-revenue">0</div></div>
-                    <div class="card danger"><h3>Total Expenses</h3><div class="value" id="kpi-expenses">0</div></div>
-                    <div class="card warning"><h3>Net P/L</h3><div class="value" id="kpi-pl">0</div></div>
+                    <div class="card success"><h3>Total Revenue</h3><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.2rem;" id="kpi-revenue-label">All Time</div><div class="value" id="kpi-revenue">0</div></div>
+                    <div class="card danger"><h3>Total Expenses</h3><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.2rem;" id="kpi-expenses-label">All Time</div><div class="value" id="kpi-expenses">0</div></div>
+                    <div class="card warning"><h3>Net P/L</h3><div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.2rem;" id="kpi-pl-label">All Time</div><div class="value" id="kpi-pl">0</div></div>
                 </div>
 
                 <!-- CASH FLOW SUMMARY PANEL -->
@@ -679,8 +694,9 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
                         <h3 style="color:var(--accent); font-size:1rem;">📊 Cash Flow Summary</h3>
                         <div style="display:flex; gap:0.5rem;">
-                            <button class="btn btn-sm" id="cf-btn-today" onclick="setCashFlowPeriod('today')" style="background:var(--accent);color:white;">Today</button>
-                            <button class="btn btn-sm" id="cf-btn-week"  onclick="setCashFlowPeriod('week')"  style="background:#eee;">This Week</button>
+                            <button class="btn btn-sm" id="cf-btn-today"  onclick="setCashFlowPeriod('today')"  style="background:var(--accent);color:white;">Today</button>
+                            <button class="btn btn-sm" id="cf-btn-week"   onclick="setCashFlowPeriod('week')"   style="background:#eee;">This Week</button>
+                            <button class="btn btn-sm" id="cf-btn-month"  onclick="setCashFlowPeriod('month')"  style="background:#eee;">This Month</button>
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:1rem;">
@@ -768,23 +784,43 @@
                     <span class="arrow">→</span>
                     <input type="date" id="date-to-purchases" onchange="renderTable('purchases')" title="To">
                     <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('purchases')">Clear</button>
-                    <button class="btn btn-sm btn-primary" onclick="exportCSV('purchases')">⬇ CSV</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportPDF('purchases')">⬇ PDF</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportWord('purchases')">⬇ Word</button>
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('purchases')">⬇ CSV</button>
                 </div>
                 <div class="table-container">
                     <table id="table-purchases"><thead><tr><th>ID</th><th>Date</th><th>Supplier</th><th>Product</th><th>Qty In</th><th>Total Cost (ZMW)</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
+
+            <!-- 4b. SUPPLIERS VIEW -->
+            <div id="view-suppliers" class="hidden">
+                <div class="view-toolbar">
+                    <button class="btn btn-primary" onclick="openAddSupplierModal()">+ Add Supplier</button>
+                    <input type="text" id="search-suppliers" placeholder="Search suppliers..." onkeyup="renderSuppliers()">
+                </div>
+                <div id="supplier-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
+                <div class="table-container">
+                    <table id="table-suppliers">
+                        <thead><tr><th>Name</th><th>Phone</th><th>Location</th><th>Total Spent</th><th>Last Purchase</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- 5. EXPENSES VIEW -->
             <div id="view-expenses" class="hidden">
                 <div class="view-toolbar">
-                    <button class="btn btn-primary" onclick="openModal('modal-exp')">+ Add Expense</button>
+                    <button class="btn btn-primary" onclick="populateExpCatSelect('exp-cat');openModal('modal-exp')">+ Add Expense</button>
                     <input type="text" id="search-expenses" placeholder="Search expenses..." onkeyup="renderTable('expenses')">
                     <input type="date" id="date-from-expenses" onchange="renderTable('expenses')" title="From">
                     <span class="arrow">→</span>
                     <input type="date" id="date-to-expenses" onchange="renderTable('expenses')" title="To">
                     <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearDateFilter('expenses')">Clear</button>
-                    <button class="btn btn-sm btn-primary" onclick="exportCSV('expenses')">⬇ CSV</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportPDF('expenses')">⬇ PDF</button>
+                    <button class="btn btn-sm btn-primary" onclick="exportWord('expenses')">⬇ Word</button>
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('expenses')">⬇ CSV</button>
                 </div>
                 <div class="table-container">
                     <table id="table-expenses"><thead><tr><th>ID</th><th>Date</th><th>Category</th><th>Description</th><th>Amount (ZMW)</th><th>Actions</th></tr></thead><tbody></tbody></table>
@@ -796,6 +832,16 @@
                 <div class="view-toolbar">
                     <button class="btn btn-primary" onclick="prepareFISPModal()">+ Add FISP Claim</button>
                     <input type="text" id="search-fisp" placeholder="Search FISP claims..." onkeyup="renderTable('fisp')">
+                    <select id="fisp-season-filter" onchange="renderTable('fisp')" style="padding:0.45rem 0.65rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.875rem;background:var(--surface);color:var(--text);min-width:130px;">
+                        <option value="">All Seasons</option>
+                        <option value="2022/23">2022/23</option>
+                        <option value="2023/24">2023/24</option>
+                        <option value="2024/25">2024/25</option>
+                        <option value="2025/26">2025/26</option>
+                        <option value="2026/27">2026/27</option>
+                    </select>
+                </div>
+                <div id="fisp-season-summary" style="display:none;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.55rem 1rem;margin-bottom:.75rem;font-size:.85rem;gap:1.5rem;flex-wrap:wrap;align-items:center;">
                 </div>
                 <div class="table-container">
                     <table id="table-fisp"><thead><tr><th>ID</th><th>Date</th><th>Farmer Name</th><th>NRC/ID</th><th>Camp/Area</th><th>Voucher No.</th><th>Product(s)</th><th>Qty</th><th>Value (ZMW)</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
@@ -838,11 +884,21 @@
                         <h3 style="font-weight:700;color:var(--dark);font-size:1rem;">Profit &amp; Loss</h3>
                         <input type="month" id="pl-month" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.875rem;outline:none;" onchange="renderPL()">
                         <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="document.getElementById('pl-month').value=''; renderPL();">All Time</button>
-                        <button class="btn btn-sm btn-primary" onclick="exportPLcsv()">⬇ P&amp;L CSV</button>
-                        <button class="btn btn-sm btn-primary" onclick="exportCSV('sales')">⬇ Sales CSV</button>
-                        <button class="btn btn-sm btn-primary" onclick="exportCSV('purchases')">⬇ Purchases CSV</button>
-                        <button class="btn btn-sm btn-primary" onclick="exportCSV('expenses')">⬇ Expenses CSV</button>
-                        <button class="btn btn-sm btn-primary" onclick="exportCSV('inventory')">⬇ Stock CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPLpdf()">⬇ P&amp;L PDF</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPLword()">⬇ P&amp;L Word</button>
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportPLcsv()">⬇ P&amp;L CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPDF('sales')">⬇ Sales PDF</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportWord('sales')">⬇ Sales Word</button>
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('sales')">⬇ Sales CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPDF('purchases')">⬇ Purchases PDF</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportWord('purchases')">⬇ Purchases Word</button>
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('purchases')">⬇ Purchases CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPDF('expenses')">⬇ Expenses PDF</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportWord('expenses')">⬇ Expenses Word</button>
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('expenses')">⬇ Expenses CSV</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportPDF('inventory')">⬇ Stock PDF</button>
+                        <button class="btn btn-sm btn-primary" onclick="exportWord('inventory')">⬇ Stock Word</button>
+                        <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="exportCSV('inventory')">⬇ Stock CSV</button>
                     </div>
                     <div style="padding:0.75rem 1.25rem 1rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;border-top:1px solid var(--border);">
                         <span style="font-weight:600;color:var(--primary-dark);font-size:0.875rem;">💾 Data Backup</span>
@@ -992,6 +1048,18 @@
                     </div>
                     <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;">Click ✕ on a tag to remove it. Built-in defaults can also be removed.</p>
                 </div>
+                <div class="card" style="margin-bottom: 2rem; border-left-color: var(--warning);">
+                    <h3 style="margin-bottom:.5rem;">🏷️ Expense Categories</h3>
+                    <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">Define the categories available when recording expenses.</p>
+                    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;" id="exp-cat-tags-container"></div>
+                    <div style="display:flex;gap:.6rem;align-items:center;max-width:400px;">
+                        <input type="text" id="new-exp-cat-input" placeholder="e.g. FISP Transport" maxlength="40"
+                            style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;outline:none;"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();addExpenseCategory();}">
+                        <button class="btn btn-primary btn-sm" onclick="addExpenseCategory()">+ Add</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:.78rem;margin-top:.6rem;">Click ✕ on a tag to remove it. Built-in defaults can also be removed.</p>
+                </div>
                 <div class="card" style="margin-bottom: 2rem;">
                     <h3>Product Management</h3>
                     <p>Edit or Remove products from your master list.</p>
@@ -1100,7 +1168,8 @@
         <div class="modal-content">
             <h3>Record Purchase</h3><br>
             <form onsubmit="handleAddPurchase(event)">
-                <div class="form-group"><input type="text" id="pur-sup" placeholder="Supplier Name" required></div>
+                <div class="form-group"><input type="text" id="pur-sup" placeholder="Supplier Name" list="supplier-datalist" autocomplete="off" required></div>
+            <datalist id="supplier-datalist"></datalist>
                 <div class="form-group"><select id="pur-prod" required></select></div>
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div class="form-group"><input type="number" id="pur-qty" placeholder="Qty Bought" required></div>
@@ -1117,7 +1186,7 @@
         <div class="modal-content">
             <h3>Add Expense</h3><br>
             <form onsubmit="handleAddExpense(event)">
-                <div class="form-group"><select id="exp-cat"><option>Transport</option><option>Rent</option><option>Salaries</option><option>Utilities</option><option>Marketing</option><option>Maintenance</option></select></div>
+                <div class="form-group"><select id="exp-cat"></select></div>
                 <div class="form-group"><input type="text" id="exp-desc" placeholder="Description" required></div>
                 <div class="form-group"><input type="number" id="exp-amt" placeholder="Amount (ZMW)" required></div>
                 <button type="submit" class="btn btn-primary" style="width: 100%">Save</button>
@@ -1150,7 +1219,19 @@
                     <div class="form-group" style="margin:0"><label>Product Redeemed</label><select id="fisp-prod"><option value="">— Select product —</option></select></div>
                     <div class="form-group" style="margin:0"><label>Qty Issued</label><input type="number" id="fisp-qty" placeholder="e.g. 2" min="0" step="1"></div>
                 </div>
-                <div class="form-group" style="margin-top:.75rem;"><label>Notes / Remarks</label><input type="text" id="fisp-notes" placeholder="Optional remarks"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;">
+                    <div class="form-group" style="margin:0"><label>Season *</label>
+                        <select id="fisp-season" required>
+                            <option value="">— Select season —</option>
+                            <option value="2022/23">2022/23</option>
+                            <option value="2023/24">2023/24</option>
+                            <option value="2024/25">2024/25</option>
+                            <option value="2025/26">2025/26</option>
+                            <option value="2026/27">2026/27</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0"><label>Notes / Remarks</label><input type="text" id="fisp-notes" placeholder="Optional remarks"></div>
+                </div>
                 <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">Submit FISP Claim</button>
             </form>
             <button onclick="closeModal('modal-fisp')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
@@ -1211,7 +1292,7 @@
             <h3>✏️ Edit Purchase</h3><br>
             <form onsubmit="handleEditPurchase(event)">
                 <input type="hidden" id="edit-pur-id">
-                <div class="form-group"><label>Supplier</label><input type="text" id="edit-pur-sup" required></div>
+                <div class="form-group"><label>Supplier</label><input type="text" id="edit-pur-sup" list="supplier-datalist" autocomplete="off" required></div>
                 <div class="form-group"><label>Product</label><select id="edit-pur-prod" required></select></div>
                 <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;">
                     <div class="form-group"><label>Qty</label><input type="number" id="edit-pur-qty" min="1" required></div>
@@ -1231,7 +1312,7 @@
             <form onsubmit="handleEditExpense(event)">
                 <input type="hidden" id="edit-exp-id">
                 <div class="form-group"><label>Category</label>
-                    <select id="edit-exp-cat"><option>Transport</option><option>Rent</option><option>Salaries</option><option>Utilities</option><option>Marketing</option><option>Maintenance</option></select>
+                    <select id="edit-exp-cat"></select>
                 </div>
                 <div class="form-group"><label>Description</label><input type="text" id="edit-exp-desc" required></div>
                 <div class="form-group"><label>Amount (ZMW)</label><input type="number" id="edit-exp-amt" min="0" step="0.01" required></div>
@@ -1284,6 +1365,16 @@
                 <div class="form-group"><label>Product / Description</label><input type="text" id="edit-crd-prod" required></div>
                 <div class="form-group"><label>Amount Due (ZMW)</label><input type="number" id="edit-crd-amt" min="0" step="0.01" required></div>
                 <div class="form-group"><label>Due Date</label><input type="date" id="edit-crd-due" required></div>
+                <div class="form-group"><label>Season</label>
+                    <select id="edit-fisp-season">
+                        <option value="">— Select season —</option>
+                        <option value="2022/23">2022/23</option>
+                        <option value="2023/24">2023/24</option>
+                        <option value="2024/25">2024/25</option>
+                        <option value="2025/26">2025/26</option>
+                        <option value="2026/27">2026/27</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Status</label>
                     <select id="edit-crd-status"><option value="Outstanding">Outstanding</option><option value="Paid">Paid</option></select>
                 </div>
@@ -1293,6 +1384,39 @@
         </div>
     </div>
 
+
+    <!-- Add Supplier Modal -->
+    <div id="modal-add-supplier" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>🏭 Add Supplier</h3><br>
+            <form onsubmit="handleAddSupplier(event)">
+                <div class="form-group"><label>Company / Name *</label><input type="text" id="sup-name" placeholder="e.g. AgroZam Ltd" required></div>
+                <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="sup-phone" placeholder="e.g. 0955 123 456"></div>
+                <div class="form-group"><label>Location / Area</label><input type="text" id="sup-location" placeholder="e.g. Lusaka, Cairo Road"></div>
+                <div class="form-group"><label>Products Supplied</label><input type="text" id="sup-products" placeholder="e.g. Fertilizers, Seeds"></div>
+                <div class="form-group"><label>Notes</label><input type="text" id="sup-notes" placeholder="Optional notes"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Supplier</button>
+            </form>
+            <button onclick="closeModal('modal-add-supplier')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Edit Supplier Modal -->
+    <div id="modal-edit-supplier" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width:420px;">
+            <h3>✏️ Edit Supplier</h3><br>
+            <form onsubmit="handleEditSupplier(event)">
+                <input type="hidden" id="edit-sup-id">
+                <div class="form-group"><label>Company / Name *</label><input type="text" id="edit-sup-name" required></div>
+                <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="edit-sup-phone"></div>
+                <div class="form-group"><label>Location / Area</label><input type="text" id="edit-sup-location"></div>
+                <div class="form-group"><label>Products Supplied</label><input type="text" id="edit-sup-products"></div>
+                <div class="form-group"><label>Notes</label><input type="text" id="edit-sup-notes"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Changes</button>
+            </form>
+            <button onclick="closeModal('modal-edit-supplier')" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+        </div>
+    </div>
 
     <!-- Add Customer Modal -->
     <div id="modal-add-customer" class="modal-overlay hidden">
@@ -1388,7 +1512,7 @@
             <div class="form-group"><label>Admin Password</label><input type="password" id="reauth-pw" placeholder="Admin password" autocomplete="off"></div>
             <div id="reauth-error" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.75rem;"></div>
             <button class="btn btn-danger" style="width:100%" onclick="confirmReauthDelete()">Delete Record</button>
-            <button onclick="closeModal('modal-admin-reauth');_reauthPending=null;" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
+            <button onclick="closeModal('modal-admin-reauth');_reauthPending=null;document.querySelector('#modal-admin-reauth h3').textContent='🔒 Confirm Delete';document.querySelector('#modal-admin-reauth p').textContent='Enter your admin password to permanently delete this record. This cannot be undone.';document.querySelector('#modal-admin-reauth .btn-danger').textContent='Delete Record';" class="btn btn-sm" style="margin-top:8px;width:100%">Cancel</button>
         </div>
     </div>
 
@@ -1421,8 +1545,10 @@
             <div id="receipt-body">
                 <!-- populated by printReceipt() -->
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;" id="receipt-actions">
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap:wrap;" id="receipt-actions">
                 <button class="btn btn-primary" style="flex:1;" onclick="window.print()">🖨 Print</button>
+                <button class="btn btn-sm" style="flex:1;background:var(--danger);color:#fff;font-weight:600;" onclick="exportReceiptPDF()">⬇ PDF</button>
+                <button class="btn btn-sm" style="flex:1; background:#25D366; color:#fff; font-weight:600;" onclick="shareReceiptWhatsApp()">📲 WhatsApp</button>
                 <button class="btn btn-sm" style="flex:1; background:#eee;" onclick="closeModal('modal-receipt')">Close</button>
             </div>
         </div>
@@ -1466,8 +1592,11 @@
             <div id="invoice-print-body">
                 <!-- populated by generateInvoiceDoc() -->
             </div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;" id="invoice-print-actions">
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap:wrap;" id="invoice-print-actions">
                 <button class="btn btn-primary" style="flex:1;" onclick="window.print()">🖨 Print</button>
+                <button class="btn btn-sm" style="flex:1;background:var(--danger);color:#fff;font-weight:600;" onclick="exportInvoicePDF()">⬇ PDF</button>
+                <button class="btn btn-sm" style="flex:1;background:var(--accent);color:#fff;font-weight:600;" onclick="exportInvoiceWord()">⬇ Word</button>
+                <button id="btn-convert-to-sale" class="btn btn-sm hidden" style="flex:1;background:var(--success);color:white;font-weight:700;" onclick="convertQuotationToSale()">✅ Convert to Sale</button>
                 <button class="btn btn-sm" style="flex:1; background:#eee;" onclick="closeModal('modal-invoice-print')">Close</button>
             </div>
         </div>
@@ -1527,6 +1656,7 @@
             fisp:      'za_fisp',
             credit:    'za_credit',
             customers:   'za_customers',
+            suppliers:   'za_suppliers',
             adjustments: 'za_adjustments',
             settings:    'za_settings'
         };
@@ -1539,8 +1669,9 @@
             fisp:      [],
             credit:    [],
             customers:    [],
+            suppliers:    [],
             adjustments:  [],
-            settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none', stockCategories: ['Fertilizer','Seed','Chemical','Tool'] }
+            settings:  { lowStockThreshold: 20, creditTermDays: 30, taxRegime: 'none', stockCategories: ['Fertilizer','Seed','Chemical','Tool'], expenseCategories: ['Transport','Rent','Salaries','Utilities','Marketing','Maintenance'] }
         };
 
         // Load a collection from localStorage, falling back to seed data on first run.
@@ -1580,6 +1711,8 @@
             set credit(v)   { writeCollection('credit', v); },
             get customers()    { return dbLoad('customers'); },
             set customers(v)   { writeCollection('customers', v); },
+            get suppliers()    { return dbLoad('suppliers'); },
+            set suppliers(v)   { writeCollection('suppliers', v); },
             get adjustments()  { return dbLoad('adjustments'); },
             set adjustments(v) { writeCollection('adjustments', v); },
             get settings()     { return dbLoad('settings'); },
@@ -1671,7 +1804,7 @@
         const CLOUD_KEY       = 'za_cloud_auth';   // { uid, email, idToken, refreshToken, idTokenExpiry }
         const SYNC_QUEUE_KEY  = 'za_pending_sync'; // persistent offline-safe outbox
         const LAST_SYNCED_KEY = 'za_last_synced';  // persisted so "Last synced" survives a page reload
-        const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit', 'customers', 'adjustments'];
+        const SYNC_COLLECTIONS = ['inventory', 'sales', 'purchases', 'expenses', 'fisp', 'credit', 'customers', 'suppliers', 'adjustments'];
 
         let cloudAuth = null;
         let sseConn = null;
@@ -2194,7 +2327,7 @@
 
         let currentUser = null;
         let creditFilter = 'outstanding'; // 'outstanding' | 'paid' | 'all'
-        let cashFlowPeriod = 'today';     // 'today' | 'week'
+        let cashFlowPeriod = 'today';     // 'today' | 'week' | 'month'
 
         const formatZMW = (num) => new Intl.NumberFormat('en-ZM', { style: 'currency', currency: 'ZMW' }).format(num);
 
@@ -2750,19 +2883,17 @@
         }
 
         async function removeStaffAccount(slot) {
-            if (!confirm(`Remove staff account ${slot}? They will no longer be able to log in.`)) return;
-            const accounts = getAccounts();
-            const clients = (accounts && accounts.clients) || [null, null];
-            const removedUsername = clients[slot - 1] && clients[slot - 1].username;
-            clients[slot - 1] = null;
-            accounts.clients = clients;
-            localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
-            if (removedUsername && cloudAuth) {
-                const idTok = await getFreshIdToken();
-                await removeUsernameDirectoryEntry(idTok, removedUsername, 'client', cloudAuth.uid);
-            }
-            renderStaffAccountUI();
-            showToast(`Staff account ${slot} removed.`);
+            if (currentUser !== 'admin') { showToast('Only admins can remove staff accounts', 'danger'); return; }
+            _reauthPending = { type: '__removeStaff__', id: String(slot) };
+            document.getElementById('reauth-pw').value = '';
+            document.getElementById('reauth-error').style.display = 'none';
+            // Temporarily update modal copy to reflect staff removal context
+            document.querySelector('#modal-admin-reauth h3').textContent = '🔒 Remove Staff Account';
+            document.querySelector('#modal-admin-reauth p').textContent =
+                `Enter your admin password to permanently remove Staff Account ${slot}. They will no longer be able to log in.`;
+            document.querySelector('#modal-admin-reauth .btn-danger').textContent = 'Remove Account';
+            openModal('modal-admin-reauth');
+            setTimeout(() => document.getElementById('reauth-pw').focus(), 120);
         }
 
 
@@ -3146,7 +3277,7 @@
             if(activeLink) activeLink.classList.add('active');
 
             // Titles
-            const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", customers: "Customer Register", reports: "Financial Reports", settings: "System Settings" };
+            const titles = { dashboard: "Dashboard Overview", inventory: "Inventory Management", sales: "Sales Log", purchases: "Purchase Orders", suppliers: "Supplier Register", expenses: "Expense Tracking", fisp: "FISP Claims", credit: "Credit Tracker", customers: "Customer Register", reports: "Financial Reports", settings: "System Settings", activitylog: "Staff Activity Log" };
             document.getElementById('page-title').textContent = titles[view] || "ZamAgro Track";
 
             // Pre-select current month on Reports
@@ -3160,6 +3291,15 @@
             }
             if (view === 'customers') {
                 renderCustomers();
+            }
+            if (view === 'suppliers') {
+                renderSuppliers();
+            }
+            if (view === 'settings') {
+                renderExpCatTags();
+            }
+            if (view === 'activitylog') {
+                renderActivityLog();
             }
         }
 
@@ -3177,9 +3317,11 @@
             renderTable('fisp');
             renderTable('credit');
             renderCustomers();
+            renderSuppliers();
             renderAdjustments();
             renderPL();
             renderSettingsTable(); // New
+            renderExpCatTags();
             const thresholdInput = document.getElementById('setting-threshold');
             if (thresholdInput) thresholdInput.value = db.settings.lowStockThreshold || 20;
             const creditTermInput = document.getElementById('setting-creditterm');
@@ -3201,21 +3343,84 @@
             document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-ZM');
         }
 
+        let _kpiPeriod = 'alltime'; // 'alltime' | 'month' | 'season'
+
+        function setKpiPeriod(p) {
+            _kpiPeriod = p;
+            ['alltime','month','season'].forEach(id => {
+                const btn = document.getElementById(`kpi-btn-${id}`);
+                if (btn) {
+                    btn.style.background = id === p ? 'var(--primary)' : '#eee';
+                    btn.style.color      = id === p ? 'white' : '';
+                }
+            });
+            renderDashboard();
+        }
+
         function renderDashboard() {
+            // --- Stock Value is always live / all-time ---
             const stockVal = db.inventory.reduce((sum, item) => sum + (item.qty * item.cost), 0);
             document.getElementById('kpi-stock').textContent = formatZMW(stockVal);
 
-            const revenue = db.sales.reduce((sum, sale) => sum + sale.total, 0);
-            document.getElementById('kpi-revenue').textContent = formatZMW(revenue);
+            // --- Determine filter for Revenue / Expenses / P&L ---
+            const now = new Date();
+            let periodLabel = 'All Time';
+            let filterFn = () => true; // date string DD/MM/YYYY → bool
 
-            const expenses = db.expenses.reduce((sum, exp) => sum + exp.amt, 0);
+            if (_kpiPeriod === 'month') {
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const yyyy = now.getFullYear();
+                periodLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+                filterFn = (dateStr) => {
+                    const [, mon, yr] = dateStr.split('/');
+                    return mon === mm && yr === String(yyyy);
+                };
+            } else if (_kpiPeriod === 'season') {
+                // Agro season: Nov 1 → Oct 31 of following year
+                const seasonStart = now.getMonth() >= 10
+                    ? new Date(now.getFullYear(), 10, 1)       // Nov this year
+                    : new Date(now.getFullYear() - 1, 10, 1);  // Nov last year
+                const seasonEnd   = new Date(seasonStart.getFullYear() + 1, 9, 31);
+                const sy = seasonStart.getFullYear();
+                periodLabel = `${sy}/${String(sy + 1).slice(-2)} Season`;
+                filterFn = (dateStr) => {
+                    const [d, m, y] = dateStr.split('/');
+                    const dt = new Date(Number(y), Number(m) - 1, Number(d));
+                    return dt >= seasonStart && dt <= seasonEnd;
+                };
+            }
+
+            // Update sub-labels
+            ['kpi-revenue-label','kpi-expenses-label','kpi-pl-label'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = periodLabel;
+            });
+
+            const revenue  = db.sales.filter(s => filterFn(s.date)).reduce((sum, s) => sum + s.total, 0);
+            const expenses = db.expenses.filter(e => filterFn(e.date)).reduce((sum, e) => sum + e.amt, 0);
+            document.getElementById('kpi-revenue').textContent  = formatZMW(revenue);
             document.getElementById('kpi-expenses').textContent = formatZMW(expenses);
 
-            // Net P/L now reads from the same computePL() engine as the Reports (P&L) tab
-            // and the P&L CSV export, so all three always agree (All-Time view).
-            const pl = computePL('');
-            document.getElementById('kpi-pl').textContent = formatZMW(pl.net);
-            document.getElementById('kpi-pl').className = pl.net >= 0 ? 'value text-success' : 'value text-danger';
+            // P&L: use computePL for all-time/month; manual calc for season
+            let plNet;
+            if (_kpiPeriod === 'alltime') {
+                const pl = computePL('');
+                plNet = pl.net;
+            } else if (_kpiPeriod === 'month') {
+                const mm   = String(now.getMonth() + 1).padStart(2, '0');
+                const yyyy = now.getFullYear();
+                const pl   = computePL(`${yyyy}-${mm}`);
+                plNet = pl.net;
+            } else {
+                // Season: rough gross margin (revenue - purchases - expenses - writeoffs)
+                const purchases = db.purchases.filter(p => filterFn(p.date)).reduce((sum, p) => sum + p.total, 0);
+                const writeoffs = db.adjustments.filter(a => filterFn(a.date) && a.direction === 'down' && a.lossValue > 0).reduce((sum, a) => sum + a.lossValue, 0);
+                const closingStock = db.inventory.reduce((sum, i) => sum + (i.qty * i.cost), 0);
+                const cogs = Math.max(0, purchases - closingStock);
+                plNet = revenue - cogs - expenses - writeoffs;
+            }
+            document.getElementById('kpi-pl').textContent  = formatZMW(plNet);
+            document.getElementById('kpi-pl').className    = plNet >= 0 ? 'value text-success' : 'value text-danger';
 
             const fispOut = db.fisp.filter(f => f.status !== 'Paid').reduce((sum, f) => sum + f.val, 0);
             document.getElementById('kpi-fisp').textContent = formatZMW(fispOut);
@@ -3286,12 +3491,14 @@
                     const methodCell = item.momoRef
                         ? `${esc(item.method)}<br><span style="font-size:.72rem;color:var(--text-muted);">Ref: ${esc(item.momoRef)}</span>`
                         : esc(item.method);
+                    const saleBy = s.recordedBy ? `<div style='font-size:.72rem;color:var(--text-muted);margin-top:.1rem;'>${esc(s.recordedBy)}</div>` : '';
                     const saleActions = currentUser === 'admin'
                         ? `<button class="btn btn-sm btn-primary" onclick="openEditSaleModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('sales','${esc(item.id)}')">🗑</button>`
                         : '';
                     row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cust)}</td><td>${itemsCell}</td><td>${formatZMW(item.total)}</td><td>${methodCell}</td><td style="white-space:nowrap;display:flex;gap:4px;"><button class="btn btn-sm" style="background:#eee;" onclick="printReceipt('${esc(item.id)}')">🖨</button>${saleActions}</td></tr>`;
                 } else if (type === 'purchases') {
                     const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
+const purBy = p.recordedBy ? `<span style='font-size:.72rem;color:var(--text-muted);'>${esc(p.recordedBy)}</span>` : '';
                     const purActions = currentUser === 'admin'
                         ? `<button class="btn btn-sm btn-primary" onclick="openEditPurchaseModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('purchases','${esc(item.id)}')">🗑</button>`
                         : '';
@@ -3302,6 +3509,8 @@
                         : '';
                     row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cat)}</td><td>${esc(item.desc)}</td><td>${formatZMW(item.amt)}</td><td style="white-space:nowrap;display:flex;gap:4px;">${expActions}&nbsp;</td></tr>`;
                 } else if (type === 'fisp') {
+                    const seasonFilter = document.getElementById('fisp-season-filter')?.value || '';
+                    if (seasonFilter && (item.season || '') !== seasonFilter) return;
                     let badge = item.status === 'Paid' ? 'status-ok' : 'status-warn';
                     const prodName = item.prodId ? (db.inventory.find(i => i.id === item.prodId)?.name || item.prodName || '—') : (item.prodName || '—');
                     const markPaidBtn = item.status !== 'Paid' ? `<button class="btn btn-sm btn-primary" onclick="payFISP('${esc(item.id)}')">Mark Paid</button>` : '';
@@ -3322,6 +3531,7 @@
                             ${currentUser === 'admin' ? `<button class="btn btn-sm btn-primary" onclick="openEditFISPModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('fisp','${esc(item.id)}')">🗑</button>` : ''}
                         </td>
                     </tr>`;
+
                 } else if (type === 'credit') {
                     if (creditFilter === 'outstanding' && item.status !== 'Outstanding') return;
                     if (creditFilter === 'paid' && item.status !== 'Paid') return;
@@ -3338,6 +3548,27 @@
                 }
                 tbody.innerHTML += row;
             });
+
+            // FISP season summary bar
+            if (type === 'fisp') {
+                const seasonFilter = document.getElementById('fisp-season-filter')?.value || '';
+                const summaryEl = document.getElementById('fisp-season-summary');
+                if (summaryEl) {
+                    const src = seasonFilter ? db.fisp.filter(f => (f.season || '') === seasonFilter) : db.fisp;
+                    const total   = src.reduce((s, f) => s + f.val, 0);
+                    const paid    = src.filter(f => f.status === 'Paid').reduce((s, f) => s + f.val, 0);
+                    const pending = src.filter(f => f.status !== 'Paid').reduce((s, f) => s + f.val, 0);
+                    const label   = seasonFilter ? `Season ${seasonFilter}` : 'All Seasons';
+                    summaryEl.style.display = 'flex';
+                    summaryEl.innerHTML = `
+                        <span style="font-weight:700;color:var(--primary-dark);">📋 ${label}</span>
+                        <span>Claims: <strong>${src.length}</strong></span>
+                        <span>Total: <strong>${formatZMW(total)}</strong></span>
+                        <span style="color:var(--success);">Paid: <strong>${formatZMW(paid)}</strong></span>
+                        <span style="color:var(--warning);">Pending: <strong>${formatZMW(pending)}</strong></span>
+                    `;
+                }
+            }
         }
 
         function clearDateFilter(type) {
@@ -3504,6 +3735,64 @@
             renderPL();
             const labels = { none: 'No tax regime', tot: 'Turnover Tax (5%)', vat: 'VAT-Registered (16%)' };
             showToast(`Tax regime set to: ${labels[val]}`);
+        }
+
+
+        // ── EXPENSE CATEGORIES ───────────────────────────────────────────
+        function getExpenseCategories() {
+            const cats = db.settings.expenseCategories;
+            return Array.isArray(cats) && cats.length ? cats : ['Transport','Rent','Salaries','Utilities','Marketing','Maintenance'];
+        }
+
+        function populateExpCatSelect(selectId, currentVal) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const cats = getExpenseCategories();
+            sel.innerHTML = '';
+            cats.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c;
+                if (c === currentVal) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function renderExpCatTags() {
+            const container = document.getElementById('exp-cat-tags-container');
+            if (!container) return;
+            const cats = getExpenseCategories();
+            container.innerHTML = cats.map(c => `
+                <span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.83rem;font-weight:600;">
+                    ${esc(c)}
+                    <button onclick="removeExpenseCategory('${esc(c)}')" title="Remove" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:.9rem;line-height:1;padding:0 2px;">&times;</button>
+                </span>`).join('');
+        }
+
+        function addExpenseCategory() {
+            const input = document.getElementById('new-exp-cat-input');
+            const val = input.value.trim();
+            if (!val) return;
+            const s = db.settings;
+            const cats = getExpenseCategories();
+            if (cats.map(c => c.toLowerCase()).includes(val.toLowerCase())) {
+                showToast('Category already exists', 'danger'); return;
+            }
+            cats.push(val);
+            s.expenseCategories = cats;
+            db.settings = s;
+            input.value = '';
+            renderExpCatTags();
+            showToast(`Expense category "${val}" added`);
+        }
+
+        function removeExpenseCategory(cat) {
+            const inUse = db.expenses.some(e => e.cat === cat);
+            if (inUse && !confirm(`"${cat}" is used by existing expenses. Remove it anyway?`)) return;
+            const s = db.settings;
+            s.expenseCategories = getExpenseCategories().filter(c => c !== cat);
+            db.settings = s;
+            renderExpCatTags();
+            showToast(`Expense category "${cat}" removed`);
         }
 
         // ── STOCK CATEGORIES ─────────────────────────────────────────────
@@ -3789,6 +4078,344 @@
             URL.revokeObjectURL(a.href);
         }
 
+        // ── SHARED EXPORT HELPERS ────────────────────────────────────────────
+
+        function _exportTableDef(type) {
+            // Returns { title, headers, rows, filename }
+            const co = getCompanyInfo().name;
+            const date = new Date().toLocaleDateString('en-GB');
+            if (type === 'inventory') {
+                return {
+                    title: `${co} — Stock Report (${date})`,
+                    headers: ['ID','Product','Category','Unit','Qty','Unit Cost (ZMW)','Total Value (ZMW)','Status'],
+                    rows: db.inventory.map(i => [i.id, i.name, i.cat, i.unit||'', i.qty, i.cost.toFixed(2), (i.qty*i.cost).toFixed(2), i.status]),
+                    filename: `ZamAgro_Stock_${date.replace(/\//g,'-')}`
+                };
+            } else if (type === 'sales') {
+                const rows = [];
+                db.sales.forEach(s => {
+                    if (s.items && s.items.length > 0) {
+                        s.items.forEach((li, idx) => {
+                            const prod = db.inventory.find(i => i.id === li.prodId)?.name || li.prodName;
+                            rows.push([idx===0?s.id:'', idx===0?s.date:'', idx===0?s.cust:'', prod, li.qty, li.unitPrice.toFixed(2), li.lineTotal.toFixed(2), idx===0?s.method:'']);
+                        });
+                    } else {
+                        const prod = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName;
+                        const up = s.qty > 0 ? (s.total/s.qty) : 0;
+                        rows.push([s.id, s.date, s.cust, prod, s.qty, up.toFixed(2), s.total.toFixed(2), s.method]);
+                    }
+                });
+                return {
+                    title: `${co} — Sales Report (${date})`,
+                    headers: ['ID','Date','Customer','Product','Qty','Unit Price','Total (ZMW)','Method'],
+                    rows, filename: `ZamAgro_Sales_${date.replace(/\//g,'-')}`
+                };
+            } else if (type === 'purchases') {
+                return {
+                    title: `${co} — Purchases Report (${date})`,
+                    headers: ['ID','Date','Supplier','Product','Qty','Unit Cost (ZMW)','Total (ZMW)'],
+                    rows: db.purchases.map(p => {
+                        const up = p.qty > 0 ? (p.total/p.qty) : 0;
+                        const prod = db.inventory.find(i => i.id === p.prodId)?.name || p.prodName || '';
+                        return [p.id, p.date, p.supplier||'', prod, p.qty, up.toFixed(2), p.total.toFixed(2)];
+                    }),
+                    filename: `ZamAgro_Purchases_${date.replace(/\//g,'-')}`
+                };
+            } else if (type === 'expenses') {
+                return {
+                    title: `${co} — Expenses Report (${date})`,
+                    headers: ['ID','Date','Category','Description','Amount (ZMW)'],
+                    rows: db.expenses.map(e => [e.id, e.date, e.cat, e.desc||'', e.amt.toFixed(2)]),
+                    filename: `ZamAgro_Expenses_${date.replace(/\//g,'-')}`
+                };
+            }
+        }
+
+        // ── PDF EXPORT ───────────────────────────────────────────────────────
+
+        function _makePDF(title, headers, rows, filename) {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) { showToast('PDF library not loaded yet — try again in a moment', 'danger'); return; }
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const co = getCompanyInfo();
+            doc.setFontSize(13); doc.setFont('helvetica','bold');
+            doc.text(co.name || 'ZamAgro Track', 14, 14);
+            doc.setFontSize(9); doc.setFont('helvetica','normal');
+            if (co.phone)   doc.text(co.phone,   14, 20);
+            if (co.address) doc.text(co.address,  14, 25);
+            doc.setFontSize(11); doc.setFont('helvetica','bold');
+            doc.text(title, 14, co.address ? 32 : co.phone ? 27 : 22);
+            doc.autoTable({
+                startY: co.address ? 36 : co.phone ? 31 : 26,
+                head: [headers],
+                body: rows,
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [30, 107, 53], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [243, 246, 238] },
+                margin: { left: 14, right: 14 }
+            });
+            doc.save(`${filename}.pdf`);
+        }
+
+        function exportPDF(type) {
+            const d = _exportTableDef(type);
+            if (d) _makePDF(d.title, d.headers, d.rows, d.filename);
+        }
+
+        function exportPLpdf() {
+            const monthVal = document.getElementById('pl-month')?.value;
+            const pl = computePL(monthVal);
+            const co = getCompanyInfo();
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) { showToast('PDF library not loaded yet — try again in a moment', 'danger'); return; }
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            doc.setFontSize(13); doc.setFont('helvetica','bold');
+            doc.text(co.name || 'ZamAgro Track', 14, 14);
+            doc.setFontSize(9); doc.setFont('helvetica','normal');
+            if (co.phone)   doc.text(co.phone, 14, 20);
+            if (co.address) doc.text(co.address, 14, 25);
+            let y = co.address ? 32 : co.phone ? 27 : 22;
+            doc.setFontSize(12); doc.setFont('helvetica','bold');
+            doc.text(`Profit & Loss — ${pl.period}`, 14, y); y += 8;
+            const summaryRows = [
+                ['Total Revenue', pl.revenue.toFixed(2)],
+                ['Purchases (Stock Bought)', pl.purchases.toFixed(2)],
+                ['Less: Closing Stock', pl.closingStock.toFixed(2)],
+                ['Net COGS', pl.cogs.toFixed(2)],
+                ['Gross Profit', pl.gross.toFixed(2)],
+                ['Operating Expenses', pl.expenses.toFixed(2)],
+                ...(pl.writeoffs > 0 ? [['Stock Write-Offs', pl.writeoffs.toFixed(2)]] : []),
+                ...pl.tax.lines.map(l => [l.label, l.val.toFixed(2)]),
+                ['NET PROFIT / LOSS', pl.net.toFixed(2)],
+            ];
+            doc.autoTable({
+                startY: y,
+                head: [['Category', `Amount (ZMW) — ${pl.period}`]],
+                body: summaryRows,
+                styles: { fontSize: 9, cellPadding: 2 },
+                headStyles: { fillColor: [30, 107, 53], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [243, 246, 238] },
+                margin: { left: 14, right: 14 }
+            });
+            doc.save(`ZamAgro_PL_${pl.period.replace(/\s/g,'_')}.pdf`);
+        }
+
+        function exportReceiptPDF() {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) { showToast('PDF library not loaded yet', 'danger'); return; }
+            const receiptNoMatch = document.getElementById('receipt-body').innerText.match(/Receipt No[:\s]+(\S+)/);
+            const saleId = receiptNoMatch ? receiptNoMatch[1] : null;
+            const s = saleId ? db.sales.find(x => x.id === saleId) : null;
+            if (!s) { showToast('Could not read receipt data', 'danger'); return; }
+            const co = getCompanyInfo();
+            const doc = new jsPDF({ unit: 'mm', format: [80, 200] }); // thermal width
+            let y = 10;
+            const ctr = (txt, size, bold) => {
+                doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal');
+                doc.text(txt, 40, y, { align: 'center' }); y += size * 0.45;
+            };
+            ctr(co.name || 'ZamAgro Track', 11, true);
+            if (co.phone)   ctr(co.phone,   8, false);
+            if (co.address) ctr(co.address, 8, false);
+            y += 2;
+            ctr('SALES RECEIPT', 9, true);
+            y += 1;
+            doc.setDrawColor(150); doc.setLineWidth(0.3); doc.line(5, y, 75, y); y += 3;
+            const row2 = (l, r) => { doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(l, 5, y); doc.text(r, 75, y, {align:'right'}); y += 4; };
+            row2('Receipt No:', s.id);
+            row2('Date:', s.date);
+            row2('Customer:', s.cust);
+            row2('Payment:', s.method + (s.momoRef ? ` (${s.momoRef})` : ''));
+            doc.line(5, y, 75, y); y += 3;
+            if (s.items && s.items.length > 0) {
+                s.items.forEach(li => {
+                    const name = db.inventory.find(p => p.id === li.prodId)?.name || li.prodName;
+                    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.text(name, 5, y); y += 4;
+                    row2(`  ${li.qty} × ${formatZMW(li.unitPrice)}`, formatZMW(li.lineTotal));
+                });
+            } else {
+                const prod = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName;
+                const up = s.qty > 0 ? s.total/s.qty : 0;
+                doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.text(prod, 5, y); y += 4;
+                row2(`  ${s.qty} × ${formatZMW(up)}`, formatZMW(s.total));
+            }
+            doc.line(5, y, 75, y); y += 3;
+            doc.setFont('helvetica','bold'); doc.setFontSize(10);
+            doc.text('TOTAL', 5, y); doc.text(formatZMW(s.total), 75, y, {align:'right'}); y += 6;
+            doc.setFont('helvetica','normal'); doc.setFontSize(8);
+            doc.text('Thank you for your business!', 40, y, {align:'center'}); y += 4;
+            doc.text('Powered by ZamAgro Track', 40, y, {align:'center'});
+            doc.save(`Receipt_${s.id}.pdf`);
+        }
+
+        // ── WORD (DOCX) EXPORT ───────────────────────────────────────────────
+
+        function _blob2download(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        async function exportWord(type) {
+            const docxLib = window.docx;
+            if (!docxLib) { showToast('Word library not loaded yet — try again in a moment', 'danger'); return; }
+            const d = _exportTableDef(type);
+            if (!d) return;
+            const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } = docxLib;
+            const co = getCompanyInfo();
+            const green = '1E6B35';
+            const headerRow = new TableRow({
+                children: d.headers.map(h => new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', size: 18 })], alignment: AlignmentType.CENTER })],
+                    shading: { fill: green },
+                    borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+                }))
+            });
+            const dataRows = d.rows.map((r, ri) => new TableRow({
+                children: r.map(cell => new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: String(cell ?? ''), size: 16 })] })],
+                    shading: { fill: ri % 2 === 0 ? 'F3F6EE' : 'FFFFFF' },
+                    borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+                }))
+            }));
+            const doc = new Document({
+                sections: [{ children: [
+                    new Paragraph({ children: [new TextRun({ text: co.name || 'ZamAgro Track', bold: true, size: 28, color: green })], heading: HeadingLevel.HEADING_1 }),
+                    ...(co.phone   ? [new Paragraph({ children: [new TextRun({ text: co.phone,   size: 18, color: '555555' })] })] : []),
+                    ...(co.address ? [new Paragraph({ children: [new TextRun({ text: co.address, size: 18, color: '555555' })] })] : []),
+                    new Paragraph({ children: [new TextRun({ text: d.title, bold: true, size: 22, color: green })], spacing: { before: 200 } }),
+                    new Paragraph({ text: '', spacing: { after: 100 } }),
+                    new Table({ rows: [headerRow, ...dataRows], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                    new Paragraph({ text: '', spacing: { after: 200 } }),
+                    new Paragraph({ children: [new TextRun({ text: `Generated by ZamAgro Track on ${new Date().toLocaleDateString('en-GB')}`, size: 16, color: '888888', italics: true })] })
+                ]}]
+            });
+            const blob = await Packer.toBlob(doc);
+            _blob2download(blob, `${d.filename}.docx`);
+        }
+
+        async function exportPLword() {
+            const docxLib = window.docx;
+            if (!docxLib) { showToast('Word library not loaded yet — try again in a moment', 'danger'); return; }
+            const monthVal = document.getElementById('pl-month')?.value;
+            const pl = computePL(monthVal);
+            const co = getCompanyInfo();
+            const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } = docxLib;
+            const green = '1E6B35';
+            const summaryRows = [
+                ['Total Sales Revenue', pl.revenue.toFixed(2)],
+                ['Purchases (Stock Bought)', pl.purchases.toFixed(2)],
+                ['Less: Closing Stock', pl.closingStock.toFixed(2)],
+                ['Net COGS', pl.cogs.toFixed(2)],
+                ['Gross Profit', pl.gross.toFixed(2)],
+                ['Operating Expenses', pl.expenses.toFixed(2)],
+                ...(pl.writeoffs > 0 ? [['Stock Write-Offs', pl.writeoffs.toFixed(2)]] : []),
+                ...pl.tax.lines.map(l => [l.label, l.val.toFixed(2)]),
+                ['NET PROFIT / LOSS', pl.net.toFixed(2)],
+            ];
+            const mkHdr = (cols) => new TableRow({ children: cols.map(h => new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', size: 18 })], alignment: AlignmentType.CENTER })],
+                shading: { fill: green },
+                borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+            }))});
+            const mkRow = (cells, ri) => new TableRow({ children: cells.map(c => new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: String(c ?? ''), size: 16 })] })],
+                shading: { fill: ri % 2 === 0 ? 'F3F6EE' : 'FFFFFF' },
+                borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+            }))});
+            const doc = new Document({ sections: [{ children: [
+                new Paragraph({ children: [new TextRun({ text: co.name || 'ZamAgro Track', bold: true, size: 28, color: green })], heading: HeadingLevel.HEADING_1 }),
+                ...(co.phone   ? [new Paragraph({ children: [new TextRun({ text: co.phone,   size: 18, color: '555555' })] })] : []),
+                ...(co.address ? [new Paragraph({ children: [new TextRun({ text: co.address, size: 18, color: '555555' })] })] : []),
+                new Paragraph({ children: [new TextRun({ text: `Profit & Loss — ${pl.period}`, bold: true, size: 24, color: green })], spacing: { before: 200 } }),
+                new Paragraph({ text: '', spacing: { after: 100 } }),
+                new Table({ rows: [mkHdr(['Category', `Amount (ZMW) — ${pl.period}`]), ...summaryRows.map((r,i) => mkRow(r,i))], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                new Paragraph({ text: '', spacing: { after: 200 } }),
+                new Paragraph({ children: [new TextRun({ text: `Generated by ZamAgro Track on ${new Date().toLocaleDateString('en-GB')}`, size: 16, color: '888888', italics: true })] })
+            ]}]});
+            const blob = await Packer.toBlob(doc);
+            _blob2download(blob, `ZamAgro_PL_${pl.period.replace(/\s/g,'_')}.docx`);
+        }
+
+        async function exportInvoiceWord() {
+            const docxLib = window.docx;
+            if (!docxLib) { showToast('Word library not loaded yet', 'danger'); return; }
+            if (!_lastQuotation) { showToast('No document data available', 'danger'); return; }
+            const q = _lastQuotation;
+            const co = getCompanyInfo();
+            const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } = docxLib;
+            const green = '1E6B35';
+            const mkHdr = (cols) => new TableRow({ children: cols.map(h => new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', size: 18 })] })],
+                shading: { fill: green },
+                borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+            }))});
+            const mkRow = (cells, ri) => new TableRow({ children: cells.map(c => new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: String(c ?? ''), size: 16 })] })],
+                shading: { fill: ri % 2 === 0 ? 'F3F6EE' : 'FFFFFF' },
+                borders: { top:{style:BorderStyle.SINGLE,size:1}, bottom:{style:BorderStyle.SINGLE,size:1}, left:{style:BorderStyle.SINGLE,size:1}, right:{style:BorderStyle.SINGLE,size:1} }
+            }))});
+            const itemRows = q.items.map((li, i) => {
+                const prod = db.inventory.find(p => p.id === li.prodId)?.name || li.prodId;
+                return [prod, String(li.qty), li.price.toFixed(2), (li.qty * li.price).toFixed(2)];
+            });
+            const doc = new Document({ sections: [{ children: [
+                new Paragraph({ children: [new TextRun({ text: co.name || 'ZamAgro Track', bold: true, size: 28, color: green })], heading: HeadingLevel.HEADING_1 }),
+                ...(co.phone   ? [new Paragraph({ children: [new TextRun({ text: co.phone,   size: 18 })] })] : []),
+                ...(co.address ? [new Paragraph({ children: [new TextRun({ text: co.address, size: 18 })] })] : []),
+                new Paragraph({ children: [new TextRun({ text: `${q.docType || 'Invoice'} — ${q.cust || ''}`, bold: true, size: 24, color: green })], spacing: { before: 200 } }),
+                new Paragraph({ children: [new TextRun({ text: `Date: ${new Date().toLocaleDateString('en-GB')}`, size: 18 })] }),
+                new Paragraph({ text: '', spacing: { after: 100 } }),
+                new Table({ rows: [mkHdr(['Product','Qty','Unit Price (ZMW)','Total (ZMW)']), ...itemRows.map((r,i)=>mkRow(r,i))], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                new Paragraph({ text: '', spacing: { after: 100 } }),
+                new Paragraph({ children: [new TextRun({ text: `TOTAL: ${formatZMW(q.items.reduce((s,li)=>s+(li.qty*li.price),0))}`, bold: true, size: 22, color: green })] }),
+                ...(q.notes ? [new Paragraph({ children: [new TextRun({ text: `Notes: ${q.notes}`, size: 16, italics: true })] })] : []),
+                new Paragraph({ children: [new TextRun({ text: `Generated by ZamAgro Track on ${new Date().toLocaleDateString('en-GB')}`, size: 16, color: '888888', italics: true })], spacing: { before: 300 } })
+            ]}]});
+            const blob = await Packer.toBlob(doc);
+            _blob2download(blob, `ZamAgro_${q.docType||'Invoice'}_${q.cust||'doc'}.docx`);
+        }
+
+        function exportInvoicePDF() {
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) { showToast('PDF library not loaded yet', 'danger'); return; }
+            if (!_lastQuotation) { showToast('No document data available', 'danger'); return; }
+            const q = _lastQuotation;
+            const co = getCompanyInfo();
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            let y = 14;
+            doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.text(co.name || 'ZamAgro Track', 14, y); y += 6;
+            doc.setFontSize(9); doc.setFont('helvetica','normal');
+            if (co.phone)   { doc.text(co.phone, 14, y); y += 5; }
+            if (co.address) { doc.text(co.address, 14, y); y += 5; }
+            y += 2;
+            doc.setFontSize(12); doc.setFont('helvetica','bold');
+            doc.text(`${q.docType || 'Invoice'} — ${q.cust || ''}`, 14, y); y += 5;
+            doc.setFontSize(9); doc.setFont('helvetica','normal');
+            doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, 14, y); y += 5;
+            const tableRows = q.items.map(li => {
+                const prod = db.inventory.find(p => p.id === li.prodId)?.name || li.prodId;
+                return [prod, String(li.qty), `K${li.price.toFixed(2)}`, `K${(li.qty*li.price).toFixed(2)}`];
+            });
+            doc.autoTable({
+                startY: y,
+                head: [['Product','Qty','Unit Price (ZMW)','Total (ZMW)']],
+                body: tableRows,
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [30,107,53], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [243,246,238] },
+                margin: { left: 14, right: 14 }
+            });
+            const finalY = doc.lastAutoTable.finalY + 6;
+            const total = q.items.reduce((s,li)=>s+(li.qty*li.price),0);
+            doc.setFont('helvetica','bold'); doc.setFontSize(11);
+            doc.text(`TOTAL: ${formatZMW(total)}`, 14, finalY);
+            if (q.notes) { doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(`Notes: ${q.notes}`, 14, finalY + 7); }
+            doc.save(`ZamAgro_${q.docType||'Invoice'}_${q.cust||'doc'}.pdf`);
+        }
+
         function exportPLcsv() {
             const monthVal = document.getElementById('pl-month')?.value;
             const pl = computePL(monthVal);
@@ -3957,12 +4584,55 @@
             openModal('modal-receipt');
         }
 
-        // --- INVOICE / QUOTATION GENERATOR ---
+        function shareReceiptWhatsApp() {
+            const sale = db.sales.find(s => document.getElementById('receipt-body').innerHTML.includes(s.id));
+            // Re-derive the currently displayed sale from the receipt body receipt number
+            const receiptNoMatch = document.getElementById('receipt-body').innerText.match(/Receipt No[:\s]+(\S+)/);
+            const saleId = receiptNoMatch ? receiptNoMatch[1] : null;
+            const s = saleId ? db.sales.find(x => x.id === saleId) : null;
+            if (!s) { showToast('Could not read receipt data', 'danger'); return; }
+
+            const co = getCompanyInfo();
+            const lines = [];
+            lines.push(`🌱 *${co.name}*`);
+            if (co.phone)   lines.push(`📞 ${co.phone}`);
+            if (co.address) lines.push(`📍 ${co.address}`);
+            lines.push('');
+            lines.push(`*SALES RECEIPT*`);
+            lines.push(`Receipt No: ${s.id}`);
+            lines.push(`Date: ${s.date}`);
+            lines.push(`Customer: ${s.cust}`);
+            lines.push(`Payment: ${s.method}${s.momoRef ? ' (Ref: ' + s.momoRef + ')' : ''}`);
+            lines.push('─────────────────────');
+
+            if (s.items && s.items.length > 0) {
+                s.items.forEach(li => {
+                    const name = db.inventory.find(p => p.id === li.prodId)?.name || li.prodName || li.prodId;
+                    lines.push(`• ${name}`);
+                    lines.push(`  ${li.qty} × ${formatZMW(li.unitPrice)} = ${formatZMW(li.lineTotal)}`);
+                });
+            } else {
+                const prodName  = db.inventory.find(i => i.id === s.prodId)?.name || s.prodName || s.prodId;
+                const unitPrice = s.qty > 0 ? (s.total / s.qty) : 0;
+                lines.push(`• ${prodName}`);
+                lines.push(`  ${s.qty} × ${formatZMW(unitPrice)} = ${formatZMW(s.total)}`);
+            }
+
+            lines.push('─────────────────────');
+            lines.push(`*TOTAL: ${formatZMW(s.total)}*`);
+            lines.push('');
+            lines.push('Thank you for your business! 🙏');
+            lines.push('_Powered by ZamAgro Track_');
+
+            const text = encodeURIComponent(lines.join('\n'));
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
         // Standalone document builder: pulls product names & prices from inventory,
         // but does NOT touch stock levels or create a sale record — it's purely a
         // printable/shareable customer-facing document (a quote may never close).
 
         let invoiceItems = [];
+        let _lastQuotation = null; // stash for Convert to Sale
 
         function openInvoiceBuilder() {
             if (db.inventory.length === 0) {
@@ -4117,8 +4787,47 @@
                 <div class="invoice-footer">${type === 'Invoice' ? 'Thank you for your business!' : 'Thank you for considering us — we look forward to working with you.'}<br>Powered by ZamAgro Track</div>
             `;
 
+            // Stash snapshot for PDF/Word export and Convert to Sale
+            _lastQuotation = { cust, phone, items: validItems, grandTotal, docType: type };
+            const convertBtn = document.getElementById('btn-convert-to-sale');
+            if (convertBtn) convertBtn.classList.toggle('hidden', type !== 'Quotation');
+
             closeModal('modal-invoice-builder');
             openModal('modal-invoice-print');
+        }
+
+
+        function convertQuotationToSale() {
+            if (!_lastQuotation) { showToast('No quotation to convert', 'danger'); return; }
+            const { cust, items: validItems } = _lastQuotation;
+
+            // Validate all products still exist in inventory
+            const inv = db.inventory;
+            for (const item of validItems) {
+                const prod = inv.find(p => p.id === item.prodId);
+                if (!prod) {
+                    showToast('One or more products no longer exist in inventory — re-build the quotation', 'danger');
+                    return;
+                }
+            }
+
+            // Pre-fill saleItems from quotation lines
+            saleItems = validItems.map(item => ({
+                prodId: item.prodId,
+                qty:    item.qty,
+                price:  item.price
+            }));
+
+            // Pre-fill customer and reset payment method
+            document.getElementById('sale-cust').value      = cust;
+            document.getElementById('sale-method').value    = 'Cash';
+            document.getElementById('sale-momo-ref').value  = '';
+            toggleMomoField();
+            renderSaleItemRows();
+
+            closeModal('modal-invoice-print');
+            openModal('modal-sale');
+            showToast(`Quotation pre-loaded for ${cust} — choose payment method and confirm`);
         }
 
         function handleAddInventory(e) {
@@ -4169,10 +4878,12 @@
 
         function setCashFlowPeriod(period) {
             cashFlowPeriod = period;
-            document.getElementById('cf-btn-today').style.background = period === 'today' ? 'var(--accent)' : '#eee';
-            document.getElementById('cf-btn-today').style.color      = period === 'today' ? 'white' : '';
-            document.getElementById('cf-btn-week').style.background  = period === 'week'  ? 'var(--accent)' : '#eee';
-            document.getElementById('cf-btn-week').style.color       = period === 'week'  ? 'white' : '';
+            ['today', 'week', 'month'].forEach(p => {
+                const btn = document.getElementById(`cf-btn-${p}`);
+                if (!btn) return;
+                btn.style.background = p === period ? 'var(--accent)' : '#eee';
+                btn.style.color      = p === period ? 'white' : '';
+            });
             renderCashFlow();
         }
 
@@ -4196,9 +4907,13 @@
             weekStart.setDate(now.getDate() - dayOfWeek);
             const weekStartISO = weekStart.toISOString().slice(0, 10);
 
+            // Month start = 1st of current month
+            const monthStartISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+
             function inPeriod(dateStr) {
                 const iso = toISO(dateStr);
                 if (period === 'today') return iso === todayISO;
+                if (period === 'month') return iso >= monthStartISO && iso <= todayISO;
                 return iso >= weekStartISO && iso <= todayISO;
             }
 
@@ -4454,7 +5169,8 @@
                 qty:      resolvedItems[0].qty,
                 total:    grandTotal,
                 method,
-                momoRef
+                momoRef,
+                recordedBy: currentUser || 'unknown'
             };
 
             const sales = db.sales;
@@ -4477,7 +5193,8 @@
                     prod:    resolvedItems.length === 1 ? resolvedItems[0].prodName : `${resolvedItems[0].prodName} +${resolvedItems.length - 1} more`,
                     amt:     grandTotal,
                     dueDate: due.toLocaleDateString('en-GB'),
-                    status:  'Outstanding'
+                    status:  'Outstanding',
+                    recordedBy: currentUser || 'unknown'
                 });
                 db.credit = credit;
             }
@@ -4497,6 +5214,15 @@
             const qty = parseInt(document.getElementById('pur-qty').value);
             const cost = parseFloat(document.getElementById('pur-cost').value);
             const supplier = document.getElementById('pur-sup').value;
+
+            // Auto-register supplier if not already in the register
+            if (supplier) {
+                const suppliers = db.suppliers;
+                if (!suppliers.find(s => s.name.toLowerCase() === supplier.toLowerCase())) {
+                    suppliers.push({ id: uid('SUP'), name: supplier, phone: '', location: '', products: '', notes: '', createdAt: new Date().toLocaleDateString('en-GB') });
+                    db.suppliers = suppliers;
+                }
+            }
 
             const inv = db.inventory;
             const product = inv.find(i => i.id === prodId);
@@ -4524,12 +5250,14 @@
                 prodId: prodId,
                 prodName: product.name,
                 qty: qty,
-                total: qty * cost
+                total: qty * cost,
+                recordedBy: currentUser || 'unknown'
             });
             db.purchases = purchases;
 
             closeModal('modal-purchase');
             e.target.reset();
+            updateSupplierDatalist();
             refreshAll();
         }
 
@@ -4541,11 +5269,13 @@
                 date: new Date().toLocaleDateString('en-GB'),
                 cat: document.getElementById('exp-cat').value,
                 desc: document.getElementById('exp-desc').value,
-                amt: parseFloat(document.getElementById('exp-amt').value)
+                amt: parseFloat(document.getElementById('exp-amt').value),
+                recordedBy: currentUser || 'unknown'
             });
             db.expenses = expenses;
             closeModal('modal-exp');
             e.target.reset();
+            populateExpCatSelect('exp-cat');
             refreshAll();
             showToast("Expense Added to P&L");
         }
@@ -4580,6 +5310,7 @@
                     <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Claim Value</span><div style="font-weight:700;color:var(--primary);">${formatZMW(item.val)}</div></div>
                     <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Product Redeemed</span><div>${esc(prodName)}</div></div>
                     <div><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Qty Issued</span><div>${item.qty ? esc(String(item.qty)) : '—'}</div></div>
+                    <div style="grid-column:1/-1;"><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Season</span><div>${esc(item.season || '—')}</div></div>
                     <div style="grid-column:1/-1;"><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Notes</span><div>${esc(item.notes || '—')}</div></div>
                     <div style="grid-column:1/-1;"><span style="color:var(--text-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;">Status</span><div><span class="badge ${badge}" style="font-size:.85rem;">${esc(item.status)}</span></div></div>
                 </div>
@@ -4624,7 +5355,9 @@
                 prodName:   prodName,
                 qty:        qty,
                 notes:      document.getElementById('fisp-notes').value.trim(),
-                status:     "Pending"
+                season:     document.getElementById('fisp-season').value,
+                status:     "Pending",
+                recordedBy: currentUser || 'unknown'
             });
             db.fisp = fisp;
             closeModal('modal-fisp');
@@ -4682,9 +5415,31 @@
                 return;
             }
             closeModal('modal-admin-reauth');
+            // Restore modal copy to default (delete context)
+            document.querySelector('#modal-admin-reauth h3').textContent = '🔒 Confirm Delete';
+            document.querySelector('#modal-admin-reauth p').textContent = 'Enter your admin password to permanently delete this record. This cannot be undone.';
+            document.querySelector('#modal-admin-reauth .btn-danger').textContent = 'Delete Record';
             if (!_reauthPending) return;
             const { type, id } = _reauthPending;
             _reauthPending = null;
+
+            // Staff account removal
+            if (type === '__removeStaff__') {
+                const slot = parseInt(id);
+                const accounts = getAccounts();
+                const clients = (accounts && accounts.clients) || [null, null];
+                const removedUsername = clients[slot - 1] && clients[slot - 1].username;
+                clients[slot - 1] = null;
+                accounts.clients = clients;
+                localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
+                if (removedUsername && cloudAuth) {
+                    const idTok = await getFreshIdToken();
+                    await removeUsernameDirectoryEntry(idTok, removedUsername, 'client', cloudAuth.uid);
+                }
+                renderStaffAccountUI();
+                showToast(`Staff account ${slot} removed.`);
+                return;
+            }
 
             // Reverse side-effects before removing the record
             if (type === 'sales') {
@@ -4985,7 +5740,7 @@
             const exp = db.expenses.find(e => e.id === id);
             if (!exp) return;
             document.getElementById('edit-exp-id').value  = exp.id;
-            document.getElementById('edit-exp-cat').value = exp.cat;
+            populateExpCatSelect('edit-exp-cat', exp.cat);
             document.getElementById('edit-exp-desc').value= exp.desc;
             document.getElementById('edit-exp-amt').value = exp.amt;
             openModal('modal-edit-expense');
@@ -5019,6 +5774,7 @@
             document.getElementById('edit-fisp-val').value          = item.val || '';
             document.getElementById('edit-fisp-qty').value          = item.qty || '';
             document.getElementById('edit-fisp-notes').value        = item.notes || '';
+            document.getElementById('edit-fisp-season').value       = item.season || '';
             document.getElementById('edit-fisp-status').value       = item.status || 'Pending';
             // Product dropdown
             const sel = document.getElementById('edit-fisp-prod');
@@ -5084,6 +5840,7 @@
             item.val        = parseFloat(document.getElementById('edit-fisp-val').value);
             item.qty        = newQty;
             item.notes      = document.getElementById('edit-fisp-notes').value.trim();
+            item.season     = document.getElementById('edit-fisp-season').value;
             item.status     = document.getElementById('edit-fisp-status').value;
             item.prodId     = newProdId;
             item.prodName   = newProdName;
@@ -5135,6 +5892,309 @@
         }
 
 
+
+
+
+        // ============================================================
+        // 📋 STAFF ACTIVITY LOG
+        // ============================================================
+
+        function clearActivityFilters() {
+            document.getElementById('al-filter-user').value = '';
+            document.getElementById('al-filter-type').value = '';
+            document.getElementById('al-from').value = '';
+            document.getElementById('al-to').value   = '';
+            renderActivityLog();
+        }
+
+        function parseDate(ddmmyyyy) {
+            const [d, m, y] = ddmmyyyy.split('/');
+            return y && m && d ? `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}` : '';
+        }
+
+        function renderActivityLog() {
+            const tbody   = document.querySelector('#table-activitylog tbody');
+            if (!tbody) return;
+
+            const filterUser = document.getElementById('al-filter-user')?.value || '';
+            const filterType = document.getElementById('al-filter-type')?.value || '';
+            const fromDate   = document.getElementById('al-from')?.value || '';
+            const toDate     = document.getElementById('al-to')?.value   || '';
+
+            // Collect all records across collections into a unified list
+            const entries = [];
+
+            db.sales.forEach(r => entries.push({
+                date: r.date, isoDate: parseDate(r.date),
+                user: r.recordedBy || '—',
+                type: 'sale', typeLabel: 'Sale',
+                id:   r.id,
+                summary: `${r.cust} — ${r.items ? r.items.map(i => i.prodName).join(', ') : r.prodName} (${r.method})`,
+                value: r.total || 0
+            }));
+
+            db.purchases.forEach(r => entries.push({
+                date: r.date, isoDate: parseDate(r.date),
+                user: r.recordedBy || '—',
+                type: 'purchase', typeLabel: 'Purchase',
+                id:   r.id,
+                summary: `${r.supplier || '—'} — ${r.prodName} × ${r.qty}`,
+                value: r.total || 0
+            }));
+
+            db.expenses.forEach(r => entries.push({
+                date: r.date, isoDate: parseDate(r.date),
+                user: r.recordedBy || '—',
+                type: 'expense', typeLabel: 'Expense',
+                id:   r.id,
+                summary: `${r.cat} — ${r.desc || ''}`,
+                value: r.amt || 0
+            }));
+
+            db.fisp.forEach(r => entries.push({
+                date: r.date, isoDate: parseDate(r.date),
+                user: r.recordedBy || '—',
+                type: 'fisp', typeLabel: 'FISP',
+                id:   r.id,
+                summary: `${r.farmerName || '—'} — Voucher ${r.voucher || '—'}`,
+                value: r.val || 0
+            }));
+
+            db.credit.forEach(r => entries.push({
+                date: r.date || '—', isoDate: parseDate(r.date || ''),
+                user: r.recordedBy || '—',
+                type: 'credit', typeLabel: 'Credit',
+                id:   r.id,
+                summary: `${r.cust} — ${r.prod || ''}`,
+                value: r.amt || 0
+            }));
+
+            db.adjustments.forEach(r => entries.push({
+                date: r.date, isoDate: parseDate(r.date),
+                user: r.recordedBy || '—',
+                type: 'adjustment', typeLabel: 'Adjustment',
+                id:   r.id,
+                summary: `${r.prodName} ${r.direction === 'down' ? '−' : '+'}${r.qty} (${r.reason})`,
+                value: r.lossValue || 0
+            }));
+
+            // Sort newest first
+            entries.sort((a, b) => b.isoDate.localeCompare(a.isoDate));
+
+            // Populate staff filter dropdown
+            const userSel = document.getElementById('al-filter-user');
+            if (userSel) {
+                const knownUsers = [...new Set(entries.map(e => e.user).filter(u => u && u !== '—'))].sort();
+                const currentVal = userSel.value;
+                userSel.innerHTML = '<option value="">All Staff</option>' +
+                    knownUsers.map(u => `<option value="${esc(u)}" ${u === currentVal ? 'selected' : ''}>${esc(u)}</option>`).join('');
+            }
+
+            // Apply filters
+            const filtered = entries.filter(e => {
+                if (filterUser && e.user !== filterUser) return false;
+                if (filterType && e.type !== filterType) return false;
+                if (fromDate && e.isoDate && e.isoDate < fromDate) return false;
+                if (toDate   && e.isoDate && e.isoDate > toDate)   return false;
+                return true;
+            });
+
+            // Summary bar
+            const summaryEl = document.getElementById('al-summary');
+            if (summaryEl) {
+                const byUser = {};
+                filtered.forEach(e => { byUser[e.user] = (byUser[e.user] || 0) + 1; });
+                summaryEl.innerHTML = Object.entries(byUser).map(([user, count]) =>
+                    `<div style="background:var(--surface);border-radius:var(--radius-sm);padding:.5rem .9rem;font-size:.82rem;border:1.5px solid var(--border);">
+                        <strong>${esc(user)}</strong> — ${count} record${count !== 1 ? 's' : ''}
+                    </div>`
+                ).join('');
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No activity records found for this filter.</td></tr>';
+                return;
+            }
+
+            const typeColors = {
+                sale: 'var(--success)', purchase: 'var(--primary)',
+                expense: 'var(--danger)', fisp: 'var(--secondary)',
+                credit: 'var(--warning)', adjustment: 'var(--text-muted)'
+            };
+
+            tbody.innerHTML = filtered.map(e => `<tr>
+                <td style="white-space:nowrap;color:var(--text-muted);font-size:.85rem;">${esc(e.date)}</td>
+                <td style="font-weight:700;">${esc(e.user)}</td>
+                <td><span style="font-size:.78rem;font-weight:700;padding:.2rem .5rem;border-radius:99px;background:${typeColors[e.type]}22;color:${typeColors[e.type]};border:1px solid ${typeColors[e.type]}55;">${esc(e.typeLabel)}</span></td>
+                <td style="font-family:monospace;font-size:.8rem;">${esc(e.id)}</td>
+                <td style="font-size:.85rem;color:var(--text-muted);">${esc(e.summary)}</td>
+                <td style="font-weight:600;">${e.value > 0 ? formatZMW(e.value) : '—'}</td>
+            </tr>`).join('');
+        }
+
+        // ============================================================
+        // 🏭 SUPPLIER REGISTER
+        // ============================================================
+
+        function updateSupplierDatalist() {
+            const dl = document.getElementById('supplier-datalist');
+            if (!dl) return;
+            dl.innerHTML = db.suppliers.map(s => `<option value="${esc(s.name)}">`).join('');
+        }
+
+        function openAddSupplierModal() {
+            ['sup-name','sup-phone','sup-location','sup-products','sup-notes'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            openModal('modal-add-supplier');
+        }
+
+        function handleAddSupplier(e) {
+            e.preventDefault();
+            const name = document.getElementById('sup-name').value.trim();
+            if (!name) { showToast('Supplier name is required', 'danger'); return; }
+            const exists = db.suppliers.find(s => s.name.toLowerCase() === name.toLowerCase());
+            if (exists) { showToast('A supplier with this name already exists', 'danger'); return; }
+            const suppliers = db.suppliers;
+            suppliers.push({
+                id:        uid('SUP'),
+                name,
+                phone:     document.getElementById('sup-phone').value.trim(),
+                location:  document.getElementById('sup-location').value.trim(),
+                products:  document.getElementById('sup-products').value.trim(),
+                notes:     document.getElementById('sup-notes').value.trim(),
+                createdAt: new Date().toLocaleDateString('en-GB')
+            });
+            db.suppliers = suppliers;
+            closeModal('modal-add-supplier');
+            e.target.reset();
+            renderSuppliers();
+            updateSupplierDatalist();
+            showToast('Supplier added');
+        }
+
+        function openEditSupplierModal(id) {
+            const s = db.suppliers.find(x => x.id === id);
+            if (!s) return;
+            document.getElementById('edit-sup-id').value       = s.id;
+            document.getElementById('edit-sup-name').value     = s.name;
+            document.getElementById('edit-sup-phone').value    = s.phone || '';
+            document.getElementById('edit-sup-location').value = s.location || '';
+            document.getElementById('edit-sup-products').value = s.products || '';
+            document.getElementById('edit-sup-notes').value    = s.notes || '';
+            openModal('modal-edit-supplier');
+        }
+
+        function handleEditSupplier(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-sup-id').value;
+            const suppliers = db.suppliers;
+            const s = suppliers.find(x => x.id === id);
+            if (!s) return;
+            const newName = document.getElementById('edit-sup-name').value.trim();
+            if (!newName) { showToast('Supplier name is required', 'danger'); return; }
+            const duplicate = suppliers.find(x => x.id !== id && x.name.toLowerCase() === newName.toLowerCase());
+            if (duplicate) { showToast('Another supplier already has this name', 'danger'); return; }
+            const oldName = s.name;
+            s.name     = newName;
+            s.phone    = document.getElementById('edit-sup-phone').value.trim();
+            s.location = document.getElementById('edit-sup-location').value.trim();
+            s.products = document.getElementById('edit-sup-products').value.trim();
+            s.notes    = document.getElementById('edit-sup-notes').value.trim();
+            db.suppliers = suppliers;
+            // Cascade name change to purchase records
+            if (oldName !== newName) {
+                const purchases = db.purchases;
+                let changed = false;
+                purchases.forEach(p => { if (p.supplier === oldName) { p.supplier = newName; changed = true; } });
+                if (changed) db.purchases = purchases;
+            }
+            closeModal('modal-edit-supplier');
+            renderSuppliers();
+            updateSupplierDatalist();
+            renderTable('purchases');
+            showToast('Supplier updated');
+        }
+
+        function deleteSupplier(id) {
+            if (currentUser !== 'admin') { showToast('Only admins can delete suppliers', 'danger'); return; }
+            const s = db.suppliers.find(x => x.id === id);
+            if (!s) return;
+            if (!confirm(`Delete supplier "${s.name}"? This cannot be undone.`)) return;
+            db.suppliers = db.suppliers.filter(x => x.id !== id);
+            renderSuppliers();
+            updateSupplierDatalist();
+            showToast('Supplier deleted', 'danger');
+        }
+
+        function renderSuppliers() {
+            const tbody = document.querySelector('#table-suppliers tbody');
+            if (!tbody) return;
+            const search    = (document.getElementById('search-suppliers')?.value || '').toLowerCase();
+            const purchases = db.purchases;
+            const suppliers = db.suppliers;
+
+            updateSupplierDatalist();
+
+            // Summary cards
+            const summaryEl = document.getElementById('supplier-summary-cards');
+            if (summaryEl) {
+                const totalSpent  = purchases.reduce((s, p) => s + (p.total || 0), 0);
+                const topSupplier = suppliers.map(s => ({
+                    name:  s.name,
+                    spent: purchases.filter(p => p.supplier === s.name).reduce((t, p) => t + (p.total || 0), 0)
+                })).sort((a, b) => b.spent - a.spent)[0];
+
+                summaryEl.innerHTML = `
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--accent);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">Registered Suppliers</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--accent);">${suppliers.length}</div>
+                    </div>
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--primary);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">Total Spent (All Time)</div>
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--primary);">${formatZMW(totalSpent)}</div>
+                    </div>
+                    ${topSupplier ? `
+                    <div style="background:var(--surface);border-radius:var(--radius);padding:1rem;border-left:4px solid var(--secondary);box-shadow:var(--shadow-sm);">
+                        <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;">Top Supplier</div>
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--secondary);">${esc(topSupplier.name)}</div>
+                        <div style="font-size:.85rem;color:var(--text-muted);">${formatZMW(topSupplier.spent)} spent</div>
+                    </div>` : ''}
+                `;
+            }
+
+            const filtered = suppliers.filter(s =>
+                !search ||
+                s.name.toLowerCase().includes(search) ||
+                (s.phone || '').includes(search) ||
+                (s.location || '').toLowerCase().includes(search) ||
+                (s.products || '').toLowerCase().includes(search)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No suppliers found. Add your first supplier above.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(s => {
+                const supPurchases  = purchases.filter(p => p.supplier === s.name);
+                const totalSpent    = supPurchases.reduce((t, p) => t + (p.total || 0), 0);
+                const lastPurchase  = supPurchases.length > 0
+                    ? supPurchases[supPurchases.length - 1].date
+                    : '—';
+                const adminBtns = currentUser === 'admin'
+                    ? `<button class="btn btn-sm btn-primary" onclick="openEditSupplierModal('${esc(s.id)}')">✏️</button> <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${esc(s.id)}')">🗑</button>`
+                    : '';
+                return `<tr>
+                    <td style="font-weight:600;">${esc(s.name)}${s.products ? `<div style="font-size:.78rem;color:var(--text-muted);margin-top:.15rem;">${esc(s.products)}</div>` : ''}</td>
+                    <td>${esc(s.phone || '—')}</td>
+                    <td>${esc(s.location || '—')}</td>
+                    <td style="font-weight:700;color:var(--primary);">${totalSpent > 0 ? formatZMW(totalSpent) : '—'}</td>
+                    <td style="color:var(--text-muted);">${esc(lastPurchase)}</td>
+                    <td style="white-space:nowrap;">${adminBtns}</td>
+                </tr>`;
+            }).join('');
+        }
 
         // ============================================================
         // ⚠️ STOCK ADJUSTMENTS
@@ -5238,7 +6298,8 @@
                 lossValue,
                 costAtTime: prod.cost || 0,
                 reason,
-                notes
+                notes,
+                recordedBy: currentUser || 'unknown'
             });
             db.adjustments = adjustments;
 
@@ -5473,6 +6534,36 @@
         showLanding();
 
     </script>
+
+            <!-- 10. ACTIVITY LOG VIEW -->
+            <div id="view-activitylog" class="hidden admin-only">
+                <div class="view-toolbar" style="flex-wrap:wrap;gap:.6rem;">
+                    <select id="al-filter-user" onchange="renderActivityLog()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.875rem;">
+                        <option value="">All Staff</option>
+                    </select>
+                    <select id="al-filter-type" onchange="renderActivityLog()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:.875rem;">
+                        <option value="">All Types</option>
+                        <option value="sale">Sales</option>
+                        <option value="purchase">Purchases</option>
+                        <option value="expense">Expenses</option>
+                        <option value="fisp">FISP Claims</option>
+                        <option value="credit">Credit</option>
+                        <option value="adjustment">Adjustments</option>
+                    </select>
+                    <input type="date" id="al-from" onchange="renderActivityLog()" title="From">
+                    <span class="arrow">→</span>
+                    <input type="date" id="al-to" onchange="renderActivityLog()" title="To">
+                    <button class="btn btn-sm" style="background:var(--surface-2);border:1.5px solid var(--border);" onclick="clearActivityFilters()">Clear</button>
+                </div>
+                <div id="al-summary" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+                <div class="table-container">
+                    <table id="table-activitylog">
+                        <thead><tr><th>Date</th><th>Staff</th><th>Type</th><th>Record ID</th><th>Summary</th><th>Value (ZMW)</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
     <!-- TERMS OF SERVICE MODAL -->
     <div id="modal-tos" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;">
         <div style="background:#fff;border-radius:var(--radius-lg);max-width:640px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
