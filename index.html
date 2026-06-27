@@ -597,9 +597,9 @@
 
     <!-- ── SUBSCRIPTION REQUEST MODAL ── -->
     <div id="modal-sub-request" class="modal-overlay hidden">
-        <div class="modal" style="max-width:400px;width:90%;background:#fff;border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-lg);">
+        <div class="modal" style="max-width:420px;width:90%;background:#fff;border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-lg);">
             <h3 style="margin-bottom:.5rem;color:var(--primary-dark);">📨 Request Subscription</h3>
-            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem;">We'll receive your request and activate your plan after payment confirmation.</p>
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem;">Pay first via Mobile Money, then fill in your transaction ID and submit.</p>
             <div style="margin-bottom:1rem;">
                 <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">PLAN REQUESTED</label>
                 <select id="subreq-tier" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;">
@@ -614,18 +614,23 @@
                 <input type="tel" id="subreq-phone" placeholder="e.g. 0977 000 000" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;"/>
             </div>
             <div style="margin-bottom:1rem;">
-                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">NOTE (optional)</label>
-                <input type="text" id="subreq-note" placeholder="e.g. Will pay via Airtel Money" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;"/>
+                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">TRANSACTION ID <span style="color:var(--danger);">*</span></label>
+                <input type="text" id="subreq-txnid" placeholder="e.g. ABCD123456" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;font-family:monospace;letter-spacing:.5px;" autocomplete="off"/>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">Found in your Mobile Money confirmation SMS.</div>
             </div>
-            <div id="subreq-err" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.75rem;"></div>
+            <div style="margin-bottom:1rem;">
+                <label style="font-size:.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:.35rem;">NOTE (optional)</label>
+                <input type="text" id="subreq-note" placeholder="e.g. Paid via Airtel Money" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;"/>
+            </div>
+            <div id="subreq-err" style="display:none;color:var(--danger);font-size:.82rem;margin-bottom:.75rem;padding:.5rem .75rem;background:#fff5f5;border-radius:6px;border:1px solid #ffd0d0;"></div>
             <div id="subreq-success" style="display:none;background:#e8f5e9;border-radius:8px;padding:1rem;text-align:center;margin-bottom:.75rem;">
                 <div style="font-size:1.5rem">✅</div>
                 <div style="font-weight:700;color:#2e7d32;margin:.3rem 0;">Request Sent!</div>
-                <div style="font-size:.82rem;color:#555;">We'll contact you shortly to confirm payment and activate your plan.</div>
+                <div style="font-size:.82rem;color:#555;">We'll verify your payment and activate your plan shortly. Contact us on WhatsApp if you need faster assistance.</div>
             </div>
             <div id="subreq-actions" style="display:flex;gap:.75rem;margin-top:.5rem;">
                 <button onclick="closeModal('modal-sub-request')" class="btn" style="flex:1;background:#f0f0f0;color:#555;">Cancel</button>
-                <button onclick="submitSubRequest()" class="btn btn-primary" style="flex:1;" id="subreq-btn">Send Request</button>
+                <button onclick="submitSubRequest()" class="btn btn-primary" style="flex:1;" id="subreq-btn">Submit Request</button>
             </div>
         </div>
     </div>
@@ -1958,10 +1963,10 @@
             return resp.json().catch(() => null);
         }
 
-        async function firebaseGet(path) {
+        async function firebaseGet(path, signal) {
             const idToken = await getFreshIdToken();
             if (!idToken) throw new Error('No valid cloud session');
-            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${cloudAuth.uid}/${path}.json?auth=${idToken}`);
+            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${cloudAuth.uid}/${path}.json?auth=${idToken}`, signal ? { signal } : undefined);
             if (!resp.ok) throw new Error(`Firebase GET ${path} failed: ${resp.status}`);
             return resp.json();
         }
@@ -1969,8 +1974,8 @@
         // Fetches a whole business node WITHOUT any Firebase Auth session — used for staff
         // sign-in on a brand-new device, since staff have no Firebase Auth user of their own
         // (see Database Rules: business nodes are publicly readable, admin-only writable).
-        async function fetchPublicBusinessSnapshot(uid) {
-            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${uid}.json`);
+        async function fetchPublicBusinessSnapshot(uid, signal) {
+            const resp = await fetch(`${FIREBASE_CONFIG.databaseURL}/businesses/${uid}.json`, signal ? { signal } : undefined);
             if (!resp.ok) throw new Error(`Could not load cloud data (${resp.status})`);
             return (await resp.json()) || {};
         }
@@ -2122,12 +2127,19 @@
         }
 
         async function pullFullSnapshot() {
-            for (const col of SYNC_COLLECTIONS) {
-                const remote = await firebaseGet(col);
-                mergeRemoteCollection(col, remote || {});
+            const TIMEOUT_MS = 15000;
+            const ac = new AbortController();
+            const timer = setTimeout(() => ac.abort(), TIMEOUT_MS);
+            try {
+                for (const col of SYNC_COLLECTIONS) {
+                    const remote = await firebaseGet(col, ac.signal);
+                    mergeRemoteCollection(col, remote || {});
+                }
+                const remoteSettings = await firebaseGet('settings', ac.signal);
+                if (remoteSettings) mergeRemoteSettings(remoteSettings);
+            } finally {
+                clearTimeout(timer);
             }
-            const remoteSettings = await firebaseGet('settings');
-            if (remoteSettings) mergeRemoteSettings(remoteSettings);
         }
 
         async function connectCloudSync(email, password, mode) {
@@ -2966,106 +2978,32 @@
                 return;
             }
 
-            const acct = accounts
-                ? (role === 'client'
-                    ? ((accounts.clients || []).find(c => c && c.username.toLowerCase() === u.toLowerCase()) || null)
-                    : accounts[role])
-                : null;
             let valid = false;
             let displayName = null;
 
-            if (acct && acct.username.toLowerCase() === u.toLowerCase()) {
-                // A local account exists for this role+username on this device. Local hash check
-                // first — a quick, free way to reject an obviously wrong password without
-                // spending a network round-trip. It is NOT sufficient on its own: login is only
-                // granted once the cloud check below also succeeds, so a login can never go
-                // through while offline or while the cloud account can't be verified.
-                const localHash = await pbkdf2Hash(p, acct.salt);
-                if (localHash !== acct.hash) {
-                    valid = false;
-                } else {
-                    btn.textContent = 'Verifying with cloud…';
-                    try {
-                        if (role === 'admin') {
-                            // Use typed company name; fall back to locally stored name
-                            const companyName = loginCompany || (db.settings && db.settings.companyName) || '';
-                            const email = deriveCloudEmail(companyName, u);
-                            const data = await cloudSignIn(email, p);
-                            saveCloudAuth({
-                                uid: data.localId,
-                                email,
-                                idToken: data.idToken,
-                                refreshToken: data.refreshToken,
-                                idTokenExpiry: Date.now() + (parseInt(data.expiresIn, 10) * 1000)
-                            });
-                            await pullFullSnapshot(); // safe merge, not a destructive overwrite — this device may have its own unsynced local edits
-                            startCloudListener();
-                            valid = true;
-                            displayName = acct.username;
-                        } else {
-                            // Staff have no Firebase Auth user of their own — verify against the
-                            // live public directory entry instead (requires reaching the cloud
-                            // either way, so this already can't succeed offline). Note
-                            // lookupUsernameDirectory returns null both when the entry genuinely
-                            // doesn't exist AND when the network request itself fails, so check
-                            // connectivity explicitly to give an accurate error either way.
-                            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-                                throw new TypeError('offline');
-                            }
-                            const entry = await lookupUsernameDirectory(u, role);
-                            if (!entry || entry.role !== 'client' || !entry.salt || !entry.hash) {
-                                valid = false;
-                            } else {
-                                const dirHash = await pbkdf2Hash(p, entry.salt);
-                                if (dirHash !== entry.hash) {
-                                    valid = false;
-                                } else {
-                                    const snapshot = await fetchPublicBusinessSnapshot(entry.uid);
-                                    window.__applyingRemoteSync = true;
-                                    SYNC_COLLECTIONS.forEach(col => {
-                                        const remote = (snapshot && snapshot[col]) || {};
-                                        mergeRemoteCollection(col, remote);
-                                    });
-                                    if (snapshot && snapshot.settings) mergeRemoteSettings(snapshot.settings);
-                                    window.__applyingRemoteSync = false;
-                                    valid = true;
-                                    displayName = acct.username;
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        // Wrong cloud password, account removed, or offline/unreachable — any of
-                        // these blocks login even though the local hash matched. A stale local
-                        // hash (e.g. password changed elsewhere) must never grant access on its own.
-                        valid = false;
-                        const isNetworkErr = e instanceof TypeError || (e && (e.code === 'NETWORK_ERROR' || e.code === 'NETWORK_REQUEST_FAILED' || String(e.message).toLowerCase().includes('network') || String(e.message).toLowerCase().includes('fetch')));
-                        if (isNetworkErr) {
-                            errEl.textContent = 'Could not reach the cloud. Check your connection and try again — login requires a connection.';
-                            errEl.style.display = 'block';
-                        } else if (e && (e.code === 'INVALID_PASSWORD' || e.code === 'EMAIL_NOT_FOUND')) {
-                            errEl.textContent = 'Incorrect username or password.';
-                            errEl.style.display = 'block';
-                        }
-                    }
+            // Always go straight to Firebase — no local hash check.
+            btn.textContent = 'Verifying with cloud…';
+            try {
+                const result = await cloudFirstLogin(role, u, p, loginCompany);
+                valid = result.valid;
+                displayName = result.displayName;
+                if (result.notFound) {
+                    errEl.textContent = 'No account found with that username. Make sure you are online and the company name is correct.';
+                    errEl.style.display = 'block';
+                } else if (result.networkError) {
+                    errEl.textContent = result.errorMessage
+                        ? 'Could not reach the cloud: ' + result.errorMessage
+                        : 'Could not reach the cloud. Check your connection and try again.';
+                    errEl.style.display = 'block';
+                } else if (!result.valid && result.errorMessage) {
+                    errEl.textContent = result.errorMessage;
+                    errEl.style.display = 'block';
                 }
-            } else {
-                // No local account matches — this is likely a brand-new device. Try resolving
-                // the username via the cloud directory and pulling that business's data down.
-                btn.textContent = 'Looking up account…';
-                try {
-                    const result = await cloudFirstLogin(role, u, p, loginCompany);
-                    valid = result.valid;
-                    displayName = result.displayName;
-                    if (result.notFound) {
-                        errEl.textContent = 'No account found with that username. If this is a new device, make sure you are online.';
-                        errEl.style.display = 'block';
-                    } else if (result.networkError) {
-                        errEl.textContent = 'Could not reach the cloud. Check your connection and try again.';
-                        errEl.style.display = 'block';
-                    }
-                } catch (e) {
-                    console.error('ZamAgro: cloud-first login failed', e);
-                }
+            } catch (e) {
+                valid = false;
+                console.error('ZamAgro: login failed', e);
+                errEl.textContent = e.message || 'Login failed. Check your connection and try again.';
+                errEl.style.display = 'block';
             }
 
             btn.disabled = false; btn.textContent = 'Login';
@@ -3106,6 +3044,7 @@
             if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                 return { valid: false, networkError: true };
             }
+            const _timeout = new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('Cloud verification timed out. Check your internet connection and try again.'), { code: 'TIMEOUT' })), 20000));
 
             // For admin: derive the Firebase email directly from company+username instead of
             // going through the public directory — this is both faster and avoids the collision
@@ -3115,12 +3054,13 @@
                 const derivedEmail = deriveCloudEmail(loginCompany, username);
                 let authData;
                 try {
-                    authData = await cloudSignIn(derivedEmail, password);
+                    authData = await Promise.race([cloudSignIn(derivedEmail, password), _timeout]);
                 } catch (e) {
                     if (e && (e.code === 'EMAIL_NOT_FOUND' || e.code === 'INVALID_LOGIN_CREDENTIALS')) {
                         return { valid: false, notFound: true };
                     }
-                    return { valid: false }; // wrong password
+                    console.error('ZamAgro: cloud-first admin sign-in failed', e);
+                    return { valid: false, errorMessage: e && e.message }; // wrong password, or some other cloud/auth error
                 }
                 saveCloudAuth({
                     uid: authData.localId,
@@ -3131,9 +3071,10 @@
                 });
                 let snapshot;
                 try {
-                    snapshot = await fetchPublicBusinessSnapshot(cloudAuth.uid);
+                    snapshot = await Promise.race([fetchPublicBusinessSnapshot(cloudAuth.uid), _timeout]);
                 } catch (e) {
-                    return { valid: false, networkError: true };
+                    console.error('ZamAgro: cloud-first admin snapshot fetch failed', e);
+                    return { valid: false, networkError: true, errorMessage: e && e.message };
                 }
                 rebuildLocalDataFromSnapshot(snapshot);
                 const adminSalt = genSalt();
@@ -3165,7 +3106,8 @@
                 try {
                     authData = await cloudSignIn(entry.email, password);
                 } catch (e) {
-                    return { valid: false }; // wrong password — fall through to normal lockout/error message
+                    console.error('ZamAgro: directory-based admin sign-in failed', e);
+                    return { valid: false, errorMessage: e && e.message }; // wrong password — fall through to normal lockout/error message
                 }
                 saveCloudAuth({
                     uid: authData.localId,
@@ -3178,7 +3120,8 @@
                 try {
                     snapshot = await fetchPublicBusinessSnapshot(cloudAuth.uid);
                 } catch (e) {
-                    return { valid: false, networkError: true };
+                    console.error('ZamAgro: directory-based admin snapshot fetch failed', e);
+                    return { valid: false, networkError: true, errorMessage: e && e.message };
                 }
                 rebuildLocalDataFromSnapshot(snapshot);
                 // Recreate the local admin (and client, if any) accounts so future logins on
@@ -3208,7 +3151,8 @@
             try {
                 snapshot = await fetchPublicBusinessSnapshot(entry.uid);
             } catch (e) {
-                return { valid: false, networkError: true };
+                console.error('ZamAgro: staff snapshot fetch failed', e);
+                return { valid: false, networkError: true, errorMessage: e && e.message };
             }
             rebuildLocalDataFromSnapshot(snapshot);
             // Recreate local accounts: this staff member as client, admin left absent (staff
@@ -3321,6 +3265,102 @@
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // ── SUBSCRIPTION REQUEST ─────────────────────────────────────────
+        function openSubRequest(tier, isRenewal) {
+            // Reset form state
+            ['subreq-err','subreq-success'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            document.getElementById('subreq-actions').style.display = 'flex';
+            document.getElementById('subreq-btn').disabled = false;
+            document.getElementById('subreq-btn').textContent = 'Submit Request';
+            document.getElementById('subreq-phone').value = '';
+            document.getElementById('subreq-txnid').value = '';
+            document.getElementById('subreq-note').value = '';
+            document.getElementById('subreq-txnid').style.borderColor = '';
+            // Pre-select tier
+            if (tier) {
+                const sel = document.getElementById('subreq-tier');
+                if (sel) sel.value = tier;
+            }
+            openModal('modal-sub-request');
+        }
+
+        async function submitSubRequest() {
+            const errEl  = document.getElementById('subreq-err');
+            const btn    = document.getElementById('subreq-btn');
+            errEl.style.display = 'none';
+
+            const tier  = document.getElementById('subreq-tier').value.trim();
+            const phone = document.getElementById('subreq-phone').value.trim();
+            const txnId = document.getElementById('subreq-txnid').value.trim();
+            const note  = document.getElementById('subreq-note').value.trim();
+
+            // Validation
+            if (!phone) {
+                errEl.textContent = 'Please enter your phone / WhatsApp number.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!txnId) {
+                errEl.textContent = 'Transaction ID is required. Check your Mobile Money SMS.';
+                errEl.style.display = 'block';
+                document.getElementById('subreq-txnid').style.borderColor = 'var(--danger)';
+                document.getElementById('subreq-txnid').focus();
+                return;
+            }
+            document.getElementById('subreq-txnid').style.borderColor = '';
+
+            if (!cloudAuth || !cloudAuth.uid) {
+                errEl.textContent = 'You must be signed in to submit a request.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+
+            try {
+                const s            = dbLoad('settings') || {};
+                const currentTier  = (getLicense() || {}).tier || 'trial';
+                const payload = {
+                    companyName:   s.companyName || '',
+                    adminUsername: s.adminUser   || '',
+                    phone,
+                    tier,
+                    currentTier,
+                    txnId,
+                    note,
+                    status: 'pending',
+                    ts: Date.now()
+                };
+
+                // Write to root-level subscriptionRequests/{uid} using user's auth token
+                const idToken = await getFreshIdToken();
+                if (!idToken) throw new Error('No valid cloud session. Please sign in again.');
+                const url = `${FIREBASE_CONFIG.databaseURL}/subscriptionRequests/${cloudAuth.uid}.json?auth=${idToken}`;
+                const resp = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!resp.ok) {
+                    const body = await resp.text().catch(() => '');
+                    throw new Error(`Server error (${resp.status})${body ? ': ' + body : ''}`);
+                }
+
+                // Show success
+                document.getElementById('subreq-success').style.display = 'block';
+                document.getElementById('subreq-actions').style.display = 'none';
+            } catch(e) {
+                btn.disabled = false;
+                btn.textContent = 'Submit Request';
+                errEl.textContent = e.message || 'Failed to send request. Please try again.';
+                errEl.style.display = 'block';
+            }
+        }
 
         // --- CORE LOGIC ---
 
@@ -3507,14 +3547,14 @@
                     const methodCell = item.momoRef
                         ? `${esc(item.method)}<br><span style="font-size:.72rem;color:var(--text-muted);">Ref: ${esc(item.momoRef)}</span>`
                         : esc(item.method);
-                    const saleBy = s.recordedBy ? `<div style='font-size:.72rem;color:var(--text-muted);margin-top:.1rem;'>${esc(s.recordedBy)}</div>` : '';
+                    const saleBy = item.recordedBy ? `<div style='font-size:.72rem;color:var(--text-muted);margin-top:.1rem;'>${esc(item.recordedBy)}</div>` : '';
                     const saleActions = currentUser === 'admin'
                         ? `<button class="btn btn-sm btn-primary" onclick="openEditSaleModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('sales','${esc(item.id)}')">🗑</button>`
                         : '';
                     row = `<tr><td>${esc(item.id)}</td><td>${esc(item.date)}</td><td>${esc(item.cust)}</td><td>${itemsCell}</td><td>${formatZMW(item.total)}</td><td>${methodCell}</td><td style="white-space:nowrap;display:flex;gap:4px;"><button class="btn btn-sm" style="background:#eee;" onclick="printReceipt('${esc(item.id)}')">🖨</button>${saleActions}</td></tr>`;
                 } else if (type === 'purchases') {
                     const currentProdName = db.inventory.find(i => i.id === item.prodId)?.name || item.prodName;
-const purBy = p.recordedBy ? `<span style='font-size:.72rem;color:var(--text-muted);'>${esc(p.recordedBy)}</span>` : '';
+                    const purBy = item.recordedBy ? `<span style='font-size:.72rem;color:var(--text-muted);'>${esc(item.recordedBy)}</span>` : '';
                     const purActions = currentUser === 'admin'
                         ? `<button class="btn btn-sm btn-primary" onclick="openEditPurchaseModal('${esc(item.id)}')">✏️</button><button class="btn btn-sm btn-danger" onclick="deleteRecord('purchases','${esc(item.id)}')">🗑</button>`
                         : '';
