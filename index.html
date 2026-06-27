@@ -1085,25 +1085,8 @@
                 <div class="card" style="margin-top:2rem;border-left-color:#6A1B9A;">
                     <h3 style="margin-bottom:1rem;color:#6A1B9A;">🔑 License Management</h3>
                     <div id="license-info-box" style="background:#f9f9f9;border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.9rem;"></div>
-                    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
-                        <div>
-                            <label style="font-weight:600;display:block;margin-bottom:.4rem;">Set Plan</label>
-                            <select id="lic-tier-select" style="padding:8px;border:1px solid #ccc;border-radius:var(--radius);">
-                                <option value="trial">Trial (30 days free)</option>
-                                <option value="starter">Starter — K200/mo</option>
-                                <option value="standard">Standard — K500/mo</option>
-                                <option value="pro">Pro — K1,000/mo</option>
-                                <option value="lifetime">Lifetime — K3,500 once-off</option>
-                            </select>
-                        </div>
-                        <div id="lic-expiry-group">
-                            <label style="font-weight:600;display:block;margin-bottom:.4rem;">Expiry Date</label>
-                            <input type="date" id="lic-expiry-input" style="padding:8px;border:1px solid #ccc;border-radius:var(--radius);">
-                        </div>
-                        <button class="btn btn-primary" onclick="saveLicense()">Apply License</button>
-                        <button class="btn" style="background:#eee;" onclick="resetToTrial()">Reset to Trial</button>
-                    </div>
-                    <p style="color:var(--gray);font-size:.8rem;margin-top:.75rem;">Enter the plan and expiry date as provided after payment. Lifetime plan has no expiry.</p>
+                    <button class="btn btn-primary" style="margin-top:.5rem;" onclick="openSubRequest(null)">📨 Request / Upgrade Plan</button>
+                    <p style="color:var(--gray);font-size:.78rem;margin-top:.6rem;">Pay via Mobile Money first, then submit your transaction ID to activate.</p>
                 </div>
             </div>
 
@@ -2636,25 +2619,13 @@
         }
 
         function saveLicense() {
-            const tier = document.getElementById('lic-tier-select').value;
-            let expiry;
-            if (tier === 'lifetime') {
-                expiry = 9999999999999; // far future
-            } else {
-                const dateVal = document.getElementById('lic-expiry-input').value;
-                if (!dateVal) { showToast('Please enter an expiry date.', 'danger'); return; }
-                expiry = new Date(dateVal).getTime() + 24*60*60*1000 - 1; // end of that day
-            }
-            saveLicenseData(tier, expiry);
-            applyLicenseUI();
-            showToast(`License updated: ${TIER_LABELS[tier]}`);
+            // Admin-only: open request modal instead.
+            openSubRequest(null);
         }
 
         function resetToTrial() {
-            const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
-            saveLicenseData('trial', expiry);
-            applyLicenseUI();
-            showToast('Reset to 30-day trial.');
+            // Admin-only: disabled in customer app.
+            showToast('License is managed by the ZamAgro administrator.', 'danger');
         }
 
         // Show/hide lifetime expiry date input
