@@ -2681,7 +2681,7 @@
         const AUTH_KEY = 'za_auth_accounts';
         const LOCKOUT_KEY = 'za_lockout';
         const MAX_ATTEMPTS = 5;
-        const LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
+        const LOCKOUT_MS = 30 * 1000; // 30 seconds
 
         async function pbkdf2Hash(password, salt) {
             const enc = new TextEncoder();
@@ -2931,11 +2931,11 @@
             const lockoutEl = document.getElementById('login-lockout');
             const loginBtn  = document.getElementById('login-btn');
             if (lk.until > Date.now()) {
-                const mins = Math.ceil((lk.until - Date.now()) / 60000);
-                lockoutEl.textContent = `Too many failed attempts. Try again in ${mins} minute${mins>1?'s':''}.`;
+                const secsLeft = Math.ceil((lk.until - Date.now()) / 1000);
+                lockoutEl.textContent = `Too many failed attempts. Try again in ${secsLeft} second${secsLeft!==1?'s':''}.`;
                 lockoutEl.style.display = 'block';
                 loginBtn.disabled = true;
-                setTimeout(checkLockoutDisplay, 10000);
+                setTimeout(checkLockoutDisplay, 1000);
             } else {
                 lockoutEl.style.display = 'none';
                 loginBtn.disabled = false;
