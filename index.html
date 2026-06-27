@@ -7,10 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Export libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <style>
         /* --- CSS VARIABLES & RESET --- */
         :root {
@@ -1757,7 +1753,7 @@
         //            ".read":  true,
         //            ".write": "auth != null && auth.uid === $uid",
         //            "$collection": {
-        //              ".validate": "$collection === 'inventory' || $collection === 'sales' || $collection === 'purchases' || $collection === 'expenses' || $collection === 'fisp' || $collection === 'credit' || $collection === 'settings'"
+        //              ".validate": "$collection === 'inventory' || $collection === 'sales' || $collection === 'purchases' || $collection === 'expenses' || $collection === 'fisp' || $collection === 'credit' || $collection === 'settings' || $collection === 'customers' || $collection === 'suppliers' || $collection === 'adjustments'"
         //            }
         //          }
         //        },
@@ -2351,6 +2347,12 @@
             ['landing-page','setup-page','app-layout'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('login-page').classList.remove('hidden');
             document.getElementById('login-error').style.display = 'none';
+            // Pre-fill company name from saved settings so returning users don't have to retype it
+            try {
+                const savedCompany = (dbLoad('settings') && dbLoad('settings').companyName) || '';
+                const companyField = document.getElementById('login-company-name');
+                if (companyField && savedCompany && !companyField.value) companyField.value = savedCompany;
+            } catch(e) {}
             const accounts = getAccounts();
             const roleSelect = document.getElementById('loginRole');
             const clientOption = roleSelect ? roleSelect.querySelector('option[value="client"]') : null;
@@ -2440,12 +2442,14 @@
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
 
-            const existingSettings = JSON.parse(localStorage.getItem('zamagro_settings') || '{}');
+            const existingSettings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
             existingSettings.companyName = companyName;
-            localStorage.setItem('zamagro_settings', JSON.stringify(existingSettings));
+            existingSettings.updatedAt = Date.now();
+            localStorage.setItem(KEYS.settings, JSON.stringify(existingSettings));
             // pushFullSnapshot inside connectCloudSync already ran against empty/seed data since
-            // settings.companyName wasn't saved yet at that point — push once more now that it is.
-            db.settings = existingSettings;
+            // settings.companyName wasn't saved yet at that point — force-push now that cloudAuth
+            // exists so company name is guaranteed to reach Firebase before we redirect.
+            try { await firebaseRequest('PUT', 'settings', existingSettings); } catch(e) { console.warn('ZamAgro: settings push failed', e); }
 
             await publishUsernameDirectoryEntry(cloudAuth?.idToken, adminUser, {
                 uid: cloudAuth.uid, email: cloudEmail, role: 'admin', username: adminUser
@@ -2802,10 +2806,13 @@
             };
             localStorage.setItem(AUTH_KEY, JSON.stringify(accounts));
 
-            const existingSettings = JSON.parse(localStorage.getItem('zamagro_settings') || '{}');
+            const existingSettings = JSON.parse(localStorage.getItem(KEYS.settings) || '{}');
             existingSettings.companyName = companyName;
-            localStorage.setItem('zamagro_settings', JSON.stringify(existingSettings));
-            db.settings = existingSettings; // push company name to cloud now that a session exists
+            existingSettings.updatedAt = Date.now();
+            localStorage.setItem(KEYS.settings, JSON.stringify(existingSettings));
+            // Force-push settings to Firebase immediately now that cloudAuth exists, so company
+            // name is guaranteed to reach the cloud before redirecting to login.
+            try { await firebaseRequest('PUT', 'settings', existingSettings); } catch(e) { console.warn('ZamAgro: settings push failed', e); }
 
             await publishUsernameDirectoryEntry(cloudAuth?.idToken, adminUser, {
                 uid: cloudAuth.uid, email: cloudEmail, role: 'admin', username: adminUser
@@ -6657,5 +6664,9 @@ const purBy = p.recordedBy ? `<span style='font-size:.72rem;color:var(--text-mut
         </div>
     </div>
 
+    <!-- Export libraries — loaded async so they never block app startup or login -->
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script async src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 </body>
 </html>
